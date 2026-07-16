@@ -1959,13 +1959,11 @@ input, textarea, select { font: inherit; color: inherit; }
   .athlete-hero { padding-block: var(--sp-4); }
   .athlete-hero-stats {
     flex-wrap: nowrap;
-    gap: 0;
+    gap: var(--sp-6);
     width: 100%;
   }
   .hero-stat {
-    padding: var(--sp-1) var(--sp-2);
-    flex: 1;
-    min-width: 0;
+    padding: 0;
   }
   .hero-stat-value { font-size: var(--fs-base); }
   .hero-stat-label { font-size: 0.625rem; }
