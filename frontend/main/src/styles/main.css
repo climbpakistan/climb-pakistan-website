@@ -1846,6 +1846,7 @@ input, textarea, select { font: inherit; color: inherit; }
   .news-grid { grid-template-columns: repeat(2, 1fr); }
   .learn-gallery { grid-template-columns: repeat(2, 1fr); }
   .athlete-detail-grid { grid-template-columns: 1fr; }
+  .athlete-detail-side { order: -1; }
   .info-card { position: static; }
   .comp-gallery { grid-template-columns: repeat(3, 1fr); }
   .about-stats { grid-template-columns: repeat(2, 1fr); }
@@ -1958,10 +1959,17 @@ input, textarea, select { font: inherit; color: inherit; }
   .athlete-hero { padding-block: var(--sp-4); }
   .athlete-hero-stats {
     flex-wrap: nowrap;
-    gap: var(--sp-2);
+    gap: 0;
+    justify-content: space-between;
     width: 100%;
   }
-  .hero-stat { padding: var(--sp-1) var(--sp-2); flex: 1; min-width: 0; }
+  .hero-stat {
+    padding: var(--sp-1) var(--sp-2);
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    text-align: center;
+  }
   .hero-stat-value { font-size: var(--fs-base); }
   .hero-stat-label { font-size: 0.625rem; }
   .athlete-hero-actions { flex-wrap: nowrap; }
