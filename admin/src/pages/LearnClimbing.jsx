@@ -1,14 +1,14 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getLearnSections, createLearnSection, updateLearnSection, deleteLearnSection } from '../api';
 
-// ── Formatting toolbar helpers ──
-function insertFormat(textarea, before, after = '') {
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selected = textarea.value.substring(start, end);
-  const replacement = `${before}${selected || 'text'}${after}`;
-  const newVal = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-  return { newVal, cursorPos: start + before.length + (selected ? selected.length : 4) + after.length };
+const LAYOUT_OPTIONS = [
+  { value: 'image-left', label: 'Image Left + Text Right' },
+  { value: 'image-center', label: 'Title & Image Center + Text Below' },
+  { value: 'text-only', label: 'Text Only' },
+];
+
+function emptySection() {
+  return { layout: 'text-only', heading: '', imageUrl: '', text: '' };
 }
 
 export default function LearnClimbing() {
@@ -17,11 +17,10 @@ export default function LearnClimbing() {
   const [editingSlug, setEditingSlug] = useState(null);
   const [form, setForm] = useState({
     slug: '', title: '', subtitle: '', image: '',
-    content: '',
+    contentSections: [emptySection()],
     gallery: [{ label: '', caption: '', imageUrl: '' }],
     status: 'Draft',
   });
-  const bodyRef = useRef(null);
 
   useEffect(() => {
     getLearnSections().then(setSections).finally(() => setLoading(false));
@@ -31,7 +30,7 @@ export default function LearnClimbing() {
     setEditingSlug('__new__');
     setForm({
       slug: '', title: '', subtitle: '', image: '',
-      content: '',
+      contentSections: [emptySection()],
       gallery: [{ label: '', caption: '', imageUrl: '' }],
       status: 'Draft',
     });
@@ -39,36 +38,84 @@ export default function LearnClimbing() {
 
   const openEdit = (section) => {
     setEditingSlug(section.slug);
-    // Merge body (intro) + details into one content string
-    const bodyText = section.body || '';
-    const detailsText = section.details?.length ? section.details.join('\n\n') : '';
-    const merged = detailsText ? bodyText + '\n\n' + detailsText : bodyText;
+    // Convert old format to sections if needed
+    let contentSections = section.sections?.length
+      ? section.sections.map((s) => ({
+          layout: s.layout || 'text-only',
+          heading: s.heading || '',
+          imageUrl: s.imageUrl || '',
+          text: s.text || '',
+        }))
+      : [emptySection()];
+
+    // If there's old body/details, add them as text-only sections
+    if ((!section.sections || !section.sections.length) && (section.body || section.details?.length)) {
+      contentSections = [];
+      if (section.body) {
+        contentSections.push({ layout: 'text-only', heading: '', imageUrl: '', text: section.body });
+      }
+      if (section.details?.length) {
+        section.details.forEach((para) => {
+          contentSections.push({ layout: 'text-only', heading: '', imageUrl: '', text: para });
+        });
+      }
+    }
 
     const existingGallery = section.gallery && section.gallery.length > 0
       ? section.gallery.map((g) => ({ label: g.label || '', caption: g.caption || '', imageUrl: g.imageUrl || '' }))
       : [{ label: '', caption: '', imageUrl: '' }];
 
     setForm({
-      ...section,
-      content: merged,
+      slug: section.slug,
+      title: section.title,
+      subtitle: section.subtitle || '',
+      image: section.image || '',
+      contentSections,
       gallery: existingGallery,
+      status: section.status,
     });
   };
 
   const cancelEdit = () => setEditingSlug(null);
 
+  const updateSection = (index, field, value) => {
+    const updated = [...form.contentSections];
+    updated[index] = { ...updated[index], [field]: value };
+    setForm({ ...form, contentSections: updated });
+  };
+
+  const addSection = () => {
+    setForm({ ...form, contentSections: [...form.contentSections, emptySection()] });
+  };
+
+  const removeSection = (index) => {
+    if (form.contentSections.length <= 1) return;
+    setForm({ ...form, contentSections: form.contentSections.filter((_, i) => i !== index) });
+  };
+
+  const moveSection = (index, direction) => {
+    const items = [...form.contentSections];
+    const target = index + direction;
+    if (target < 0 || target >= items.length) return;
+    [items[index], items[target]] = [items[target], items[index]];
+    setForm({ ...form, contentSections: items });
+  };
+
   const save = async () => {
     if (!form.title.trim()) return;
     const slug = form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    // Store everything in `body`, clear `details` for the new format
+    // Clean up empty text sections
+    const sections = form.contentSections.filter((s) => s.text.trim() || s.layout !== 'text-only');
+
     const section = {
       slug,
       title: form.title,
       subtitle: form.subtitle,
       image: form.image,
-      body: form.content,
+      body: '',  // Clear old fields
       details: [],
+      sections,
       gallery: form.gallery.filter((g) => g.imageUrl?.trim()),
       status: form.status,
     };
@@ -97,40 +144,6 @@ export default function LearnClimbing() {
       alert('Failed to delete section: ' + err.message);
     }
   };
-
-const handleFormat = (type) => {
-  const textarea = bodyRef.current;
-  if (!textarea) return;
-  let result;
-  switch (type) {
-    case 'bold':
-      result = insertFormat(textarea, '**', '**');
-      break;
-    case 'size1':
-      result = insertFormat(textarea, '[s1]', '[/s1]');
-      break;
-    case 'size2':
-      result = insertFormat(textarea, '[s2]', '[/s2]');
-      break;
-    case 'size3':
-      result = insertFormat(textarea, '[s3]', '[/s3]');
-      break;
-    case 'size4':
-      result = insertFormat(textarea, '[s4]', '[/s4]');
-      break;
-    case 'image':
-      result = insertFormat(textarea, '![caption](', ')');
-      break;
-    default:
-      return;
-  }
-  setForm({ ...form, content: result.newVal });
-  // Restore cursor position after React re-render
-  requestAnimationFrame(() => {
-    textarea.focus();
-    textarea.setSelectionRange(result.cursorPos, result.cursorPos);
-  });
-};
 
   if (loading) return <p style={{ padding: 'var(--sp-6)' }}>Loading sections...</p>;
 
@@ -181,82 +194,141 @@ const handleFormat = (type) => {
             </div>
           </div>
 
-          {/* ── Unified editor with formatting toolbar ── */}
-          <div className="form-group" style={{ marginTop: 'var(--sp-4)' }}>
-            <label className="form-label" style={{ marginBottom: 'var(--sp-2)' }}>Article Content</label>
-
-            {/* Formatting toolbar */}
-            <div style={{
-              display: 'flex',
-              gap: 'var(--sp-1)',
-              marginBottom: 'var(--sp-2)',
-              padding: 'var(--sp-2) var(--sp-3)',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
-              borderBottom: 0,
-              flexWrap: 'wrap',
-            }}>
-              <button type="button" onClick={() => handleFormat('bold')} title="Bold"
-                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                <strong>B</strong>
+          {/* ── Section Editor ── */}
+          <div className="form-group" style={{ marginTop: 'var(--sp-6)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-4)' }}>
+              <label className="form-label" style={{ marginBottom: 0, fontSize: 'var(--fs-md)' }}>Content Sections</label>
+              <button className="btn btn-primary" type="button" onClick={addSection} style={{ fontSize: 'var(--fs-xs)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4 }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                Add Section
               </button>
-              <span style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 var(--sp-1)' }} />
-              <button type="button" onClick={() => handleFormat('size1')} title="Font size 1 - small"
-                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: '0.625rem', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                S
-              </button>
-              <button type="button" onClick={() => handleFormat('size2')} title="Font size 2 - normal"
-                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: 'var(--fs-sm)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                M
-              </button>
-              <button type="button" onClick={() => handleFormat('size3')} title="Font size 3 - large"
-                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: 'var(--fs-md)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                L
-              </button>
-              <button type="button" onClick={() => handleFormat('size4')} title="Font size 4 - extra large"
-                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: 'var(--fs-lg)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                XL
-              </button>
-              <button type="button" onClick={() => handleFormat('image')} title="Insert image"
-                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontSize: 'var(--fs-sm)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                🖼 Image
-              </button>
-              <span style={{ flex: 1 }} />
-              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', alignSelf: 'center' }}>
-                Blank lines = new paragraphs
-              </span>
             </div>
 
-            <textarea
-              ref={bodyRef}
-              className="form-input"
-              rows={20}
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              placeholder={`Write your article here...
-
-Use # Heading for large titles
-Use ## Subheading for medium titles
-Use **bold** for emphasis
-Use ![caption](image-url) for inline images
-
-Blank lines separate paragraphs.`}
-              style={{
-                fontFamily: 'monospace',
-                fontSize: 'var(--fs-sm)',
-                lineHeight: 1.7,
-                borderTopLeftRadius: 0,
-                borderTopRightRadius: 0,
-              }}
-            />
-            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
-              <strong>Formatting guide:</strong> {' '}
-              <code>**bold**</code> — bold &nbsp;|&nbsp;
-              <code>[s1]text[/s1]</code> to <code>[s4]text[/s4]</code> — font size 1 (small) to 4 (extra large) &nbsp;|&nbsp;
-              <code>![caption](url)</code> — inline image &nbsp;|&nbsp;
-              Blank line = new paragraph
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-3)' }}>
+              Each section is a separate content block. Choose a layout, add an image (optional), and write your text. Supports <strong>**bold**</strong>.
             </p>
+
+            {form.contentSections.map((section, i) => (
+              <div key={i} style={{
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                padding: 'var(--sp-4)',
+                marginBottom: 'var(--sp-3)',
+                background: 'var(--surface-2)',
+                position: 'relative',
+              }}>
+                {/* Section header with reorder buttons */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 'var(--sp-3)',
+                  paddingBottom: 'var(--sp-2)',
+                  borderBottom: '1px solid var(--border)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: 'var(--accent)',
+                      color: '#071009',
+                      fontWeight: 700,
+                      fontSize: 'var(--fs-xs)',
+                    }}>{i + 1}</span>
+                    <span style={{ fontWeight: 600, fontSize: 'var(--fs-sm)', color: 'var(--text)' }}>
+                      {LAYOUT_OPTIONS.find((o) => o.value === section.layout)?.label || 'Section'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 'var(--sp-1)' }}>
+                    <button type="button" onClick={() => moveSection(i, -1)} disabled={i === 0}
+                      style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', opacity: i === 0 ? 0.3 : 1, fontSize: 'var(--fs-xs)' }}>
+                      ↑
+                    </button>
+                    <button type="button" onClick={() => moveSection(i, 1)} disabled={i === form.contentSections.length - 1}
+                      style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', opacity: i === form.contentSections.length - 1 ? 0.3 : 1, fontSize: 'var(--fs-xs)' }}>
+                      ↓
+                    </button>
+                    <button type="button" onClick={() => removeSection(i)}
+                      style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, cursor: 'pointer', background: 'transparent', border: '1px solid transparent', color: 'var(--error)', fontSize: 'var(--fs-xs)' }}>
+                      ✕ Remove
+                    </button>
+                  </div>
+                </div>
+
+                {/* Heading */}
+                <div className="form-group" style={{ marginBottom: 'var(--sp-3)' }}>
+                  <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Heading</label>
+                  <input
+                    className="form-input"
+                    value={section.heading}
+                    onChange={(e) => updateSection(i, 'heading', e.target.value)}
+                    placeholder="Optional paragraph heading..."
+                    style={{ fontWeight: 600 }}
+                  />
+                </div>
+
+                {/* Layout picker */}
+                <div className="form-group" style={{ marginBottom: 'var(--sp-3)' }}>
+                  <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Layout</label>
+                  <select className="form-input" value={section.layout} onChange={(e) => updateSection(i, 'layout', e.target.value)} style={{ width: '100%' }}>
+                    {LAYOUT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Image URL - only for image-left and image-center */}
+                {section.layout !== 'text-only' && (
+                  <div className="form-group" style={{ marginBottom: 'var(--sp-3)' }}>
+                    <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Image URL</label>
+                    <input
+                      className="form-input"
+                      value={section.imageUrl}
+                      onChange={(e) => updateSection(i, 'imageUrl', e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    {section.imageUrl && (
+                      <div style={{ marginTop: 'var(--sp-2)', maxHeight: 100, overflow: 'hidden', borderRadius: 'var(--radius-sm)' }}>
+                        <img src={section.imageUrl} alt="" style={{ width: 'auto', maxHeight: 100, objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none' }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Text content */}
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Text Content</label>
+                  <textarea
+                    className="form-input"
+                    rows={6}
+                    value={section.text}
+                    onChange={(e) => updateSection(i, 'text', e.target.value)}
+                    placeholder="Write your content here... **bold** for emphasis"
+                    style={{ fontFamily: 'monospace', fontSize: 'var(--fs-sm)', lineHeight: 1.6 }}
+                  />
+                </div>
+
+                {/* Live preview of the layout */}
+                {section.layout !== 'text-only' && section.imageUrl && (
+                  <div style={{
+                    marginTop: 'var(--sp-2)',
+                    padding: 'var(--sp-3)',
+                    background: 'var(--surface)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px dashed var(--border)',
+                    fontSize: 'var(--fs-xs)',
+                    color: 'var(--text-muted)',
+                  }}>
+                    <strong>Preview:</strong>{' '}
+                    {section.layout === 'image-left' ? '🖼 Image on left, text on right' : '📷 Title + image centered, text below'}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* ── Gallery section ── */}
@@ -268,7 +340,7 @@ Blank lines separate paragraphs.`}
               </button>
             </div>
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-2)' }}>
-              Optional — for inline images inside the article text, use <code>![caption](url)</code> in the content editor above.
+              Optional bottom gallery. For inline images inside sections, use the Image URL field in each section above.
             </p>
             {form.gallery.map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: 'var(--sp-2)', marginBottom: 'var(--sp-2)', alignItems: 'center' }}>

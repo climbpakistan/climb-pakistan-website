@@ -127,9 +127,51 @@ export default function Article() {
             <div className="article-media placeholder-photo" aria-hidden="true"><span>Photo</span></div>
           )}
           <div className="article-body">
-            {article.body?.map((paragraph, i) => (
-              <p key={i}>{renderFormattedText(paragraph)}</p>
-            ))}
+            {article.sections?.length > 0 ? (
+              // New section-based format
+              article.sections.map((sec, i) => {
+                switch (sec.layout) {
+                  case 'image-left':
+                    return (
+                      <div className="section-block section-image-left" key={i}>
+                        {sec.heading && <h3 className="section-heading">{sec.heading}</h3>}
+                        {sec.imageUrl && (
+                          <div className="section-image-wrap">
+                            <img src={sec.imageUrl} alt="" loading="lazy" />
+                          </div>
+                        )}
+                        <div className="section-text-wrap">
+                          <p>{renderFormattedText(sec.text)}</p>
+                        </div>
+                      </div>
+                    );
+                  case 'image-center':
+                    return (
+                      <div className="section-block section-image-center" key={i}>
+                        {sec.heading && <h3 className="section-heading">{sec.heading}</h3>}
+                        {sec.imageUrl && (
+                          <div className="section-image-wrap-center">
+                            <img src={sec.imageUrl} alt="" loading="lazy" />
+                          </div>
+                        )}
+                        <p>{renderFormattedText(sec.text)}</p>
+                      </div>
+                    );
+                  default:
+                    return (
+                      <div className="section-block" key={i}>
+                        {sec.heading && <h3 className="section-heading">{sec.heading}</h3>}
+                        <p>{renderFormattedText(sec.text)}</p>
+                      </div>
+                    );
+                }
+              })
+            ) : (
+              // Legacy format: body array of paragraphs
+              article.body?.map((paragraph, i) => (
+                <p key={i}>{renderFormattedText(paragraph)}</p>
+              ))
+            )}
           </div>
         </div>
       </article>

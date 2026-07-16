@@ -6,6 +6,13 @@ const galleryItemSchema = new mongoose.Schema({
   caption: { type: String, default: '' },
 }, { _id: false });
 
+const contentSectionSchema = new mongoose.Schema({
+  layout: { type: String, enum: ['image-left', 'image-center', 'text-only'], default: 'text-only' },
+  heading: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
+  text: { type: String, default: '' },
+}, { _id: false });
+
 const learnSectionSchema = new mongoose.Schema({
   slug: { type: String, required: true, unique: true, index: true },
   title: { type: String, required: true },
@@ -13,6 +20,7 @@ const learnSectionSchema = new mongoose.Schema({
   image: { type: String, default: '' },
   body: { type: String, default: '' },
   details: [{ type: String }],
+  sections: [contentSectionSchema],  // New structured sections
   gallery: [galleryItemSchema],
   status: { type: String, default: 'Draft', enum: ['Draft', 'Published'] },
   createdAt: { type: Date, default: Date.now },
