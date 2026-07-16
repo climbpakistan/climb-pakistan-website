@@ -1,12 +1,18 @@
 import { useRef, useState, useCallback } from 'react';
 
+const ZOOM_LEVELS = [1, 1.5, 2, 3, 4];
+
 export default function ImagePositionPicker({ imageUrl, value, onChange, aspectRatio = '21/9', maxHeight }) {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(false);
+  const [zoom, setZoom] = useState(1);
 
   // Parse aspect ratio string like "21/9" → [21, 9]
   const [ratioW, ratioH] = aspectRatio.split('/').map(Number);
-  const containerMaxWidth = maxHeight ? `${Math.round(maxHeight * ratioW / ratioH)}px` : 'none';
+  const hasFixedSize = Boolean(maxHeight);
+  const baseHeight = hasFixedSize ? maxHeight : null;
+  const effectiveHeight = baseHeight ? Math.round(baseHeight * zoom) : null;
+  const effectiveWidth = effectiveHeight ? Math.round(effectiveHeight * ratioW / ratioH) : null;
 
   // Parse current value: "50% 50%" → { x: 50, y: 50 }
   const pos = (value || '50% 50%').split(' ').map((v) => parseFloat(v));
@@ -41,6 +47,16 @@ export default function ImagePositionPicker({ imageUrl, value, onChange, aspectR
     setDragging(false);
   }, []);
 
+  const zoomIn = () => {
+    const idx = ZOOM_LEVELS.indexOf(zoom);
+    if (idx < ZOOM_LEVELS.length - 1) setZoom(ZOOM_LEVELS[idx + 1]);
+  };
+
+  const zoomOut = () => {
+    const idx = ZOOM_LEVELS.indexOf(zoom);
+    if (idx > 0) setZoom(ZOOM_LEVELS[idx - 1]);
+  };
+
   if (!imageUrl) {
     return (
       <div style={{
@@ -59,12 +75,87 @@ export default function ImagePositionPicker({ imageUrl, value, onChange, aspectR
 
   return (
     <div>
-      <label className="form-label" style={{ fontSize: 'var(--fs-xs)', marginBottom: 'var(--sp-2)' }}>
-        Image Focus Point — <span style={{ fontWeight: 400, fontFamily: 'monospace' }}>{value || '50% 50%'}</span>
-      </label>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 'var(--sp-2)',
+        flexWrap: 'wrap',
+        gap: 'var(--sp-2)',
+      }}>
+        <label className="form-label" style={{ fontSize: 'var(--fs-xs)', marginBottom: 0 }}>
+          Image Focus Point — <span style={{ fontWeight: 400, fontFamily: 'monospace' }}>{value || '50% 50%'}</span>
+        </label>
+
+        {hasFixedSize && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-1)' }}>
+            <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginRight: 'var(--sp-1)' }}>
+              Zoom:
+            </span>
+            <button
+              type="button"
+              onClick={zoomOut}
+              disabled={zoom === ZOOM_LEVELS[0]}
+              title="Zoom out"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 4,
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                cursor: zoom === ZOOM_LEVELS[0] ? 'not-allowed' : 'pointer',
+                opacity: zoom === ZOOM_LEVELS[0] ? 0.4 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 'var(--fs-sm)',
+                fontWeight: 700,
+              }}
+            >
+              −
+            </button>
+            <span style={{
+              minWidth: 36,
+              textAlign: 'center',
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 600,
+              color: 'var(--text)',
+              fontFamily: 'monospace',
+            }}>
+              {zoom}×
+            </span>
+            <button
+              type="button"
+              onClick={zoomIn}
+              disabled={zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}
+              title="Zoom in"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 4,
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                cursor: zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1] ? 'not-allowed' : 'pointer',
+                opacity: zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1] ? 0.4 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 'var(--fs-sm)',
+                fontWeight: 700,
+              }}
+            >
+              +
+            </button>
+          </div>
+        )}
+      </div>
+
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-2)' }}>
-        Click or drag on the image to set the crop focus. The preview below shows exactly how the hero will look.
+        Click or drag on the image to set the crop focus. {hasFixedSize && 'Use zoom for precise positioning.'}
       </p>
+
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
@@ -73,26 +164,26 @@ export default function ImagePositionPicker({ imageUrl, value, onChange, aspectR
         onMouseLeave={handleMouseUp}
         style={{
           position: 'relative',
-          width: maxHeight ? containerMaxWidth : '100%',
-          aspectRatio,
-          maxHeight: maxHeight || 'none',
-          overflow: 'hidden',
+          width: effectiveWidth || '100%',
+          height: effectiveHeight || 'auto',
+          aspectRatio: effectiveHeight ? 'none' : aspectRatio,
           borderRadius: 'var(--radius-sm)',
           border: dragging ? '2px solid var(--accent)' : '1px solid var(--border)',
           cursor: 'crosshair',
           userSelect: 'none',
-          transition: 'border-color 0.15s ease',
+          transition: 'border-color 0.15s ease, width 0.2s ease, height 0.2s ease',
         }}
       >
         <img
           src={imageUrl}
           alt="Adjust focus point"
           style={{
-            width: '100%',
-            height: '100%',
+            width: effectiveWidth || '100%',
+            height: effectiveHeight || '100%',
             objectFit: 'cover',
             objectPosition: `${x}% ${y}%`,
             pointerEvents: 'none',
+            display: 'block',
           }}
           onError={(e) => { e.target.style.display = 'none'; }}
         />
