@@ -23,6 +23,7 @@ const athleteSchema = new mongoose.Schema({
   isChampion: { type: Boolean, default: false },
   championTitle: { type: String, default: '' },
   photoUrl: { type: String, default: '' },
+  photoPosition: { type: String, default: '50% 50%' },
   about: { type: String, default: '' },
   medals: [medalSchema],
   createdAt: { type: Date, default: Date.now },

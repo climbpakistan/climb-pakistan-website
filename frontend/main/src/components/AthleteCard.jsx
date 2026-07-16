@@ -19,6 +19,7 @@ export function ChampionCard({ athlete, disciplineTitle, rank, points }) {
             alt={athlete.name}
             className="champion-card-img"
             loading="lazy"
+            style={{ objectPosition: athlete.photoPosition || '50% 50%' }}
           />
         ) : (
           <div className="champion-avatar">{initials(athlete.name)}</div>
@@ -56,6 +57,7 @@ export default function AthleteCard({ athlete }) {
             alt={athlete.name}
             className="athlete-card-img"
             loading="lazy"
+            style={{ objectPosition: athlete.photoPosition || '50% 50%' }}
           />
         ) : (
           <div className="athlete-card-avatar">{initials(athlete.name)}</div>

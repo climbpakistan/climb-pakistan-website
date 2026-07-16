@@ -73,7 +73,13 @@ export default function Athlete() {
           <div className="athlete-hero-layout">
             <div className="athlete-hero-media hero-entrance" aria-hidden="true">
               {athlete.photoUrl ? (
-                <img src={athlete.photoUrl} alt={athlete.name} className="athlete-hero-photo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 16 }} />
+                <img src={athlete.photoUrl} alt={athlete.name} className="athlete-hero-photo" style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: athlete.photoPosition || '50% 50%',
+                  borderRadius: 16,
+                }} />
               ) : (
                 <>
                   <div className="athlete-hero-avatar">{initials(athlete.name)}</div>

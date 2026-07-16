@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAthletes, createAthlete, updateAthlete, deleteAthlete, importAthletesExcel } from '../api';
+import ImagePositionPicker from '../components/ImagePositionPicker';
 
 const disciplineOptions = ['Speed Climbing', 'Lead Climbing', 'Boulder'];
 const medalOptions = ['Gold', 'Silver', 'Bronze'];
@@ -11,7 +12,7 @@ export default function Athletes() {
   const [form, setForm] = useState({
     slug: '', name: '', gender: 'Male', mainDiscipline: '', disciplines: [], team: '', rank: 1, hometown: '',
     age: '', startedClimbing: '', instagram: '', worldClimbingUrl: '', internationalParticipation: 0,
-    isChampion: false, championTitle: '', photoUrl: '', about: '', medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
+    isChampion: false, championTitle: '', photoUrl: '', photoPosition: '50% 50%', about: '', medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
   });
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
@@ -25,13 +26,13 @@ export default function Athletes() {
     setForm({
       slug: '', name: '', gender: 'Male', mainDiscipline: '', disciplines: [], team: '', rank: 1, hometown: '',
       age: '', startedClimbing: '', instagram: '', worldClimbingUrl: '', internationalParticipation: 0,
-      isChampion: false, championTitle: '', photoUrl: '', about: '', medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
+      isChampion: false, championTitle: '', photoUrl: '', photoPosition: '50% 50%', about: '', medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
     });
   };
 
   const openEdit = (athlete) => {
     setEditingSlug(athlete.slug);
-    setForm({ ...athlete, medals: athlete.medals?.length ? athlete.medals : [{ competition: '', discipline: 'Speed', medal: 'Gold' }] });
+    setForm({ ...athlete, photoPosition: athlete.photoPosition || '50% 50%', medals: athlete.medals?.length ? athlete.medals : [{ competition: '', discipline: 'Speed', medal: 'Gold' }] });
   };
 
   const cancelEdit = () => setEditingSlug(null);
@@ -263,6 +264,16 @@ export default function Athletes() {
             <label className="form-label">Photo URL</label>
             <input className="form-input" value={form.photoUrl} onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} placeholder="https://example.com/athlete-photo.jpg" />
           </div>
+          {form.photoUrl && (
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <ImagePositionPicker
+                imageUrl={form.photoUrl}
+                value={form.photoPosition}
+                onChange={(pos) => setForm({ ...form, photoPosition: pos })}
+                aspectRatio="3/4"
+              />
+            </div>
+          )}
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">About</label>
             <textarea className="form-input" rows={3} value={form.about} onChange={(e) => setForm({ ...form, about: e.target.value })} />
