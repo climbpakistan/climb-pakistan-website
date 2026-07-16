@@ -1740,6 +1740,12 @@ input, textarea, select { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--cp-border);
 }
 
+/* Font size classes for inline text */
+.font-size-1 { font-size: var(--fs-xs); }
+.font-size-2 { font-size: var(--fs-base); }
+.font-size-3 { font-size: var(--fs-lg); }
+.font-size-4 { font-size: var(--fs-xl); display: block; margin-bottom: var(--sp-2); }
+
 .learn-gallery-heading {
   margin-bottom: var(--sp-8);
   max-width: 760px;

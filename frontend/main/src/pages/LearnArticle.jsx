@@ -2,26 +2,25 @@ import { useParams, Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getLearnSection } from '../api';
 
-function renderFormattedText(text) {
+function renderInlineContent(text) {
+  // Parse inline formatting: **bold**, [s1]..[/s4] font sizes, images, line breaks
   if (!text) return null;
-  // Support ![alt](url) syntax for inline images
+
+  // First pass: extract images
   const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
   const parts = [];
   let lastIndex = 0;
   let match;
   while ((match = imgRegex.exec(text)) !== null) {
-    // Push text before this image
     if (match.index > lastIndex) {
       parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
     }
     parts.push({ type: 'image', alt: match[1], url: match[2] });
     lastIndex = match.index + match[0].length;
   }
-  // Push remaining text
   if (lastIndex < text.length) {
     parts.push({ type: 'text', value: text.slice(lastIndex) });
   }
-
   if (parts.length === 0) return null;
 
   return parts.map((part, i) => {
@@ -33,25 +32,75 @@ function renderFormattedText(text) {
         </div>
       );
     }
-    // Render formatted text (bold + line breaks)
-    const textParts = part.value.split(/(\*\*[^*]+\*\*)/g);
-    return (
-      <span key={i}>
-        {textParts.map((tp, j) => {
-          if (tp.startsWith('**') && tp.endsWith('**')) {
-            return <strong key={j}>{tp.slice(2, -2)}</strong>;
-          }
-          if (tp.includes('\n')) {
-            const lines = tp.split('\n');
-            return lines.map((line, k) => (
-              <span key={`${j}-${k}`}>{line}{k < lines.length - 1 && <br/>}</span>
-            ));
-          }
-          return tp;
-        })}
-      </span>
-    );
+
+    // Parse [s1][/s1] through [s4][/s4] and **bold** within text
+    const sizeRegex = /\[s([1-4])\](.*?)\[\/s\1\]/gs;
+    const boldRegex = /\*\*([^*]+)\*\*/g;
+    const elements = [];
+    let remaining = part.value;
+    let lastIdx = 0;
+    let sizeMatch;
+
+    while ((sizeMatch = sizeRegex.exec(remaining)) !== null) {
+      // Push text before this size tag (parse bold within it)
+      if (sizeMatch.index > lastIdx) {
+        const before = remaining.slice(lastIdx, sizeMatch.index);
+        elements.push(renderInlineText(before));
+      }
+      // Render the sized content (also supports bold inside)
+      const content = sizeMatch[2];
+      const size = parseInt(sizeMatch[1]);
+      elements.push(
+        <span className={`font-size-${size}`} key={`s${i}-${sizeMatch.index}`}>
+          {renderInlineText(content)}
+        </span>
+      );
+      lastIdx = sizeMatch.index + sizeMatch[0].length;
+    }
+    // Push remaining text after last size tag
+    if (lastIdx < remaining.length) {
+      elements.push(renderInlineText(remaining.slice(lastIdx)));
+    }
+
+    return <span key={i}>{elements}</span>;
   });
+}
+
+// Helper: renders text with **bold** and line breaks (no size tags)
+function renderInlineText(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((tp, j) => {
+    if (tp.startsWith('**') && tp.endsWith('**')) {
+      return <strong key={j}>{tp.slice(2, -2)}</strong>;
+    }
+    if (tp.includes('\n')) {
+      const lines = tp.split('\n');
+      return lines.map((line, k) => (
+        <span key={`${j}-${k}`}>{line}{k < lines.length - 1 && <br/>}</span>
+      ));
+    }
+    return tp;
+  });
+}
+
+function renderBodyParagraphs(body, details) {
+  // If there are legacy details, render old format
+  if (details?.length) {
+    return (
+      <>
+        <p className="learn-article-lead">{renderInlineContent(body)}</p>
+        {details.map((para, i) => (
+          <p key={i}>{renderInlineContent(para)}</p>
+        ))}
+      </>
+    );
+  }
+
+  // New format: split body by blank lines into paragraphs
+  const paragraphs = (body || '').split(/\n{2,}/).filter((p) => p.trim());
+  return paragraphs.map((para, i) => (
+    <p key={i}>{renderInlineContent(para.trim())}</p>
+  ));
 }
 
 export default function LearnArticle() {
@@ -126,10 +175,7 @@ export default function LearnArticle() {
       <section className="section-tight" style={{ paddingTop: 0 }}>
         <div className="container">
           <div className="learn-article-body">
-            <p className="learn-article-lead">{renderFormattedText(section.body)}</p>
-            {section.details?.map((para, i) => (
-              <p key={i}>{renderFormattedText(para)}</p>
-            ))}
+            {renderBodyParagraphs(section.body, section.details)}
           </div>
         </div>
       </section>

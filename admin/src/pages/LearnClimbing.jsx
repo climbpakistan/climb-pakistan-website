@@ -1,11 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { getLearnSections, createLearnSection, updateLearnSection, deleteLearnSection } from '../api';
+
+// ── Formatting toolbar helpers ──
+function insertFormat(textarea, before, after = '') {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const selected = textarea.value.substring(start, end);
+  const replacement = `${before}${selected || 'text'}${after}`;
+  const newVal = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+  return { newVal, cursorPos: start + before.length + (selected ? selected.length : 4) + after.length };
+}
 
 export default function LearnClimbing() {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingSlug, setEditingSlug] = useState(null);
-  const [form, setForm] = useState({ slug: '', title: '', subtitle: '', image: '', body: '', detailsText: '', gallery: [{ label: '', caption: '', imageUrl: '' }], status: 'Draft' });
+  const [form, setForm] = useState({
+    slug: '', title: '', subtitle: '', image: '',
+    content: '',
+    gallery: [{ label: '', caption: '', imageUrl: '' }],
+    status: 'Draft',
+  });
+  const bodyRef = useRef(null);
 
   useEffect(() => {
     getLearnSections().then(setSections).finally(() => setLoading(false));
@@ -13,15 +29,30 @@ export default function LearnClimbing() {
 
   const openNew = () => {
     setEditingSlug('__new__');
-    setForm({ slug: '', title: '', subtitle: '', image: '', body: '', detailsText: '', gallery: [{ label: '', caption: '', imageUrl: '' }], status: 'Draft' });
+    setForm({
+      slug: '', title: '', subtitle: '', image: '',
+      content: '',
+      gallery: [{ label: '', caption: '', imageUrl: '' }],
+      status: 'Draft',
+    });
   };
 
   const openEdit = (section) => {
     setEditingSlug(section.slug);
+    // Merge body (intro) + details into one content string
+    const bodyText = section.body || '';
+    const detailsText = section.details?.length ? section.details.join('\n\n') : '';
+    const merged = detailsText ? bodyText + '\n\n' + detailsText : bodyText;
+
     const existingGallery = section.gallery && section.gallery.length > 0
       ? section.gallery.map((g) => ({ label: g.label || '', caption: g.caption || '', imageUrl: g.imageUrl || '' }))
       : [{ label: '', caption: '', imageUrl: '' }];
-    setForm({ ...section, detailsText: section.details ? section.details.join('\n\n') : '', gallery: existingGallery });
+
+    setForm({
+      ...section,
+      content: merged,
+      gallery: existingGallery,
+    });
   };
 
   const cancelEdit = () => setEditingSlug(null);
@@ -29,9 +60,18 @@ export default function LearnClimbing() {
   const save = async () => {
     if (!form.title.trim()) return;
     const slug = form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const { detailsText, ...rest } = form;
-    const details = detailsText.split('\n\n').filter((p) => p.trim());
-    const section = { ...rest, slug, details };
+
+    // Store everything in `body`, clear `details` for the new format
+    const section = {
+      slug,
+      title: form.title,
+      subtitle: form.subtitle,
+      image: form.image,
+      body: form.content,
+      details: [],
+      gallery: form.gallery.filter((g) => g.imageUrl?.trim()),
+      status: form.status,
+    };
 
     try {
       if (editingSlug === '__new__') {
@@ -57,6 +97,40 @@ export default function LearnClimbing() {
       alert('Failed to delete section: ' + err.message);
     }
   };
+
+const handleFormat = (type) => {
+  const textarea = bodyRef.current;
+  if (!textarea) return;
+  let result;
+  switch (type) {
+    case 'bold':
+      result = insertFormat(textarea, '**', '**');
+      break;
+    case 'size1':
+      result = insertFormat(textarea, '[s1]', '[/s1]');
+      break;
+    case 'size2':
+      result = insertFormat(textarea, '[s2]', '[/s2]');
+      break;
+    case 'size3':
+      result = insertFormat(textarea, '[s3]', '[/s3]');
+      break;
+    case 'size4':
+      result = insertFormat(textarea, '[s4]', '[/s4]');
+      break;
+    case 'image':
+      result = insertFormat(textarea, '![caption](', ')');
+      break;
+    default:
+      return;
+  }
+  setForm({ ...form, content: result.newVal });
+  // Restore cursor position after React re-render
+  requestAnimationFrame(() => {
+    textarea.focus();
+    textarea.setSelectionRange(result.cursorPos, result.cursorPos);
+  });
+};
 
   if (loading) return <p style={{ padding: 'var(--sp-6)' }}>Loading sections...</p>;
 
@@ -97,9 +171,6 @@ export default function LearnClimbing() {
             <div className="form-group">
               <label className="form-label">Hero Image URL</label>
               <input className="form-input" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://example.com/section-image.jpg" />
-              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
-                For inline images inside the body/details text, use <strong>![caption](image-url)</strong> syntax.
-              </p>
             </div>
             <div className="form-group">
               <label className="form-label">Status</label>
@@ -108,45 +179,113 @@ export default function LearnClimbing() {
                 <option>Published</option>
               </select>
             </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Body (intro paragraph)</label>
-              <textarea className="form-input" rows={8} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Use **bold**, ![alt](url) for images, Enter for line breaks" />
-              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
-                Supports <strong>**bold**</strong> text, line breaks, and inline images with <strong>![caption](image-url)</strong>.
-              </p>
+          </div>
+
+          {/* ── Unified editor with formatting toolbar ── */}
+          <div className="form-group" style={{ marginTop: 'var(--sp-4)' }}>
+            <label className="form-label" style={{ marginBottom: 'var(--sp-2)' }}>Article Content</label>
+
+            {/* Formatting toolbar */}
+            <div style={{
+              display: 'flex',
+              gap: 'var(--sp-1)',
+              marginBottom: 'var(--sp-2)',
+              padding: 'var(--sp-2) var(--sp-3)',
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
+              borderBottom: 0,
+              flexWrap: 'wrap',
+            }}>
+              <button type="button" onClick={() => handleFormat('bold')} title="Bold"
+                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                <strong>B</strong>
+              </button>
+              <span style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 var(--sp-1)' }} />
+              <button type="button" onClick={() => handleFormat('size1')} title="Font size 1 - small"
+                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: '0.625rem', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                S
+              </button>
+              <button type="button" onClick={() => handleFormat('size2')} title="Font size 2 - normal"
+                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: 'var(--fs-sm)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                M
+              </button>
+              <button type="button" onClick={() => handleFormat('size3')} title="Font size 3 - large"
+                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: 'var(--fs-md)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                L
+              </button>
+              <button type="button" onClick={() => handleFormat('size4')} title="Font size 4 - extra large"
+                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontWeight: 600, fontSize: 'var(--fs-lg)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                XL
+              </button>
+              <button type="button" onClick={() => handleFormat('image')} title="Insert image"
+                style={{ padding: 'var(--sp-1) var(--sp-2)', borderRadius: 4, fontSize: 'var(--fs-sm)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                🖼 Image
+              </button>
+              <span style={{ flex: 1 }} />
+              <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', alignSelf: 'center' }}>
+                Blank lines = new paragraphs
+              </span>
             </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Details (one paragraph per blank line)</label>
-              <textarea className="form-input" rows={12} value={form.detailsText} onChange={(e) => setForm({ ...form, detailsText: e.target.value })} placeholder="Each paragraph separated by a blank line. Use **bold**, ![alt](url) for images." />
-              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
-                Blank lines create new paragraphs. Supports <strong>**bold**</strong>, inline images with <strong>![caption](image-url)</strong>, and line breaks.
-              </p>
+
+            <textarea
+              ref={bodyRef}
+              className="form-input"
+              rows={20}
+              value={form.content}
+              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              placeholder={`Write your article here...
+
+Use # Heading for large titles
+Use ## Subheading for medium titles
+Use **bold** for emphasis
+Use ![caption](image-url) for inline images
+
+Blank lines separate paragraphs.`}
+              style={{
+                fontFamily: 'monospace',
+                fontSize: 'var(--fs-sm)',
+                lineHeight: 1.7,
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+              }}
+            />
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
+              <strong>Formatting guide:</strong> {' '}
+              <code>**bold**</code> — bold &nbsp;|&nbsp;
+              <code>[s1]text[/s1]</code> to <code>[s4]text[/s4]</code> — font size 1 (small) to 4 (extra large) &nbsp;|&nbsp;
+              <code>![caption](url)</code> — inline image &nbsp;|&nbsp;
+              Blank line = new paragraph
+            </p>
+          </div>
+
+          {/* ── Gallery section ── */}
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-2)' }}>
+              <label className="form-label" style={{ marginBottom: 0 }}>Gallery Images (shown at bottom of article)</label>
+              <button className="btn btn-outline" type="button" onClick={() => setForm({ ...form, gallery: [...form.gallery, { label: '', caption: '', imageUrl: '' }] })} style={{ fontSize: 'var(--fs-xs)' }}>
+                + Add Image
+              </button>
             </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-2)' }}>
-                <label className="form-label" style={{ marginBottom: 0 }}>Gallery Images</label>
-                <button className="btn btn-outline" type="button" onClick={() => setForm({ ...form, gallery: [...form.gallery, { label: '', caption: '', imageUrl: '' }] })} style={{ fontSize: 'var(--fs-xs)' }}>
-                  + Add Image
-                </button>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-2)' }}>
+              Optional — for inline images inside the article text, use <code>![caption](url)</code> in the content editor above.
+            </p>
+            {form.gallery.map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: 'var(--sp-2)', marginBottom: 'var(--sp-2)', alignItems: 'center' }}>
+                <input className="form-input" value={item.imageUrl} onChange={(e) => {
+                  const g = [...form.gallery]; g[i] = { ...g[i], imageUrl: e.target.value }; setForm({ ...form, gallery: g });
+                }} placeholder="Image URL" style={{ flex: 2 }} />
+                <input className="form-input" value={item.label} onChange={(e) => {
+                  const g = [...form.gallery]; g[i] = { ...g[i], label: e.target.value }; setForm({ ...form, gallery: g });
+                }} placeholder="Label" style={{ flex: 1 }} />
+                <input className="form-input" value={item.caption} onChange={(e) => {
+                  const g = [...form.gallery]; g[i] = { ...g[i], caption: e.target.value }; setForm({ ...form, gallery: g });
+                }} placeholder="Caption" style={{ flex: 2 }} />
+                <button className="btn btn-outline" type="button" onClick={() => {
+                  setForm({ ...form, gallery: form.gallery.filter((_, idx) => idx !== i) });
+                }} style={{ flexShrink: 0, color: 'var(--error)', borderColor: 'transparent', fontSize: 'var(--fs-sm)' }}>✕</button>
               </div>
-              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-2)' }}>Each gallery item has an image URL, label and caption.</p>
-              {form.gallery.map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: 'var(--sp-2)', marginBottom: 'var(--sp-2)', alignItems: 'center' }}>
-                  <input className="form-input" value={item.imageUrl} onChange={(e) => {
-                    const g = [...form.gallery]; g[i] = { ...g[i], imageUrl: e.target.value }; setForm({ ...form, gallery: g });
-                  }} placeholder="Image URL" style={{ flex: 2 }} />
-                  <input className="form-input" value={item.label} onChange={(e) => {
-                    const g = [...form.gallery]; g[i] = { ...g[i], label: e.target.value }; setForm({ ...form, gallery: g });
-                  }} placeholder="Label" style={{ flex: 1 }} />
-                  <input className="form-input" value={item.caption} onChange={(e) => {
-                    const g = [...form.gallery]; g[i] = { ...g[i], caption: e.target.value }; setForm({ ...form, gallery: g });
-                  }} placeholder="Caption" style={{ flex: 2 }} />
-                  <button className="btn btn-outline" type="button" onClick={() => {
-                    setForm({ ...form, gallery: form.gallery.filter((_, idx) => idx !== i) });
-                  }} style={{ flexShrink: 0, color: 'var(--error)', borderColor: 'transparent', fontSize: 'var(--fs-sm)' }}>✕</button>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
