@@ -1,8 +1,12 @@
 import { useRef, useState, useCallback } from 'react';
 
-export default function ImagePositionPicker({ imageUrl, value, onChange, aspectRatio = '21/9' }) {
+export default function ImagePositionPicker({ imageUrl, value, onChange, aspectRatio = '21/9', maxHeight }) {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(false);
+
+  // Parse aspect ratio string like "21/9" → [21, 9]
+  const [ratioW, ratioH] = aspectRatio.split('/').map(Number);
+  const containerMaxWidth = maxHeight ? `${Math.round(maxHeight * ratioW / ratioH)}px` : 'none';
 
   // Parse current value: "50% 50%" → { x: 50, y: 50 }
   const pos = (value || '50% 50%').split(' ').map((v) => parseFloat(v));
@@ -66,11 +70,12 @@ export default function ImagePositionPicker({ imageUrl, value, onChange, aspectR
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        style={{
+        onMouseLeave={handleMouseUp}          style={{
           position: 'relative',
           width: '100%',
+          maxWidth: containerMaxWidth,
           aspectRatio,
+          maxHeight: maxHeight || 'none',
           overflow: 'hidden',
           borderRadius: 'var(--radius-sm)',
           border: dragging ? '2px solid var(--accent)' : '1px solid var(--border)',
