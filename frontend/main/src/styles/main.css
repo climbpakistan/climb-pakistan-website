@@ -1956,8 +1956,21 @@ input, textarea, select { font: inherit; color: inherit; }
 
   /* --- Athlete hero --- */
   .athlete-hero { padding-block: var(--sp-4); }
-  .athlete-hero-stats { gap: var(--sp-3); }
-  .hero-stat-value { font-size: var(--fs-lg); }
+  .athlete-hero-stats {
+    flex-wrap: nowrap;
+    gap: var(--sp-2);
+    width: 100%;
+  }
+  .hero-stat { padding: var(--sp-1) var(--sp-2); flex: 1; min-width: 0; }
+  .hero-stat-value { font-size: var(--fs-base); }
+  .hero-stat-label { font-size: 0.625rem; }
+  .athlete-hero-actions { flex-wrap: nowrap; }
+  .btn-instagram,
+  .btn-world-climbing {
+    padding: var(--sp-2) var(--sp-4);
+    font-size: var(--fs-xs);
+    white-space: nowrap;
+  }
 
   /* --- Rankings --- */
   .rankings-table th,
