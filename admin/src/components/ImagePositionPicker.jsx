@@ -70,10 +70,10 @@ export default function ImagePositionPicker({ imageUrl, value, onChange, aspectR
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}          style={{
+        onMouseLeave={handleMouseUp}
+        style={{
           position: 'relative',
-          width: '100%',
-          maxWidth: containerMaxWidth,
+          width: maxHeight ? containerMaxWidth : '100%',
           aspectRatio,
           maxHeight: maxHeight || 'none',
           overflow: 'hidden',

@@ -265,13 +265,14 @@ export default function Athletes() {
             <input className="form-input" value={form.photoUrl} onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} placeholder="https://example.com/athlete-photo.jpg" />
           </div>
           {form.photoUrl && (
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>                <ImagePositionPicker
-                  imageUrl={form.photoUrl}
-                  value={form.photoPosition}
-                  onChange={(pos) => setForm({ ...form, photoPosition: pos })}
-                  aspectRatio="3/4"
-                  maxHeight={380}
-                />
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <ImagePositionPicker
+                imageUrl={form.photoUrl}
+                value={form.photoPosition}
+                onChange={(pos) => setForm({ ...form, photoPosition: pos })}
+                aspectRatio="3/4"
+                maxHeight={380}
+              />
             </div>
           )}
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
