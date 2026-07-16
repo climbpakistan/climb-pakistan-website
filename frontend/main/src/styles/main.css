@@ -1560,7 +1560,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 .learn-card-media {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 21 / 9;
   overflow: hidden;
 }
 

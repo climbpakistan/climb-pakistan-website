@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback } from 'react';
 
-export default function ImagePositionPicker({ imageUrl, value, onChange }) {
+export default function ImagePositionPicker({ imageUrl, value, onChange, aspectRatio = '21/9' }) {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(false);
 
@@ -56,10 +56,10 @@ export default function ImagePositionPicker({ imageUrl, value, onChange }) {
   return (
     <div>
       <label className="form-label" style={{ fontSize: 'var(--fs-xs)', marginBottom: 'var(--sp-2)' }}>
-        Image Focus Point
+        Image Focus Point — <span style={{ fontWeight: 400, fontFamily: 'monospace' }}>{value || '50% 50%'}</span>
       </label>
       <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-2)' }}>
-        Click or drag on the image to set where the crop should focus. Current: <code>{value || '50% 50%'}</code>
+        Click or drag on the image to set the crop focus. The preview below shows exactly how the hero will look.
       </p>
       <div
         ref={containerRef}
@@ -70,8 +70,7 @@ export default function ImagePositionPicker({ imageUrl, value, onChange }) {
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: '21 / 9',
-          maxHeight: 200,
+          aspectRatio,
           overflow: 'hidden',
           borderRadius: 'var(--radius-sm)',
           border: dragging ? '2px solid var(--accent)' : '1px solid var(--border)',
@@ -93,13 +92,13 @@ export default function ImagePositionPicker({ imageUrl, value, onChange }) {
           onError={(e) => { e.target.style.display = 'none'; }}
         />
 
-        {/* Grid overlay */}
+        {/* Rule-of-thirds grid overlay */}
         <div style={{
           position: 'absolute',
           inset: 0,
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
+            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
           `,
           backgroundSize: '33.33% 33.33%',
           pointerEvents: 'none',

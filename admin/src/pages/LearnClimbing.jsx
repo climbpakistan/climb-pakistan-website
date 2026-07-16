@@ -194,6 +194,7 @@ export default function LearnClimbing() {
                   imageUrl={form.image}
                   value={form.imagePosition}
                   onChange={(pos) => setForm({ ...form, imagePosition: pos })}
+                  aspectRatio="21/9"
                 />
               </div>
             )}

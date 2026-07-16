@@ -20,7 +20,14 @@ export default function NewsCard({ article }) {
     <article className="news-card">
       <Link to={`/news/${article.slug}`} className="news-card-media placeholder-photo" aria-hidden="true">
         {article.imageUrl ? (
-          <img src={article.imageUrl} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+          <img src={article.imageUrl} alt={article.title} style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: article.imagePosition || '50% 50%',
+            position: 'absolute',
+            inset: 0,
+          }} />
         ) : (
           <span>Photo</span>
         )}

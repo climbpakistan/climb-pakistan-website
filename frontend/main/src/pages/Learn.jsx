@@ -50,7 +50,12 @@ export default function Learn() {
                 >
                   <div className="learn-card-media">
                     {section.image ? (
-                      <img src={section.image} alt={section.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={section.image} alt={section.title} style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        objectPosition: section.imagePosition || '50% 50%',
+                      }} />
                     ) : (
                       <div className="learn-card-img-gradient">
                         <span className="learn-card-img-label">

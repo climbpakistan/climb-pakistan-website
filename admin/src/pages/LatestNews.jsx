@@ -196,6 +196,7 @@ export default function LatestNews() {
                   imageUrl={form.imageUrl}
                   value={form.imagePosition}
                   onChange={(pos) => setForm({ ...form, imagePosition: pos })}
+                  aspectRatio="16/10"
                 />
               </div>
             )}
