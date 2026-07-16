@@ -1840,16 +1840,24 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* ---------- 15. Responsive ---------- */
 @media (max-width: 1024px) {
+  /* --- Grids → 2 cols --- */
   .champion-grid { grid-template-columns: repeat(2, 1fr); }
   .coverage-grid { grid-template-columns: repeat(2, 1fr); }
   .news-grid { grid-template-columns: repeat(2, 1fr); }
+  .learn-gallery { grid-template-columns: repeat(2, 1fr); }
   .athlete-detail-grid { grid-template-columns: 1fr; }
   .info-card { position: static; }
   .comp-gallery { grid-template-columns: repeat(3, 1fr); }
   .about-stats { grid-template-columns: repeat(2, 1fr); }
+
+  /* --- Spacing tweaks --- */
+  .section { padding-block: var(--sp-16); }
+  .athlete-hero-stats { gap: var(--sp-12); }
+  .footer-logo { font-size: calc(var(--fs-md) * 2); }
 }
 
 @media (max-width: 860px) {
+  /* --- Mobile nav --- */
   .nav-links {
     position: fixed;
     inset: 72px 0 0 0;
@@ -1862,6 +1870,7 @@ input, textarea, select { font: inherit; color: inherit; }
     transform: translateX(100%);
     transition: transform 0.25s ease;
     overflow-y: auto;
+    z-index: 200;
   }
   .nav-links.is-open { transform: translateX(0); }
   .nav-links li { width: 100%; }
@@ -1870,21 +1879,50 @@ input, textarea, select { font: inherit; color: inherit; }
 
   .search-dropdown { position: fixed; top: 72px; left: var(--sp-4); right: var(--sp-4); width: auto; }
 
-  .hero { padding-block: var(--sp-16) var(--sp-12); }
+  /* --- Grids → 1 col --- */
   .champion-grid { grid-template-columns: 1fr; }
   .coverage-grid { grid-template-columns: 1fr; }
   .news-grid { grid-template-columns: 1fr; }
   .athlete-grid { grid-template-columns: 1fr; }
   .athlete-hero-layout { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: repeat(2, 1fr); gap: var(--sp-8) var(--sp-6); }
+  .hero { padding-block: var(--sp-12) var(--sp-10); }
   .follow-cta-inner { flex-direction: column; align-items: flex-start; }
   .comp-list-item { grid-template-columns: 1fr; }
   .comp-list-media { aspect-ratio: 16 / 9; }
+  .comp-list-body { padding: var(--sp-4); }
   .comp-gallery { grid-template-columns: repeat(2, 1fr); }
   .about-stats { grid-template-columns: 1fr 1fr; }
   .learn-card-grid { grid-template-columns: 1fr; }
   .learn-gallery { grid-template-columns: repeat(2, 1fr); }
+  .learn-card-body { padding: var(--sp-4); }
   .footer-bottom { flex-direction: column; gap: var(--sp-3); align-items: flex-start; }
+
+  /* --- Spacing & typography --- */
+  .section { padding-block: var(--sp-12); }
+  .section-tight { padding-block: var(--sp-8); }
+  .section-head h2 { font-size: var(--fs-xl); }
+  .hero-sub { font-size: var(--fs-base); }
+
+  /* --- Athlete hero --- */
+  .athlete-hero-stats { gap: var(--sp-6); }
+  .athlete-hero-media { max-height: 280px; }
+
+  /* --- Rankings --- */
+  .rankings-table th,
+  .rankings-table td { padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); }
+  .rankings-rank { width: 36px; font-size: var(--fs-md); }
+  .rank-1 .ranking-avatar { width: 48px; height: 48px; font-size: var(--fs-md); }
+  .rank-2 .ranking-avatar { width: 42px; height: 42px; font-size: var(--fs-sm); }
+  .ranking-avatar:not(.rank-1 .ranking-avatar):not(.rank-2 .ranking-avatar) { width: 36px; height: 36px; font-size: var(--fs-xs); }
+
+  /* --- Footer --- */
+  .footer-logo { font-size: calc(var(--fs-md) * 2); }
+  .footer-brand p { font-size: var(--fs-sm); }
+
+  /* --- Medal rows --- */
+  .medal-row { padding: var(--sp-3); gap: var(--sp-3); }
+  .medal-competition { font-size: var(--fs-xs); }
 }
 
 @media (max-width: 560px) {
@@ -1893,7 +1931,82 @@ input, textarea, select { font: inherit; color: inherit; }
   .about-stats { grid-template-columns: 1fr; }
   .hero-actions, .thanks-actions { flex-direction: column; align-items: stretch; }
   .learn-gallery { grid-template-columns: 1fr; }
+  .comp-gallery { grid-template-columns: 1fr; }
   .rankings-top-bar { flex-direction: column; align-items: flex-start; }
+
+  /* --- Typography --- */
+  .page-title { font-size: var(--fs-2xl); }
+  .hero-title { font-size: clamp(2rem, 8vw, 3rem); }
+  .section-head h2 { font-size: var(--fs-lg); }
+  .section-head { flex-direction: column; align-items: flex-start; }
+  .coverage-num { font-size: var(--fs-xl); }
+
+  /* --- Spacing --- */
+  .hero { padding-block: var(--sp-10) var(--sp-8); }
+  .section { padding-block: var(--sp-10); }
+  .section-tight { padding-block: var(--sp-6); }
+  .follow-cta { padding-block: var(--sp-10); }
+  .site-footer { padding-block: var(--sp-10) var(--sp-6); }
+  .hero-sub { margin-top: var(--sp-4); }
+  .thanks-hero { padding-block: var(--sp-12); }
+
+  /* --- Contact form --- */
+  .contact-form-wrap { padding: var(--sp-4); }
+  .contact-form .btn { align-self: stretch; }
+
+  /* --- Athlete hero --- */
+  .athlete-hero { padding-block: var(--sp-4); }
+  .athlete-hero-stats { gap: var(--sp-3); }
+  .hero-stat-value { font-size: var(--fs-lg); }
+
+  /* --- Rankings --- */
+  .rankings-table th,
+  .rankings-table td { padding: var(--sp-2); font-size: var(--fs-xs); }
+  .rankings-rank { font-size: var(--fs-sm); width: 28px; }
+  .rankings-table td:nth-child(3),
+  .rankings-table th:nth-child(3) { display: none; }
+  .rankings-athlete-cell { gap: var(--sp-2); }
+  .ranking-avatar { width: 32px; height: 32px; font-size: 0.625rem; }
+  .rank-1 .ranking-avatar { width: 40px; height: 40px; font-size: var(--fs-sm); }
+  .rank-2 .ranking-avatar { width: 36px; height: 36px; font-size: 0.625rem; }
+
+  /* --- Competitions --- */
+  .comp-list-body h3 { font-size: var(--fs-md); }
+  .comp-tab { padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); }
+
+  /* --- Athlete grid --- */
+  .athlete-card-body { padding: var(--sp-4); }
+  .athlete-card-body h3 { font-size: var(--fs-sm); }
+  .athlete-card-tags { gap: var(--sp-1); }
+
+  /* --- Champion cards --- */
+  .champion-card-body { padding: var(--sp-4); }
+  .champion-name { font-size: var(--fs-md); }
+  .champion-stats { gap: var(--sp-2); }
+  .champion-stat { min-width: 56px; padding: var(--sp-1) var(--sp-2); }
+  .champion-stat-value { font-size: var(--fs-md); }
+
+  /* --- News cards --- */
+  .news-card-body { padding: var(--sp-4); }
+  .news-card-body h3 { font-size: var(--fs-sm); }
+
+  /* --- Learn cards --- */
+  .learn-card-body h3 { font-size: var(--fs-md); }
+
+  /* --- Article pages --- */
+  .article-title { font-size: var(--fs-xl); }
+
+  /* --- Coverage cards --- */
+  .coverage-card { padding: var(--sp-4); }
+  .coverage-card h3 { font-size: var(--fs-sm); }
+
+  /* --- Pagination --- */
+  .pagination { gap: var(--sp-1); }
+  .page-btn { width: 34px; height: 34px; font-size: var(--fs-sm); }
+
+  /* --- Medal rows --- */
+  .medal-count { padding: var(--sp-1) var(--sp-3); }
+  .medal-count-num { font-size: var(--fs-md); }
 }
 
 /* ---------- 16. Small fixes & polish ---------- */

@@ -58,7 +58,6 @@ export default function Login() {
             className="form-input"
             id="email"
             type="email"
-            placeholder="admin@climbpakistan.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoFocus
@@ -70,7 +69,6 @@ export default function Login() {
             className="form-input"
             id="password"
             type="password"
-            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
