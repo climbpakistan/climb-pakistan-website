@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getAthletes, getNews, getCompetitions } from '../api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.PROD ? 'https://climb-pakistan-backend.onrender.com/api' : 'http://localhost:3001/api');
 
 export default function Dashboard() {
   const [athleteCount, setAthleteCount] = useState(null);

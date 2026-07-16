@@ -1,6 +1,8 @@
-// In production, set VITE_API_URL in your deployment environment.
-// Defaults to the local backend during development.
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// In production, set VITE_API_URL in your Vercel environment variables.
+// Defaults to the local backend during development, and the live
+// backend on Vercel (so your custom domain works out of the box).
+const BASE_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.PROD ? 'https://climb-pakistan-backend.onrender.com/api' : 'http://localhost:3001/api');
 
 async function fetchJSON(url) {
   const res = await fetch(url);

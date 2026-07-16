@@ -31,7 +31,16 @@ app.use(helmet());
 // CORS — restrict to specific origins in production
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
-  : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3001'];
+  : [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:3001',
+      // Custom domain & Vercel previews
+      'https://climbpakistan.com',
+      'https://www.climbpakistan.com',
+      'https://climb-pakistan.vercel.app',
+      'https://climb-pakistan-admin.vercel.app',
+    ];
 
 app.use(cors({
   origin: function (origin, callback) {
