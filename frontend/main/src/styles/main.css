@@ -1745,12 +1745,12 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* Heading within a section block */
 .section-heading {
+  flex: 0 0 100%;
   font-size: var(--fs-lg);
   color: var(--cp-white);
   text-transform: uppercase;
   letter-spacing: 0.02em;
   margin-bottom: var(--sp-3);
-  width: 100%;
 }
 .section-block:first-child .section-heading {
   margin-top: 0;
@@ -1762,6 +1762,7 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Image Left + Text Right */
 .section-image-left {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-6);
   align-items: flex-start;
 }
