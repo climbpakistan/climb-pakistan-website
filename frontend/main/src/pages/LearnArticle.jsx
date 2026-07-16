@@ -4,18 +4,53 @@ import { getLearnSection } from '../api';
 
 function renderFormattedText(text) {
   if (!text) return null;
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  // Support ![alt](url) syntax for inline images
+  const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  while ((match = imgRegex.exec(text)) !== null) {
+    // Push text before this image
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
+    }
+    parts.push({ type: 'image', alt: match[1], url: match[2] });
+    lastIndex = match.index + match[0].length;
+  }
+  // Push remaining text
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', value: text.slice(lastIndex) });
+  }
+
+  if (parts.length === 0) return null;
+
   return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    if (part.type === 'image') {
+      return (
+        <div className="inline-image" key={i}>
+          <img src={part.url} alt={part.alt || 'Article image'} loading="lazy" />
+          {part.alt && <span className="inline-image-caption">{part.alt}</span>}
+        </div>
+      );
     }
-    if (part.includes('\n')) {
-      const lines = part.split('\n');
-      return lines.map((line, j) => (
-        <span key={`${i}-${j}`}>{line}{j < lines.length - 1 && <br/>}</span>
-      ));
-    }
-    return part;
+    // Render formatted text (bold + line breaks)
+    const textParts = part.value.split(/(\*\*[^*]+\*\*)/g);
+    return (
+      <span key={i}>
+        {textParts.map((tp, j) => {
+          if (tp.startsWith('**') && tp.endsWith('**')) {
+            return <strong key={j}>{tp.slice(2, -2)}</strong>;
+          }
+          if (tp.includes('\n')) {
+            const lines = tp.split('\n');
+            return lines.map((line, k) => (
+              <span key={`${j}-${k}`}>{line}{k < lines.length - 1 && <br/>}</span>
+            ));
+          }
+          return tp;
+        })}
+      </span>
+    );
   });
 }
 

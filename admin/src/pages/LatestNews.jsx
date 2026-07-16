@@ -112,6 +112,9 @@ export default function LatestNews() {
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Featured Image URL</label>
               <input className="form-input" value={editForm.imageUrl} onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })} placeholder="https://example.com/news-image.jpg" />
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
+                Main image shown at the top of the article. For inline images inside paragraphs, use <strong>![caption](image-url)</strong> in the body text below.
+              </p>
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Excerpt</label>
@@ -127,16 +130,17 @@ export default function LatestNews() {
                 <option>Published</option>
               </select>
             </div>
-          </div>
-
-          <div className="form-group">
+          </div>            <div className="form-group">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-2)' }}>
               <label className="form-label" style={{ marginBottom: 0 }}>Body Paragraphs</label>
               <button className="btn btn-outline" type="button" onClick={addBodyParagraph} style={{ fontSize: 'var(--fs-xs)' }}>+ Add Paragraph</button>
             </div>
+            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-2)' }}>
+              Use <strong>**bold**</strong> for bold text. Use <strong>![caption](image-url)</strong> to place an image inline within a paragraph (e.g. <strong>![Lead climbing technique](https://example.com/photo.jpg)</strong>). The caption text shows below the image.
+            </p>
             {editForm.body.map((para, i) => (
               <div key={i} style={{ display: 'flex', gap: 'var(--sp-2)', marginBottom: 'var(--sp-2)' }}>
-                <textarea className="form-input" rows={10} value={para} onChange={(e) => updateBody(i, e.target.value)} placeholder={`Paragraph ${i + 1} — use **bold** for emphasis, Enter for line breaks`} />
+                <textarea className="form-input" rows={10} value={para} onChange={(e) => updateBody(i, e.target.value)} placeholder={`Paragraph ${i + 1} — use **bold**, ![alt](url) for images, Enter for line breaks`} />
                 <button className="btn btn-outline" type="button" onClick={() => removeBodyParagraph(i)} style={{ flexShrink: 0, color: 'var(--error)', borderColor: 'transparent' }} title="Remove paragraph">✕</button>
               </div>
             ))}

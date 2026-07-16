@@ -957,12 +957,49 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .article-meta { color: var(--cp-text-muted); font-size: var(--fs-sm); margin-bottom: var(--sp-6); }
 .article-media {
-  aspect-ratio: 16 / 8;
   border-radius: var(--radius-md);
   margin-bottom: var(--sp-8);
+  overflow: hidden;
+  max-height: 480px;
 }
-.article-body { display: flex; flex-direction: column; gap: var(--sp-5); }
-.article-body p { color: var(--cp-text); font-size: var(--fs-base); line-height: 1.75; }
+.article-media img {
+  width: 100%;
+  height: auto;
+  max-height: 480px;
+  object-fit: contain;
+  background: var(--cp-bg-alt);
+}
+.article-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.article-body p {
+  color: var(--cp-text);
+  font-size: var(--fs-base);
+  line-height: 1.75;
+}
+.article-body .inline-image {
+  margin-block: var(--sp-4);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-align: center;
+}
+.article-body .inline-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  background: var(--cp-bg-alt);
+  border-radius: var(--radius-sm);
+}
+.article-body .inline-image .inline-image-caption {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--cp-text-muted);
+  margin-top: var(--sp-2);
+  font-style: italic;
+}
 .related { border-top: 1px solid var(--cp-border); margin-top: var(--sp-16); padding-top: var(--sp-12); }
 
 /* ---------- 8. Athletes (grid, cards, profile page) ---------- */
@@ -1636,13 +1673,21 @@ input, textarea, select { font: inherit; color: inherit; }
 .learn-article-media {
   border-radius: var(--radius-lg);
   overflow: hidden;
-  aspect-ratio: 21 / 9;
   border: 1px solid var(--cp-border);
+  max-height: 480px;
+}
+.learn-article-media img {
+  width: 100%;
+  height: auto;
+  max-height: 480px;
+  object-fit: contain;
+  background: var(--cp-bg-alt);
+  display: block;
 }
 
 .learn-article-media-gradient {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 21 / 9;
   background: linear-gradient(135deg, var(--cp-surface-2), var(--cp-bg-alt), var(--cp-bg), var(--cp-surface-2));
   display: flex;
   align-items: center;
@@ -1665,6 +1710,27 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-text);
   font-size: var(--fs-base);
   line-height: 1.75;
+}
+.learn-article-body .inline-image {
+  margin-block: var(--sp-4);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-align: center;
+}
+.learn-article-body .inline-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  background: var(--cp-bg-alt);
+  border-radius: var(--radius-sm);
+}
+.learn-article-body .inline-image .inline-image-caption {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--cp-text-muted);
+  margin-top: var(--sp-2);
+  font-style: italic;
 }
 .learn-article-lead {
   font-size: var(--fs-md) !important;
@@ -1704,8 +1770,14 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 
 .learn-gallery-media {
-  aspect-ratio: 16 / 11;
   overflow: hidden;
+  max-height: 240px;
+}
+.learn-gallery-media img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: var(--cp-bg-alt);
 }
 
 .learn-gallery-gradient {

@@ -95,8 +95,11 @@ export default function LearnClimbing() {
               <input className="form-input" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
             </div>
             <div className="form-group">
-              <label className="form-label">Image URL</label>
+              <label className="form-label">Hero Image URL</label>
               <input className="form-input" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://example.com/section-image.jpg" />
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
+                For inline images inside the body/details text, use <strong>![caption](image-url)</strong> syntax.
+              </p>
             </div>
             <div className="form-group">
               <label className="form-label">Status</label>
@@ -107,16 +110,16 @@ export default function LearnClimbing() {
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Body (intro paragraph)</label>
-              <textarea className="form-input" rows={8} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Use **bold** for emphasis" />
+              <textarea className="form-input" rows={8} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Use **bold**, ![alt](url) for images, Enter for line breaks" />
               <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
-                Supports **bold** text and line breaks.
+                Supports <strong>**bold**</strong> text, line breaks, and inline images with <strong>![caption](image-url)</strong>.
               </p>
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Details (one paragraph per blank line)</label>
-              <textarea className="form-input" rows={12} value={form.detailsText} onChange={(e) => setForm({ ...form, detailsText: e.target.value })} placeholder="Each paragraph separated by a blank line. Use **bold** for emphasis." />
+              <textarea className="form-input" rows={12} value={form.detailsText} onChange={(e) => setForm({ ...form, detailsText: e.target.value })} placeholder="Each paragraph separated by a blank line. Use **bold**, ![alt](url) for images." />
               <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
-                Blank lines create new paragraphs. Supports **bold** text and line breaks.
+                Blank lines create new paragraphs. Supports <strong>**bold**</strong>, inline images with <strong>![caption](image-url)</strong>, and line breaks.
               </p>
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
