@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getLearnSections, createLearnSection, updateLearnSection, deleteLearnSection } from '../api';
+import ImagePositionPicker from '../components/ImagePositionPicker';
 
 const LAYOUT_OPTIONS = [
   { value: 'image-left', label: 'Image Left + Text Right' },
@@ -16,7 +17,7 @@ export default function LearnClimbing() {
   const [loading, setLoading] = useState(true);
   const [editingSlug, setEditingSlug] = useState(null);
   const [form, setForm] = useState({
-    slug: '', title: '', subtitle: '', image: '',
+    slug: '', title: '', subtitle: '', image: '', imagePosition: '50% 50%',
     contentSections: [emptySection()],
     gallery: [{ label: '', caption: '', imageUrl: '' }],
     status: 'Draft',
@@ -29,7 +30,7 @@ export default function LearnClimbing() {
   const openNew = () => {
     setEditingSlug('__new__');
     setForm({
-      slug: '', title: '', subtitle: '', image: '',
+      slug: '', title: '', subtitle: '', image: '', imagePosition: '50% 50%',
       contentSections: [emptySection()],
       gallery: [{ label: '', caption: '', imageUrl: '' }],
       status: 'Draft',
@@ -70,6 +71,7 @@ export default function LearnClimbing() {
       title: section.title,
       subtitle: section.subtitle || '',
       image: section.image || '',
+      imagePosition: section.imagePosition || '50% 50%',
       contentSections,
       gallery: existingGallery,
       status: section.status,
@@ -113,6 +115,7 @@ export default function LearnClimbing() {
       title: form.title,
       subtitle: form.subtitle,
       image: form.image,
+      imagePosition: form.imagePosition,
       body: '',  // Clear old fields
       details: [],
       sections,
@@ -185,6 +188,15 @@ export default function LearnClimbing() {
               <label className="form-label">Hero Image URL</label>
               <input className="form-input" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://example.com/section-image.jpg" />
             </div>
+            {form.image && (
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <ImagePositionPicker
+                  imageUrl={form.image}
+                  value={form.imagePosition}
+                  onChange={(pos) => setForm({ ...form, imagePosition: pos })}
+                />
+              </div>
+            )}
             <div className="form-group">
               <label className="form-label">Status</label>
               <select className="form-input" style={{ width: 200 }} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>

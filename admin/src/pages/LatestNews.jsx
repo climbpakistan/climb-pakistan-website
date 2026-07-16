@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getNews, createNews, updateNews, deleteNews } from '../api';
+import ImagePositionPicker from '../components/ImagePositionPicker';
 
 const tagOptions = ['Competitions', 'Announcements', 'Athletes'];
 
@@ -18,7 +19,7 @@ export default function LatestNews() {
   const [loading, setLoading] = useState(true);
   const [editingSlug, setEditingSlug] = useState(null);
   const [form, setForm] = useState({
-    slug: '', title: '', tag: 'Competitions', date: '', excerpt: '', imageUrl: '',
+    slug: '', title: '', tag: 'Competitions', date: '', excerpt: '', imageUrl: '', imagePosition: '50% 50%',
     contentSections: [emptySection()],
     status: 'Draft',
   });
@@ -31,7 +32,7 @@ export default function LatestNews() {
     setEditingSlug('__new__');
     setForm({
       slug: '', title: '', tag: 'Competitions', date: new Date().toISOString().slice(0, 10),
-      excerpt: '', imageUrl: '',
+      excerpt: '', imageUrl: '', imagePosition: '50% 50%',
       contentSections: [emptySection()],
       status: 'Draft',
     });
@@ -67,6 +68,7 @@ export default function LatestNews() {
       date: article.date,
       excerpt: article.excerpt || '',
       imageUrl: article.imageUrl || '',
+      imagePosition: article.imagePosition || '50% 50%',
       contentSections,
       status: article.status,
     });
@@ -111,6 +113,7 @@ export default function LatestNews() {
       date: form.date,
       excerpt: form.excerpt,
       imageUrl: form.imageUrl,
+      imagePosition: form.imagePosition,
       body: sections.map((s) => s.text),  // Keep body array for backward compat
       sections,
       status: form.status,
@@ -187,6 +190,15 @@ export default function LatestNews() {
               <label className="form-label">Featured Image URL</label>
               <input className="form-input" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://example.com/news-image.jpg" />
             </div>
+            {form.imageUrl && (
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <ImagePositionPicker
+                  imageUrl={form.imageUrl}
+                  value={form.imagePosition}
+                  onChange={(pos) => setForm({ ...form, imagePosition: pos })}
+                />
+              </div>
+            )}
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Excerpt</label>
               <textarea className="form-input" rows={4} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} placeholder="Short preview shown on the news cards. Supports **bold**." />

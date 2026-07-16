@@ -121,7 +121,12 @@ export default function Article() {
           <p className="article-meta">{formatDate(article.date)}</p>
           {article.imageUrl ? (
             <div className="article-media">
-              <img src={article.imageUrl} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={article.imageUrl} alt={article.title} style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: article.imagePosition || '50% 50%',
+              }} />
             </div>
           ) : (
             <div className="article-media placeholder-photo" aria-hidden="true"><span>Photo</span></div>

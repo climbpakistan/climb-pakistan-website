@@ -14,6 +14,7 @@ const newsSchema = new mongoose.Schema({
   date: { type: String, required: true },
   excerpt: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
+  imagePosition: { type: String, default: '50% 50%' },
   body: [{ type: String }],
   sections: [contentSectionSchema],
   status: { type: String, default: 'Draft', enum: ['Draft', 'Published'] },

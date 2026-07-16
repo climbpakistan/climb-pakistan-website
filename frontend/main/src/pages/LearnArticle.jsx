@@ -159,7 +159,12 @@ export default function LearnArticle() {
         <div className="container">
           <div className="learn-article-media">
             {section.image ? (
-              <img src={section.image} alt={section.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={section.image} alt={section.title} style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: section.imagePosition || '50% 50%',
+              }} />
             ) : (
               <div className="learn-article-media-gradient">
                 <span className="learn-card-img-label">

@@ -18,6 +18,7 @@ const learnSectionSchema = new mongoose.Schema({
   title: { type: String, required: true },
   subtitle: { type: String, default: '' },
   image: { type: String, default: '' },
+  imagePosition: { type: String, default: '50% 50%' },
   body: { type: String, default: '' },
   details: [{ type: String }],
   sections: [contentSectionSchema],  // New structured sections
