@@ -5,24 +5,22 @@ import NewsCard from '../components/NewsCard';
 
 function renderFormattedText(text) {
   if (!text) return null;
-  // Support ![alt](url) syntax for inline images
+
+  // First pass: extract images
   const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
   const parts = [];
   let lastIndex = 0;
   let match;
   while ((match = imgRegex.exec(text)) !== null) {
-    // Push text before this image
     if (match.index > lastIndex) {
       parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
     }
     parts.push({ type: 'image', alt: match[1], url: match[2] });
     lastIndex = match.index + match[0].length;
   }
-  // Push remaining text
   if (lastIndex < text.length) {
     parts.push({ type: 'text', value: text.slice(lastIndex) });
   }
-
   if (parts.length === 0) return null;
 
   return parts.map((part, i) => {
@@ -34,24 +32,49 @@ function renderFormattedText(text) {
         </div>
       );
     }
-    // Render formatted text (bold + line breaks)
-    const textParts = part.value.split(/(\*\*[^*]+\*\*)/g);
-    return (
-      <span key={i}>
-        {textParts.map((tp, j) => {
-          if (tp.startsWith('**') && tp.endsWith('**')) {
-            return <strong key={j}>{tp.slice(2, -2)}</strong>;
-          }
-          if (tp.includes('\n')) {
-            const lines = tp.split('\n');
-            return lines.map((line, k) => (
-              <span key={`${j}-${k}`}>{line}{k < lines.length - 1 && <br/>}</span>
-            ));
-          }
-          return tp;
-        })}
-      </span>
-    );
+
+    // Parse [s1][/s1] through [s4][/s4] and **bold**
+    const elements = [];
+    const sizeRegex = /\[s([1-4])\](.*?)\[\/s\1\]/gs;
+    let remaining = part.value;
+    let lastIdx = 0;
+    let sizeMatch;
+
+    while ((sizeMatch = sizeRegex.exec(remaining)) !== null) {
+      if (sizeMatch.index > lastIdx) {
+        elements.push(renderInlineText(remaining.slice(lastIdx, sizeMatch.index)));
+      }
+      const content = sizeMatch[2];
+      const size = parseInt(sizeMatch[1]);
+      elements.push(
+        <span className={`font-size-${size}`} key={`s${i}-${sizeMatch.index}`}>
+          {renderInlineText(content)}
+        </span>
+      );
+      lastIdx = sizeMatch.index + sizeMatch[0].length;
+    }
+    if (lastIdx < remaining.length) {
+      elements.push(renderInlineText(remaining.slice(lastIdx)));
+    }
+
+    return <span key={i}>{elements}</span>;
+  });
+}
+
+// Helper: renders text with **bold** and line breaks (no size tags)
+function renderInlineText(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((tp, j) => {
+    if (tp.startsWith('**') && tp.endsWith('**')) {
+      return <strong key={j}>{tp.slice(2, -2)}</strong>;
+    }
+    if (tp.includes('\n')) {
+      const lines = tp.split('\n');
+      return lines.map((line, k) => (
+        <span key={`${j}-${k}`}>{line}{k < lines.length - 1 && <br/>}</span>
+      ));
+    }
+    return tp;
   });
 }
 
