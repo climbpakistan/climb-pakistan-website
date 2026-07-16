@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getAthletes, getNews, getCompetitions } from '../api';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
 export default function Dashboard() {
   const [athleteCount, setAthleteCount] = useState(null);
   const [newsCount, setNewsCount] = useState(null);
   const [activeCompCount, setActiveCompCount] = useState(null);
+  const [pageViews, setPageViews] = useState(null);
 
   useEffect(() => {
     getAthletes().then((a) => setAthleteCount(a.length)).catch(() => setAthleteCount('—'));
@@ -12,6 +15,14 @@ export default function Dashboard() {
     getCompetitions().then((c) => {
       setActiveCompCount(c.filter((comp) => comp.status !== 'Completed').length);
     }).catch(() => setActiveCompCount('—'));
+
+    // Fetch page view stats
+    fetch(`${API_URL}/page-views/stats`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('admin-token')}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setPageViews(data.total))
+      .catch(() => setPageViews('—'));
   }, []);
 
   return (
@@ -39,8 +50,16 @@ export default function Dashboard() {
         </div>
         <div className="stat-card">
           <div className="stat-label">Page Views</div>
-          <div className="stat-value">—</div>
-          <div className="stat-change">Requires analytics setup</div>
+          <div className="stat-value">
+            {pageViews !== null && pageViews !== '—'
+              ? pageViews.toLocaleString()
+              : pageViews ?? '...'}
+          </div>
+          <div className="stat-change positive">
+            {pageViews !== null && pageViews !== '—'
+              ? 'Tracking since setup'
+              : 'Live data'}
+          </div>
         </div>
       </div>
 

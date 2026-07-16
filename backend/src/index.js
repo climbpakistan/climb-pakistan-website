@@ -20,6 +20,7 @@ import rankingRoutes from './routes/rankings.js';
 import teamRankingRoutes from './routes/teamRankings.js';
 import teamRoutes from './routes/teams.js';
 import contactRoutes from './routes/contact.js';
+import pageViewRoutes from './routes/pageViews.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -85,6 +86,10 @@ app.use('/api/teams', requireAdmin, teamRoutes);
 // Contact form POST must remain public (visitors submit it)
 // Admin-only /settings endpoints use their own middleware inside the route
 app.use('/api/contact', contactLimiter, contactRoutes);
+
+// ── Page Views ──
+// POST /api/page-views is public (tracking), GET /stats is protected inside the route
+app.use('/api/page-views', pageViewRoutes);
 
 // Start server
 async function start() {
