@@ -1960,15 +1960,12 @@ input, textarea, select { font: inherit; color: inherit; }
   .athlete-hero-stats {
     flex-wrap: nowrap;
     gap: 0;
-    justify-content: space-between;
     width: 100%;
   }
   .hero-stat {
     padding: var(--sp-1) var(--sp-2);
     flex: 1;
     min-width: 0;
-    align-items: center;
-    text-align: center;
   }
   .hero-stat-value { font-size: var(--fs-base); }
   .hero-stat-label { font-size: 0.625rem; }
