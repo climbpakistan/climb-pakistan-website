@@ -18,7 +18,8 @@ export default function Competitions() {
   const [competitions, setCompetitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingSlug, setEditingSlug] = useState(null);
-  const [form, setForm] = useState({ slug: '', name: '', location: '', startDate: '', endDate: '', status: 'Upcoming', disciplines: [], overview: '', imageUrl: '', images: [{ url: '', title: '' }], newsSlugs: [], results: emptyResults() });
+  const [form, setForm] = useState({ slug: '', name: '', location: '', startDate: '', endDate: '', status: 'Upcoming', disciplines: [], overview: '', imageUrl: '', images: [{ url: '', title: '' }], newsSlugs: [], tags: [], results: emptyResults() });
+  const [tagInput, setTagInput] = useState('');
   const [resultTabDisc, setResultTabDisc] = useState('Speed');
   const [resultTabGender, setResultTabGender] = useState('Men');
   const [editingResultIdx, setEditingResultIdx] = useState(null);
@@ -54,7 +55,8 @@ export default function Competitions() {
 
   const openNew = () => {
     setEditingSlug('__new__');
-    setForm({ slug: '', name: '', location: '', startDate: '', endDate: '', status: 'Upcoming', disciplines: [], overview: '', imageUrl: '', images: [{ url: '', title: '' }], newsSlugs: [], results: emptyResults() });
+    setForm({ slug: '', name: '', location: '', startDate: '', endDate: '', status: 'Upcoming', disciplines: [], overview: '', imageUrl: '', images: [{ url: '', title: '' }], newsSlugs: [], tags: [], results: emptyResults() });
+    setTagInput('');
     setResultTabDisc('Speed');
     setResultTabGender('Men');
     setEditingResultIdx(null);
@@ -65,8 +67,10 @@ export default function Competitions() {
     setForm({
       ...comp,
       images: comp.images?.length > 0 ? comp.images.map(normalizeImage) : [{ url: '', title: '' }],
+      tags: comp.tags || [],
       results: comp.results || emptyResults(),
     });
+    setTagInput('');
     const firstDisc = comp.disciplines?.[0] || 'Speed';
     setResultTabDisc(firstDisc);
     setResultTabGender('Men');
@@ -168,12 +172,32 @@ export default function Competitions() {
     }));
   };
 
+  const addTag = (tag) => {
+    const t = tag.trim().toLowerCase();
+    if (t && !form.tags.includes(t)) {
+      setForm({ ...form, tags: [...form.tags, t] });
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (tag) => {
+    setForm({ ...form, tags: form.tags.filter((t) => t !== tag) });
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tagInput);
+    }
+  };
+
   const save = async () => {
     if (!form.name.trim()) return;
     const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const comp = {
       ...form,
       slug,
+      tags: form.tags,
       images: form.images.filter((img) => (typeof img === 'string' ? img : img.url).trim() !== '').map(normalizeImage),
     };
 
@@ -368,6 +392,28 @@ export default function Competitions() {
               <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-1)' }}>
                 Supports **bold** and paragraph breaks (blank line between paragraphs).
               </p>
+            </div>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">SEO Tags <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(hidden — used in structured data)</span></label>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap', alignItems: 'center', marginBottom: 'var(--sp-2)' }}>
+                {form.tags.map((t) => (
+                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-light)', fontSize: 'var(--fs-xs)', fontWeight: 500 }}>
+                    {t}
+                    <button type="button" onClick={() => removeTag(t)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>×</button>
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+                <input
+                  className="form-input"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  placeholder="Type a tag and press Enter..."
+                  style={{ flex: 1, maxWidth: 300, fontSize: 'var(--fs-sm)' }}
+                />
+                <button type="button" className="btn btn-outline" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => addTag(tagInput)}>Add</button>
+              </div>
             </div>
           </div>
 

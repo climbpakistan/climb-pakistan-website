@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getLearnSection } from '../api';
 import Seo from '../components/Seo';
+import { learnSectionSchema } from '../utils/jsonLd';
 
 function renderInlineContent(text) {
   // Parse inline formatting: **bold**, [s1]..[/s4] font sizes, images, line breaks
@@ -147,6 +148,7 @@ export default function LearnArticle() {
         description={desc}
         ogImage={section.image}
         path={`/learn/${slug}`}
+        jsonLd={learnSectionSchema(section)}
       />
 
       {/* Header */}

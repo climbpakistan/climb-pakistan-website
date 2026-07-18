@@ -4,6 +4,7 @@ import useFetch from '../hooks/useFetch';
 import { getRankings, getTeamRankings, getAthletes, getTeams } from '../api';
 import { AnimatedSection } from '../hooks/animations';
 import Seo from '../components/Seo';
+import { rankingsSchema } from '../utils/jsonLd';
 
 const CATEGORIES = ['Men', 'Women'];
 const DISCIPLINES = ['Speed', 'Lead', 'Boulder'];
@@ -38,8 +39,15 @@ function assignRanks(entries, pointsKey) {
 }
 
 export default function Rankings() {
-  const { data: rankings, loading: rankingsLoading } = useFetch(getRankings, []);
-  const { data: teamRankings, loading: teamRankingsLoading } = useFetch(getTeamRankings, []);
+  // Extract ranking data and tags from the new { data, tags } API format
+  const { data: rankingsRaw, loading: rankingsLoading } = useFetch(getRankings, []);
+  const rankings = (rankingsRaw?.data !== undefined) ? rankingsRaw.data : rankingsRaw;
+  const rankingsTags = rankingsRaw?.tags || [];
+
+  const { data: teamRankingsRaw, loading: teamRankingsLoading } = useFetch(getTeamRankings, []);
+  const teamRankings = (teamRankingsRaw?.data !== undefined) ? teamRankingsRaw.data : teamRankingsRaw;
+  const teamRankingsTags = teamRankingsRaw?.tags || [];
+
   const { data: athletes } = useFetch(getAthletes, []);
   const { data: teams } = useFetch(getTeams, []);
 
@@ -186,6 +194,7 @@ export default function Rankings() {
         title={`National Rankings${headingYear ? ' ' + headingYear : ''}`}
         description="Senior men and senior women national rankings by discipline. Track climbing standings across speed, lead, and boulder disciplines."
         path="/rankings"
+        jsonLd={rankingsSchema(mode === 'Team Rankings' ? teamRankingsTags : rankingsTags)}
       />
 
       <section className="page-header">

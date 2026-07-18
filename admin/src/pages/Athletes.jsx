@@ -12,8 +12,10 @@ export default function Athletes() {
   const [form, setForm] = useState({
     slug: '', name: '', gender: 'Male', mainDiscipline: '', disciplines: [], team: '', rank: 1, hometown: '',
     age: '', startedClimbing: '', instagram: '', worldClimbingUrl: '', internationalParticipation: 0,
-    isChampion: false, championTitle: '', photoUrl: '', photoPosition: '50% 50%', about: '', medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
+    isChampion: false, championTitle: '', photoUrl: '', photoPosition: '50% 50%', about: '', tags: [], medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
   });
+
+  const [tagInput, setTagInput] = useState('');
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
 
@@ -26,13 +28,15 @@ export default function Athletes() {
     setForm({
       slug: '', name: '', gender: 'Male', mainDiscipline: '', disciplines: [], team: '', rank: 1, hometown: '',
       age: '', startedClimbing: '', instagram: '', worldClimbingUrl: '', internationalParticipation: 0,
-      isChampion: false, championTitle: '', photoUrl: '', photoPosition: '50% 50%', about: '', medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
+      isChampion: false, championTitle: '', photoUrl: '', photoPosition: '50% 50%', about: '', tags: [], medals: [{ competition: '', discipline: 'Speed', medal: 'Gold' }],
     });
+    setTagInput('');
   };
 
   const openEdit = (athlete) => {
     setEditingSlug(athlete.slug);
-    setForm({ ...athlete, photoPosition: athlete.photoPosition || '50% 50%', medals: athlete.medals?.length ? athlete.medals : [{ competition: '', discipline: 'Speed', medal: 'Gold' }] });
+    setForm({ ...athlete, photoPosition: athlete.photoPosition || '50% 50%', tags: athlete.tags || [], medals: athlete.medals?.length ? athlete.medals : [{ competition: '', discipline: 'Speed', medal: 'Gold' }] });
+    setTagInput('');
   };
 
   const cancelEdit = () => setEditingSlug(null);
@@ -53,10 +57,29 @@ export default function Athletes() {
   const addMedal = () => setForm({ ...form, medals: [...form.medals, { competition: '', discipline: 'Speed', medal: 'Gold' }] });
   const removeMedal = (i) => { if (form.medals.length > 1) setForm({ ...form, medals: form.medals.filter((_, idx) => idx !== i) }); };
 
+  const addTag = (tag) => {
+    const t = tag.trim().toLowerCase();
+    if (t && !form.tags.includes(t)) {
+      setForm({ ...form, tags: [...form.tags, t] });
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (tag) => {
+    setForm({ ...form, tags: form.tags.filter((t) => t !== tag) });
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tagInput);
+    }
+  };
+
   const save = async () => {
     if (!form.name.trim()) return;
     const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const athlete = { ...form, slug, medals: form.medals.filter((m) => m.competition.trim()) };
+    const athlete = { ...form, slug, tags: form.tags, medals: form.medals.filter((m) => m.competition.trim()) };
 
     try {
       if (editingSlug === '__new__') {
@@ -278,6 +301,29 @@ export default function Athletes() {
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">About</label>
             <textarea className="form-input" rows={3} value={form.about} onChange={(e) => setForm({ ...form, about: e.target.value })} />
+          </div>
+
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">SEO Tags <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(hidden — used in structured data)</span></label>
+            <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap', alignItems: 'center', marginBottom: 'var(--sp-2)' }}>
+              {form.tags.map((t) => (
+                <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-light)', fontSize: 'var(--fs-xs)', fontWeight: 500 }}>
+                  {t}
+                  <button type="button" onClick={() => removeTag(t)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>×</button>
+                </span>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+              <input
+                className="form-input"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Type a tag and press Enter..."
+                style={{ flex: 1, maxWidth: 300, fontSize: 'var(--fs-sm)' }}
+              />
+              <button type="button" className="btn btn-outline" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => addTag(tagInput)}>Add</button>
+            </div>
           </div>
 
           {/* Medals */}

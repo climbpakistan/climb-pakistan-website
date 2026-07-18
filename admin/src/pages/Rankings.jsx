@@ -68,6 +68,9 @@ function nestTeam(flat) {
 export default function Rankings() {
   const [tab, setTab] = useState('Individual Rankings');
 
+  const [formTags, setFormTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
+
   // ── Individual state ──
   const [gender, setGender] = useState('Men');
   const [discipline, setDiscipline] = useState('Speed');
@@ -97,9 +100,12 @@ export default function Rankings() {
   // ── Data loading ──
   useEffect(() => {
     Promise.all([
-      getRankings().then((data) => {
-        const flat = flatten(data);
+      getRankings().then((res) => {
+        // Support both { data, tags } format and raw data format (backward compat)
+        const rankingData = res.data !== undefined ? res.data : res;
+        const flat = flatten(rankingData);
         setIndividualEntries(flat);
+        if (res.tags) setFormTags(res.tags);
         // Default to most recent year with data
         const yrs = extractIndividualYears(flat);
         if (yrs.length > 0) setIndividualYear((prev) => prev || yrs[0]);
@@ -110,9 +116,12 @@ export default function Rankings() {
 
   useEffect(() => {
     Promise.all([
-      getTeamRankings().then((data) => {
-        const flat = flattenTeam(data);
+      getTeamRankings().then((res) => {
+        // Support both { data, tags } format and raw data format (backward compat)
+        const rankingData = res.data !== undefined ? res.data : res;
+        const flat = flattenTeam(rankingData);
         setTeamEntries(flat);
+        if (res.tags) setFormTags(res.tags);
         // Default to most recent year with data
         const yrs = extractTeamYears(flat);
         if (yrs.length > 0) setTeamYear((prev) => prev || yrs[0]);
@@ -185,8 +194,9 @@ export default function Rankings() {
       const result = await importRankingsExcel(file);
       setIndividualImportResult(result);
       // Refresh data
-      const data = await getRankings();
-      setIndividualEntries(flatten(data));
+      const res = await getRankings();
+      const rankingData = res.data !== undefined ? res.data : res;
+      setIndividualEntries(flatten(rankingData));
     } catch (err) {
       alert('Import failed: ' + err.message);
     } finally {
@@ -242,7 +252,10 @@ export default function Rankings() {
   };
 
   const saveIndividualRankings = async () => {
-    try { await updateRankings(nest(individualEntries)); alert('Individual rankings saved successfully!'); } catch (err) { alert('Failed to save: ' + err.message); }
+    try {
+      await updateRankings({ data: nest(individualEntries), tags: formTags });
+      alert('Individual rankings saved successfully!');
+    } catch (err) { alert('Failed to save: ' + err.message); }
   };
 
   // ── Team helpers ──
@@ -340,8 +353,9 @@ export default function Rankings() {
       const result = await importTeamRankingsExcel(file);
       setTeamImportResult(result);
       // Refresh data
-      const teamData = await getTeamRankings();
-      setTeamEntries(flattenTeam(teamData));
+      const teamRes = await getTeamRankings();
+      const teamRankingData = teamRes.data !== undefined ? teamRes.data : teamRes;
+      setTeamEntries(flattenTeam(teamRankingData));
     } catch (err) {
       alert('Import failed: ' + err.message);
     } finally {
@@ -351,7 +365,10 @@ export default function Rankings() {
   };
 
   const saveTeamRankings = async () => {
-    try { await updateTeamRankings(nestTeam(teamEntries)); alert('Team rankings saved successfully!'); } catch (err) { alert('Failed to save: ' + err.message); }
+    try {
+      await updateTeamRankings({ data: nestTeam(teamEntries), tags: formTags });
+      alert('Team rankings saved successfully!');
+    } catch (err) { alert('Failed to save: ' + err.message); }
   };
 
   if (individualLoading && teamLoading) return <p style={{ padding: 'var(--sp-6)' }}>Loading rankings...</p>;
@@ -401,6 +418,32 @@ export default function Rankings() {
             <datalist id="individual-year-list">
               {availableIndividualYears.map((y) => <option key={y} value={y} />)}
             </datalist>
+            <div className="form-group" style={{ marginLeft: 'var(--sp-4)', display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
+              <label className="form-label" style={{ marginBottom: 0, whiteSpace: 'nowrap', fontSize: 'var(--fs-xs)' }}>SEO Tags</label>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                {formTags.map((t) => (
+                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 2, padding: '1px 6px', borderRadius: 3, background: 'var(--accent-light)', fontSize: 'var(--fs-xs)', fontWeight: 500 }}>
+                    {t}
+                    <button type="button" onClick={() => setFormTags(formTags.filter((x) => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 12, padding: 0, lineHeight: 1 }}>×</button>
+                  </span>
+                ))}
+                <input
+                  className="form-input"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                      e.preventDefault();
+                      const t = tagInput.trim().toLowerCase();
+                      if (t && !formTags.includes(t)) setFormTags([...formTags, t]);
+                      setTagInput('');
+                    }
+                  }}
+                  placeholder="Add tag..."
+                  style={{ width: 100, fontSize: 'var(--fs-xs)', padding: '2px 6px' }}
+                />
+              </div>
+            </div>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--sp-2)', alignItems: 'center' }}>
               <button className="btn btn-primary" type="button" onClick={addIndividualEntry}>+ Add Entry</button>
               <label className="btn btn-outline" style={{ cursor: individualImporting ? 'not-allowed' : 'pointer', opacity: individualImporting ? 0.6 : 1, fontSize: 'var(--fs-sm)' }}>

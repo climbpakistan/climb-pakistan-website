@@ -23,6 +23,7 @@ const learnSectionSchema = new mongoose.Schema({
   details: [{ type: String }],
   sections: [contentSectionSchema],  // New structured sections
   gallery: [galleryItemSchema],
+  tags: [{ type: String }],
   status: { type: String, default: 'Draft', enum: ['Draft', 'Published'] },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

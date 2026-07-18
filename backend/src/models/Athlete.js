@@ -25,6 +25,7 @@ const athleteSchema = new mongoose.Schema({
   photoUrl: { type: String, default: '' },
   photoPosition: { type: String, default: '50% 50%' },
   about: { type: String, default: '' },
+  tags: [{ type: String }],
   medals: [medalSchema],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

@@ -5,6 +5,7 @@ import { getCompetition, getNews, getAthletes } from '../api';
 import { AnimatedSection } from '../hooks/animations';
 import NewsCard from '../components/NewsCard';
 import Seo from '../components/Seo';
+import { competitionSchema } from '../utils/jsonLd';
 
 const TABS = ['overview', 'results', 'news', 'gallery'];
 const TAB_LABELS = { overview: 'Overview', news: 'News', results: 'Results', gallery: 'Gallery' };
@@ -88,6 +89,7 @@ export default function Competition() {
         ogImage={competition.imageUrl}
         ogType="article"
         path={`/competitions/${slug}`}
+        jsonLd={competitionSchema(competition)}
       />
 
       <section className="page-header page-header--enhanced">

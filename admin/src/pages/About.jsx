@@ -7,6 +7,8 @@ export default function About() {
   const [mission, setMission] = useState('');
   const [closing, setClosing] = useState('');
   const [stats, setStats] = useState([{ label: '', value: '' }]);
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     getAbout()
@@ -15,6 +17,7 @@ export default function About() {
         setMission(content.mission || '');
         setClosing(content.closing || '');
         setStats(content.stats?.length ? content.stats : [{ label: '', value: '' }]);
+        setTags(content.tags || []);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -25,9 +28,24 @@ export default function About() {
     setStats(updated);
   };
 
+  const addTag = (tag) => {
+    const t = tag.trim().toLowerCase();
+    if (t && !tags.includes(t)) setTags([...tags, t]);
+    setTagInput('');
+  };
+
+  const removeTag = (tag) => setTags(tags.filter((t) => t !== tag));
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tagInput);
+    }
+  };
+
   const handleSave = async () => {
     try {
-      await updateAbout({ intro, mission, closing, stats: stats.filter((s) => s.label.trim()) });
+      await updateAbout({ intro, mission, closing, tags, stats: stats.filter((s) => s.label.trim()) });
       alert('About page saved successfully!');
     } catch (err) {
       alert('Failed to save: ' + err.message);
@@ -38,6 +56,7 @@ export default function About() {
     setIntro('');
     setMission('');
     setClosing('');
+    setTags([]);
     setStats([{ label: '', value: '' }]);
   };
 
@@ -87,6 +106,29 @@ export default function About() {
               </div>
             ))}
             <button className="btn btn-outline" type="button" onClick={() => setStats([...stats, { label: '', value: '' }])} style={{ fontSize: 'var(--fs-xs)', justifySelf: 'start' }}>+ Add Stat</button>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">SEO Tags <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(hidden — used in structured data)</span></label>
+          <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap', alignItems: 'center', marginBottom: 'var(--sp-2)' }}>
+            {tags.map((t) => (
+              <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-light)', fontSize: 'var(--fs-xs)', fontWeight: 500 }}>
+                {t}
+                <button type="button" onClick={() => removeTag(t)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>×</button>
+              </span>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+            <input
+              className="form-input"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              placeholder="Type a tag and press Enter..."
+              style={{ flex: 1, maxWidth: 300, fontSize: 'var(--fs-sm)' }}
+            />
+            <button type="button" className="btn btn-outline" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => addTag(tagInput)}>Add</button>
           </div>
         </div>
 

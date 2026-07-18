@@ -29,6 +29,7 @@ const competitionSchema = new mongoose.Schema({
   overview: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
   images: [{ type: mongoose.Schema.Types.Mixed }],
+  tags: [{ type: String }],
   newsSlugs: [{ type: String }],
   results: { type: disciplineResultsSchema, default: () => ({
     Speed: { Men: [], Women: [] },

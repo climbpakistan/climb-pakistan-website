@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     if (!doc) {
       doc = await Ranking.create({ data: {} });
     }
-    res.json(doc.data);
+    res.json({ data: doc.data, tags: doc.tags || [] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -70,14 +70,20 @@ router.put('/', async (req, res) => {
   try {
     let doc = await Ranking.findOne();
     if (!doc) {
-      doc = await Ranking.create({ data: req.body });
+      doc = await Ranking.create({ data: req.body.data || req.body });
     } else {
-      doc.data = req.body;
+      // Support both raw data and { data: ..., tags: ... } format
+      if (req.body.data !== undefined) {
+        doc.data = req.body.data;
+        if (req.body.tags !== undefined) doc.tags = req.body.tags;
+      } else {
+        doc.data = req.body;
+      }
       doc.markModified('data');
       doc.updatedAt = new Date();
       await doc.save();
     }
-    res.json(doc.data);
+    res.json({ data: doc.data, tags: doc.tags || [] });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

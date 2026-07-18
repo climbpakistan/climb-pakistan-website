@@ -10,6 +10,7 @@ const aboutContentSchema = new mongoose.Schema({
   mission: { type: String, default: '' },
   closing: { type: String, default: '' },
   stats: [statSchema],
+  tags: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

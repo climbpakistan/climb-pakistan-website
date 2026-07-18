@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-const BASE_URL = 'https://climbpakistan.com';
+const BASE_URL = 'https://www.climbpakistan.com';
 const SITE_NAME = 'Climb Pakistan';
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.svg`;
 const TWITTER_HANDLE = '@climb_pakistan';

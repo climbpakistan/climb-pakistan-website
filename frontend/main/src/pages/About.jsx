@@ -3,6 +3,7 @@ import useFetch from '../hooks/useFetch';
 import { getAboutContent } from '../api';
 import { AnimatedSection } from '../hooks/animations';
 import Seo from '../components/Seo';
+import { aboutSchema } from '../utils/jsonLd';
 
 export default function About() {
   const { data: content, loading } = useFetch(getAboutContent, []);
@@ -17,6 +18,7 @@ export default function About() {
         title="About"
         description={aboutDesc}
         path="/about"
+        jsonLd={aboutSchema(content)}
       />
 
       <section className="page-header page-header--enhanced">

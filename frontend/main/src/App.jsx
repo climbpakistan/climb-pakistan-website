@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './hooks/ThemeContext';
 import Layout from './components/Layout';
+import { AnalyticsProvider } from './hooks/useAnalytics';
 
 import Home from './pages/Home';
 import News from './pages/News';
@@ -23,6 +24,7 @@ export default function App() {
     <HelmetProvider>
       <ThemeProvider>
         <BrowserRouter>
+          <AnalyticsProvider>
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
@@ -41,6 +43,7 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
+          </AnalyticsProvider>
         </BrowserRouter>
       </ThemeProvider>
     </HelmetProvider>

@@ -20,8 +20,11 @@ export default function LearnClimbing() {
     slug: '', title: '', subtitle: '', image: '', imagePosition: '50% 50%',
     contentSections: [emptySection()],
     gallery: [{ label: '', caption: '', imageUrl: '' }],
+    tags: [],
     status: 'Draft',
   });
+
+  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     getLearnSections().then(setSections).finally(() => setLoading(false));
@@ -33,8 +36,10 @@ export default function LearnClimbing() {
       slug: '', title: '', subtitle: '', image: '', imagePosition: '50% 50%',
       contentSections: [emptySection()],
       gallery: [{ label: '', caption: '', imageUrl: '' }],
+      tags: [],
       status: 'Draft',
     });
+    setTagInput('');
   };
 
   const openEdit = (section) => {
@@ -74,8 +79,10 @@ export default function LearnClimbing() {
       imagePosition: section.imagePosition || '50% 50%',
       contentSections,
       gallery: existingGallery,
+      tags: section.tags || [],
       status: section.status,
     });
+    setTagInput('');
   };
 
   const cancelEdit = () => setEditingSlug(null);
@@ -103,6 +110,25 @@ export default function LearnClimbing() {
     setForm({ ...form, contentSections: items });
   };
 
+  const addTag = (tag) => {
+    const t = tag.trim().toLowerCase();
+    if (t && !form.tags.includes(t)) {
+      setForm({ ...form, tags: [...form.tags, t] });
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (tag) => {
+    setForm({ ...form, tags: form.tags.filter((t) => t !== tag) });
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tagInput);
+    }
+  };
+
   const save = async () => {
     if (!form.title.trim()) return;
     const slug = form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -120,6 +146,7 @@ export default function LearnClimbing() {
       details: [],
       sections,
       gallery: form.gallery.filter((g) => g.imageUrl?.trim()),
+      tags: form.tags,
       status: form.status,
     };
 
@@ -205,6 +232,28 @@ export default function LearnClimbing() {
                 <option>Draft</option>
                 <option>Published</option>
               </select>
+            </div>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">SEO Tags <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(hidden — used in structured data)</span></label>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap', alignItems: 'center', marginBottom: 'var(--sp-2)' }}>
+                {form.tags.map((t) => (
+                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-light)', fontSize: 'var(--fs-xs)', fontWeight: 500 }}>
+                    {t}
+                    <button type="button" onClick={() => removeTag(t)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 0, lineHeight: 1 }}>×</button>
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+                <input
+                  className="form-input"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  placeholder="Type a tag and press Enter..."
+                  style={{ flex: 1, maxWidth: 300, fontSize: 'var(--fs-sm)' }}
+                />
+                <button type="button" className="btn btn-outline" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => addTag(tagInput)}>Add</button>
+              </div>
             </div>
           </div>
 
