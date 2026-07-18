@@ -3,6 +3,7 @@ import useFetch from '../hooks/useFetch';
 import { getAthletes } from '../api';
 import AthleteCard from '../components/AthleteCard';
 import { AnimatedSection, StaggeredGrid } from '../hooks/animations';
+import Seo from '../components/Seo';
 
 const GENDER_FILTERS = ['All Genders', 'Male', 'Female'];
 const DISCIPLINE_FILTERS = ['All Disciplines', 'Speed Climbing', 'Lead Climbing', 'Boulder'];
@@ -25,6 +26,12 @@ export default function Athletes() {
 
   return (
     <>
+      <Seo
+        title="Athlete Profiles"
+        description="The climbers representing Pakistan across speed, lead and boulder — their stats, achievements and stories."
+        path="/athletes"
+      />
+
       <section className="page-header">
         <div className="container">
           <div className="hero-entrance">

@@ -4,6 +4,8 @@ import useFetch from '../hooks/useFetch';
 import { getAthlete } from '../api';
 import { AnimatedSection } from '../hooks/animations';
 import MedalIcon from '../components/MedalIcon';
+import Seo from '../components/Seo';
+import { personSchema } from '../utils/jsonLd';
 
 function initials(name) {
   return name.split(' ').map((p) => p[0]).slice(0, 2).join('');
@@ -65,8 +67,21 @@ export default function Athlete() {
   // Main discipline = first discipline in athlete's list
   const mainDiscipline = athlete.mainDiscipline || athlete.disciplines?.[0] || '—';
 
+  const athleteDesc = athlete.about
+    ? athlete.about.replace(/<[^>]*>/g, '').slice(0, 160)
+    : `${athlete.name} — climbing athlete from Pakistan competing in ${mainDiscipline}.`;
+
   return (
     <>
+      <Seo
+        title={athlete.name}
+        description={athleteDesc}
+        ogImage={athlete.photoUrl}
+        ogType="profile"
+        path={`/athletes/${slug}`}
+        jsonLd={personSchema(athlete)}
+      />
+
       {/* ============ HERO ============ */}
       <section className="athlete-hero">
         <div className="container">

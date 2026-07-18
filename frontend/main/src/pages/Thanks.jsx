@@ -1,8 +1,15 @@
 import { Link } from 'react-router-dom';
+import Seo from '../components/Seo';
 
 export default function Thanks() {
   return (
-    <section className="thanks-hero">
+    <>
+      <Seo
+        title="Thank You"
+        description="Your message has been received. We'll get back to you soon."
+        noIndex
+      />
+      <section className="thanks-hero">
       <div className="container thanks-hero-inner">
         <div className="thanks-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,8 +23,8 @@ export default function Thanks() {
         <div className="thanks-actions">
           <Link to="/" className="btn btn-primary">Back to Home</Link>
           <Link to="/contact" className="btn btn-outline">Send Another Message</Link>
-        </div>
-      </div>
-    </section>
+        </div>        </div>
+      </section>
+    </>
   );
 }

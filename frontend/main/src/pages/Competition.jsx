@@ -4,6 +4,7 @@ import useFetch from '../hooks/useFetch';
 import { getCompetition, getNews, getAthletes } from '../api';
 import { AnimatedSection } from '../hooks/animations';
 import NewsCard from '../components/NewsCard';
+import Seo from '../components/Seo';
 
 const TABS = ['overview', 'results', 'news', 'gallery'];
 const TAB_LABELS = { overview: 'Overview', news: 'News', results: 'Results', gallery: 'Gallery' };
@@ -75,8 +76,20 @@ export default function Competition() {
   const relatedNews = allNews?.filter((n) => competition.newsSlugs?.includes(n.slug)) || [];
   const resultRows = competition.results?.[resultsDiscipline]?.[resultsGender] || [];
 
+  const compDesc = competition.overview
+    ? competition.overview.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').slice(0, 160)
+    : `${competition.name} — a climbing competition in ${competition.location}.`;
+
   return (
     <>
+      <Seo
+        title={competition.name}
+        description={compDesc}
+        ogImage={competition.imageUrl}
+        ogType="article"
+        path={`/competitions/${slug}`}
+      />
+
       <section className="page-header page-header--enhanced">
         <div className="page-header-bg-grid"></div>
         <div className="page-header-glow"></div>

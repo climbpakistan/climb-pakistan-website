@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './hooks/ThemeContext';
 import Layout from './components/Layout';
 
@@ -19,27 +20,29 @@ import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/news/:slug" element={<Article />} />
-            <Route path="/athletes" element={<Athletes />} />
-            <Route path="/athletes/:slug" element={<Athlete />} />
-            <Route path="/rankings" element={<Rankings />} />
-            <Route path="/competitions" element={<Competitions />} />
-            <Route path="/competitions/:slug" element={<Competition />} />
-            <Route path="/learn" element={<Learn />} />
-            <Route path="/learn/:slug" element={<LearnArticle />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/thanks" element={<Thanks />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/news/:slug" element={<Article />} />
+              <Route path="/athletes" element={<Athletes />} />
+              <Route path="/athletes/:slug" element={<Athlete />} />
+              <Route path="/rankings" element={<Rankings />} />
+              <Route path="/competitions" element={<Competitions />} />
+              <Route path="/competitions/:slug" element={<Competition />} />
+              <Route path="/learn" element={<Learn />} />
+              <Route path="/learn/:slug" element={<LearnArticle />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/thanks" element={<Thanks />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }

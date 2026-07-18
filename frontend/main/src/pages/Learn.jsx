@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getLearnSections } from '../api';
 import { AnimatedSection, StaggeredGrid } from '../hooks/animations';
+import Seo from '../components/Seo';
 
 function renderFormattedText(text) {
   if (!text) return null;
@@ -19,6 +20,12 @@ export default function Learn() {
 
   return (
     <>
+      <Seo
+        title="New to Climbing?"
+        description="A plain-language introduction to sport climbing in Pakistan — disciplines, scoring, training tips, and how to get started."
+        path="/learn"
+      />
+
       <section className="page-header page-header--enhanced">
         <div className="page-header-bg-grid" />
         <div className="page-header-glow" />

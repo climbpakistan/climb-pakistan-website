@@ -2,12 +2,23 @@ import { Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getAboutContent } from '../api';
 import { AnimatedSection } from '../hooks/animations';
+import Seo from '../components/Seo';
 
 export default function About() {
   const { data: content, loading } = useFetch(getAboutContent, []);
 
+  const aboutDesc = content?.mission
+    ? content.mission.slice(0, 160)
+    : "The story behind Pakistan's sport climbing platform — Climb Pakistan.";
+
   return (
     <>
+      <Seo
+        title="About"
+        description={aboutDesc}
+        path="/about"
+      />
+
       <section className="page-header page-header--enhanced">
         <div className="page-header-bg-grid"></div>
         <div className="page-header-glow"></div>

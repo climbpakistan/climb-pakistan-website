@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getRankings, getTeamRankings, getAthletes, getTeams } from '../api';
 import { AnimatedSection } from '../hooks/animations';
+import Seo from '../components/Seo';
 
 const CATEGORIES = ['Men', 'Women'];
 const DISCIPLINES = ['Speed', 'Lead', 'Boulder'];
@@ -181,6 +182,12 @@ export default function Rankings() {
   // ──────────────────────────────────────────────
   return (
     <>
+      <Seo
+        title={`National Rankings${headingYear ? ' ' + headingYear : ''}`}
+        description="Senior men and senior women national rankings by discipline. Track climbing standings across speed, lead, and boulder disciplines."
+        path="/rankings"
+      />
+
       <section className="page-header">
         <div className="container">
           <div className="hero-entrance">

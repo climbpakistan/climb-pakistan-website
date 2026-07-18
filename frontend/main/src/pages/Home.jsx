@@ -6,6 +6,7 @@ import { useInView } from '../hooks/useInView';
 import { AnimatedSection, StaggeredGrid } from '../hooks/animations';
 import useFetch from '../hooks/useFetch';
 import { getAthletes, getNews, getMainPage } from '../api';
+import Seo from '../components/Seo';
 
 export default function Home() {
   const { data: athletes } = useFetch(getAthletes, []);
@@ -39,8 +40,17 @@ export default function Home() {
 
   const [ctaRef, ctaVisible] = useInView({ threshold: 0.15 });
 
+  const heroTitle = mainPage?.heroTitle || 'Your Source For<br />Climbing in Pakistan';
+  const heroSubtitle = mainPage?.heroSubtitle || 'News, rankings, athlete stories and competition coverage from the community pushing the sport forward.';
+
   return (
     <>
+      <Seo
+        title="Home"
+        description={heroSubtitle.replace(/<[^>]*>/g, '')}
+        path="/"
+      />
+
       {/* ============ HERO ============ */}
       <section className="hero">
         <div className="hero-bg" aria-hidden="true">

@@ -2,12 +2,19 @@ import useFetch from '../hooks/useFetch';
 import { getNews } from '../api';
 import NewsCard from '../components/NewsCard';
 import { AnimatedSection, StaggeredGrid } from '../hooks/animations';
+import Seo from '../components/Seo';
 
 export default function News() {
   const { data: articles, loading } = useFetch(getNews, []);
 
   return (
     <>
+      <Seo
+        title="Latest News"
+        description="Competition results, athlete spotlights and everything happening in Pakistan's sport climbing community."
+        path="/news"
+      />
+
       <section className="page-header">
         <div className="container">
           <div className="hero-entrance">

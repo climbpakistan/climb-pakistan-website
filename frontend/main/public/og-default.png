@@ -1,0 +1,12 @@
+This file should be replaced with a proper 1200x630px social sharing image.
+
+For now, the Seo component falls back to the favicon PNG instead.
+
+The ideal OG image should:
+- Be 1200×630 pixels (1.91:1 aspect ratio)
+- Have the Climb Pakistan logo mark
+- Use the brand's dark background (#0a120d) with the green accent (#3fbf6a)
+- Be visible and readable at small sizes in social feeds
+
+Generate one using any design tool (Canva, Figma, Photoshop) or use an online tool like:
+https://www.opengraph.xyz/

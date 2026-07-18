@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.climbpakistan.com/sitemap.xml
+
+# No crawling of specific paths
+Disallow: /thanks

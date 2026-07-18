@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getLearnSection } from '../api';
+import Seo from '../components/Seo';
 
 function renderInlineContent(text) {
   // Parse inline formatting: **bold**, [s1]..[/s4] font sizes, images, line breaks
@@ -133,8 +134,21 @@ export default function LearnArticle() {
     );
   }
 
+  const desc = section.subtitle
+    ? section.subtitle
+    : section.body
+      ? section.body.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').split('\n')[0].slice(0, 160)
+      : '';
+
   return (
     <>
+      <Seo
+        title={section.title}
+        description={desc}
+        ogImage={section.image}
+        path={`/learn/${slug}`}
+      />
+
       {/* Header */}
       <section className="page-header page-header--enhanced">
         <div className="page-header-bg-grid" />

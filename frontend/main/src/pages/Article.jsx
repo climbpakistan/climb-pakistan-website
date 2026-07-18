@@ -2,6 +2,8 @@ import { Link, useParams } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getNews } from '../api';
 import NewsCard from '../components/NewsCard';
+import Seo from '../components/Seo';
+import { articleSchema } from '../utils/jsonLd';
 
 function renderFormattedText(text) {
   if (!text) return null;
@@ -112,8 +114,21 @@ export default function Article() {
 
   const related = allArticles?.filter((a) => a.slug !== article.slug).slice(0, 3) || [];
 
+  const articleDesc = article.body?.[0]
+    ? article.body[0].replace(/<[^>]*>/g, '').slice(0, 160)
+    : article.sections?.[0]?.text?.replace(/<[^>]*>/g, '').slice(0, 160) || '';
+
   return (
     <>
+      <Seo
+        title={article.title}
+        description={articleDesc}
+        ogImage={article.imageUrl}
+        ogType="article"
+        path={`/news/${slug}`}
+        jsonLd={articleSchema(article)}
+      />
+
       <article className="article">
         <div className="container article-container">
           <span className="tag">{article.tag}</span>

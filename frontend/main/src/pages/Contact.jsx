@@ -1,6 +1,7 @@
 import { Children, cloneElement, isValidElement, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
+import Seo from '../components/Seo';
 
 // Reads from VITE_WEB3FORMS_KEY env variable (set in frontend/main/.env or deployment)
 const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_KEY || '5da498b7-e854-4d6f-8c62-5ce954ede436';
@@ -102,6 +103,12 @@ export default function Contact() {
 
   return (
     <>
+      <Seo
+        title="Contact"
+        description="Get in touch with the Climb Pakistan team — story tips, athlete submissions, corrections, or general inquiries."
+        path="/contact"
+      />
+
       <section className="page-header page-header--enhanced">
         <div className="page-header-bg-grid"></div>
         <div className="page-header-glow"></div>

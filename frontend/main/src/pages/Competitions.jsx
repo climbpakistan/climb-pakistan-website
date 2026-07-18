@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import { getCompetitions } from '../api';
 import { AnimatedSection, StaggeredGrid } from '../hooks/animations';
+import Seo from '../components/Seo';
 
 function formatRange(start, end) {
   const s = new Date(start);
@@ -18,6 +19,12 @@ export default function Competitions() {
 
   return (
     <>
+      <Seo
+        title="Competitions"
+        description="Coverage and results from national championships and sanctioned sport climbing events in Pakistan."
+        path="/competitions"
+      />
+
       <section className="page-header">
         <div className="container">
           <div className="hero-entrance">
