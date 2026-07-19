@@ -2498,6 +2498,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .page-head-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--sp-4);
   flex-wrap: wrap;
 }
