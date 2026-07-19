@@ -1,5 +1,6 @@
 import { useData } from 'vike-react/useData';
 import NewsCard from '../../../src/components/NewsCard';
+import RecommendationCard from '../../../src/components/RecommendationCard';
 import Seo from '../../../src/components/Seo';
 import { articleSchema } from '../../../src/utils/jsonLd';
 import { fetchJSON, API_BASE } from '../../data';
@@ -178,20 +179,38 @@ function Page() {
         </div>
       </article>
 
-      <section className="section-tight related">
-        <div className="container">
-          <div className="section-head">
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--fs-lg)', color: 'var(--cp-white)', textTransform: 'uppercase' }}>
-              More Stories
-            </h2>
+      {/* ── Recommendations ── */}
+      {article.recommendations?.length > 0 ? (
+        <section className="section-tight recommendations">
+          <div className="container">
+            <div className="section-head">
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--fs-lg)', color: 'var(--cp-white)', textTransform: 'uppercase' }}>
+                Recommended Reading
+              </h2>
+            </div>
+            <div className="recommendations-grid">
+              {article.recommendations.map((rec, i) => (
+                <RecommendationCard recommendation={rec} key={i} />
+              ))}
+            </div>
           </div>
-          <div className="news-grid">
-            {related.map((a) => (
-              <NewsCard article={a} key={a.slug} />
-            ))}
+        </section>
+      ) : (
+        <section className="section-tight related">
+          <div className="container">
+            <div className="section-head">
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--fs-lg)', color: 'var(--cp-white)', textTransform: 'uppercase' }}>
+                More Stories
+              </h2>
+            </div>
+            <div className="news-grid">
+              {related.map((a) => (
+                <NewsCard article={a} key={a.slug} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }

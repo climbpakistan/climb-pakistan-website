@@ -13,6 +13,14 @@ const contentSectionSchema = new mongoose.Schema({
   text: { type: String, default: '' },
 }, { _id: false });
 
+const recommendationSchema = new mongoose.Schema({
+  title: { type: String, default: '' },
+  reason: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
+  url: { type: String, default: '' },
+  type: { type: String, enum: ['news', 'learn', 'external'], default: 'learn' },
+}, { _id: false });
+
 const learnSectionSchema = new mongoose.Schema({
   slug: { type: String, required: true, unique: true, index: true },
   title: { type: String, required: true },
@@ -24,6 +32,7 @@ const learnSectionSchema = new mongoose.Schema({
   sections: [contentSectionSchema],  // New structured sections
   gallery: [galleryItemSchema],
   tags: [{ type: String }],
+  recommendations: [recommendationSchema],
   status: { type: String, default: 'Draft', enum: ['Draft', 'Published'] },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

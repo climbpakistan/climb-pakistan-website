@@ -21,6 +21,7 @@ export default function LearnClimbing() {
     contentSections: [emptySection()],
     gallery: [{ label: '', caption: '', imageUrl: '' }],
     tags: [],
+    recommendations: [],
     status: 'Draft',
   });
 
@@ -37,6 +38,7 @@ export default function LearnClimbing() {
       contentSections: [emptySection()],
       gallery: [{ label: '', caption: '', imageUrl: '' }],
       tags: [],
+      recommendations: [],
       status: 'Draft',
     });
     setTagInput('');
@@ -80,6 +82,7 @@ export default function LearnClimbing() {
       contentSections,
       gallery: existingGallery,
       tags: section.tags || [],
+      recommendations: section.recommendations || [],
       status: section.status,
     });
     setTagInput('');
@@ -147,6 +150,7 @@ export default function LearnClimbing() {
       sections,
       gallery: form.gallery.filter((g) => g.imageUrl?.trim()),
       tags: form.tags,
+      recommendations: form.recommendations.filter((r) => r.title?.trim() && r.url?.trim()),
       status: form.status,
     };
 
@@ -419,6 +423,63 @@ export default function LearnClimbing() {
                 <button className="btn btn-outline" type="button" onClick={() => {
                   setForm({ ...form, gallery: form.gallery.filter((_, idx) => idx !== i) });
                 }} style={{ flexShrink: 0, color: 'var(--error)', borderColor: 'transparent', fontSize: 'var(--fs-sm)' }}>✕</button>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Recommendations ── */}
+          <div className="form-group" style={{ gridColumn: '1 / -1', marginTop: 'var(--sp-6)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-2)' }}>
+              <label className="form-label" style={{ marginBottom: 0 }}>Recommended Guides <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(shown at the bottom of the guide)</span></label>
+              <button className="btn btn-outline" type="button" onClick={() => setForm({ ...form, recommendations: [...form.recommendations, { title: '', reason: '', imageUrl: '', url: '', type: 'learn' }] })} style={{ fontSize: 'var(--fs-xs)' }}>
+                + Add Recommendation
+              </button>
+            </div>
+            {form.recommendations.length === 0 && (
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-2)' }}>
+                No recommendations yet. Add links to related guides, news articles, or external pages.
+              </p>
+            )}
+            {form.recommendations.map((rec, i) => (
+              <div key={i} style={{
+                border: '1px solid var(--card-border)',
+                borderRadius: 8,
+                padding: 'var(--sp-3)',
+                marginBottom: 'var(--sp-2)',
+                background: 'var(--bg)',
+              }}>
+                <div style={{ display: 'flex', gap: 'var(--sp-2)', marginBottom: 'var(--sp-2)', alignItems: 'center' }}>
+                  <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 600, color: 'var(--text-muted)', width: 20 }}>#{i + 1}</span>
+                  <select className="form-input" value={rec.type || 'learn'} onChange={(e) => {
+                    const r = [...form.recommendations]; r[i] = { ...r[i], type: e.target.value }; setForm({ ...form, recommendations: r });
+                  }} style={{ width: 130, fontSize: 'var(--fs-xs)' }}>
+                    <option value="learn">Learn Guide</option>
+                    <option value="news">News Article</option>
+                    <option value="external">External Link</option>
+                  </select>
+                  <button className="btn btn-outline" type="button" onClick={() => {
+                    setForm({ ...form, recommendations: form.recommendations.filter((_, idx) => idx !== i) });
+                  }} style={{ flexShrink: 0, color: 'var(--error)', borderColor: 'transparent', fontSize: 'var(--fs-sm)', marginLeft: 'auto' }}>✕ Remove</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-2)' }}>
+                  <input className="form-input" value={rec.title} onChange={(e) => {
+                    const r = [...form.recommendations]; r[i] = { ...r[i], title: e.target.value }; setForm({ ...form, recommendations: r });
+                  }} placeholder="Guide / page title" style={{ fontSize: 'var(--fs-sm)' }} />
+                  <input className="form-input" value={rec.url} onChange={(e) => {
+                    const r = [...form.recommendations]; r[i] = { ...r[i], url: e.target.value }; setForm({ ...form, recommendations: r });
+                  }} placeholder={rec.type === 'external' ? 'https://...' : '/learn/some-guide or /news/some-article'} style={{ fontSize: 'var(--fs-sm)' }} />
+                  <input className="form-input" value={rec.reason} onChange={(e) => {
+                    const r = [...form.recommendations]; r[i] = { ...r[i], reason: e.target.value }; setForm({ ...form, recommendations: r });
+                  }} placeholder="Why should they read this? (e.g. 'Deep dive into technique')" style={{ fontSize: 'var(--fs-sm)' }} />
+                  <input className="form-input" value={rec.imageUrl} onChange={(e) => {
+                    const r = [...form.recommendations]; r[i] = { ...r[i], imageUrl: e.target.value }; setForm({ ...form, recommendations: r });
+                  }} placeholder="Image URL (optional)" style={{ fontSize: 'var(--fs-sm)' }} />
+                </div>
+                {rec.imageUrl && (
+                  <div style={{ marginTop: 'var(--sp-1)', maxHeight: 60, overflow: 'hidden', borderRadius: 4 }}>
+                    <img src={rec.imageUrl} alt="" style={{ width: 'auto', maxHeight: 60, objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none' }} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

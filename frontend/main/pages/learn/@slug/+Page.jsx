@@ -1,4 +1,5 @@
 import { useData } from 'vike-react/useData';
+import RecommendationCard from '../../../src/components/RecommendationCard';
 import Seo from '../../../src/components/Seo';
 import { learnSectionSchema } from '../../../src/utils/jsonLd';
 
@@ -125,6 +126,24 @@ function Page() {
           </div>
         </div>
       </article>
+
+      {/* ── Recommendations ── */}
+      {section.recommendations?.length > 0 && (
+        <section className="section-tight recommendations">
+          <div className="container">
+            <div className="section-head">
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--fs-lg)', color: 'var(--cp-white)', textTransform: 'uppercase' }}>
+                Continue Learning
+              </h2>
+            </div>
+            <div className="recommendations-grid">
+              {section.recommendations.map((rec, i) => (
+                <RecommendationCard recommendation={rec} key={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }
