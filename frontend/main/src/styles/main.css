@@ -2228,13 +2228,11 @@ input, textarea, select { font: inherit; color: inherit; }
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--sp-6);
-  max-width: 420px;
-  margin-inline: auto;
 }
 .records-current-card {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 40% 1fr;
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
   border-radius: var(--radius-lg);
@@ -2274,7 +2272,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-avatar {
   font-family: var(--font-heading);
-  font-size: var(--fs-3xl);
+  font-size: var(--fs-2xl);
   font-weight: 700;
   color: var(--cp-accent);
   background: linear-gradient(135deg, var(--cp-accent), var(--cp-accent-2));
@@ -2303,7 +2301,8 @@ input, textarea, select { font: inherit; color: inherit; }
   flex-direction: column;
   gap: var(--sp-3);
   padding: var(--sp-5);
-  text-align: center;
+  text-align: left;
+  justify-content: center;
 }
 .records-current-name {
   font-size: var(--fs-xl);
