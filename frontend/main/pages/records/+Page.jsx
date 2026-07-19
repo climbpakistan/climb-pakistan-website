@@ -37,21 +37,13 @@ function Page() {
               {settings.heroSubtitle || "Pakistan's fastest speed climbing times — men's and women's national records tracked from sanctioned competitions."}
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* ── Gender Toggle ── */}
-      <section className="section-tight" style={{ paddingTop: 0 }}>
-        <div className="container">
           <div className="records-gender-bar">
             <button
               className={`records-gender-btn${gender === 'Men' ? ' is-active' : ''}`}
               onClick={() => setGender('Men')}
               disabled={!hasMenData}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="5" r="3" /><path d="M12 8v8" /><path d="M8 16h8" />
-              </svg>
+              <img className="records-gender-flag" src="https://flagcdn.com/w80/pk.png" width="21" height="14" alt="" />
               Men's Records
             </button>
             <button
@@ -59,13 +51,15 @@ function Page() {
               onClick={() => setGender('Women')}
               disabled={!hasWomenData}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="5" r="3" /><path d="M12 22V8" /><path d="M9 12h6" />
-              </svg>
+              <img className="records-gender-flag" src="https://flagcdn.com/w80/pk.png" width="21" height="14" alt="" />
               Women's Records
             </button>
           </div>
+        </div>
+      </section>
 
+      <section className="section-tight" style={{ paddingTop: 0 }}>
+        <div className="container">
           {!hasAnyData ? (
             <div className="records-empty">
               <div className="records-empty-icon">
@@ -77,7 +71,6 @@ function Page() {
             </div>
           ) : (
             <>
-              {/* ── Current Record Spotlight ── */}
               <AnimatedSection>
                 {currentRecords.length > 0 && (
                   <div className="records-current-section">
@@ -137,7 +130,6 @@ function Page() {
                   </div>
                 )}
 
-                {/* ── Previous Records Table ── */}
                 {previousRecords.length > 0 && (
                   <div className="records-previous-section">
                     <div className="records-section-label">

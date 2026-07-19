@@ -2158,7 +2158,7 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Gender selector */
 .records-gender-bar {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--sp-3);
   margin-bottom: var(--sp-10);
 }
@@ -2166,8 +2166,8 @@ input, textarea, select { font: inherit; color: inherit; }
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-8);
-  border-radius: 100px;
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--radius-sm);
   border: 1px solid var(--cp-border-strong);
   background: var(--cp-surface);
   color: var(--cp-text-dim);
@@ -2190,6 +2190,11 @@ input, textarea, select { font: inherit; color: inherit; }
 .records-gender-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+.records-gender-flag {
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  flex-shrink: 0;
 }
 
 /* Section label */
