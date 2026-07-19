@@ -2227,7 +2227,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .records-current-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--sp-6);
+  gap: var(--sp-4);
 }
 .records-current-card {
   position: relative;
@@ -2235,7 +2235,7 @@ input, textarea, select { font: inherit; color: inherit; }
   grid-template-columns: 40% 1fr;
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   overflow: hidden;
   transition: border-color 0.25s ease, transform 0.25s ease;
   isolation: isolate;
@@ -2248,8 +2248,8 @@ input, textarea, select { font: inherit; color: inherit; }
   position: absolute;
   top: -20%;
   right: -20%;
-  width: 300px;
-  height: 300px;
+  width: 180px;
+  height: 180px;
   background: radial-gradient(circle, rgba(63,191,106,0.06) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
@@ -2272,7 +2272,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-avatar {
   font-family: var(--font-heading);
-  font-size: var(--fs-2xl);
+  font-size: var(--fs-lg);
   font-weight: 700;
   color: var(--cp-accent);
   background: linear-gradient(135deg, var(--cp-accent), var(--cp-accent-2));
@@ -2282,35 +2282,35 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-badge {
   position: absolute;
-  top: var(--sp-3);
-  left: var(--sp-3);
-  font-size: 0.625rem;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  font-size: 0.5rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 0.3em 0.7em;
+  padding: 0.25em 0.55em;
   border-radius: 100px;
   background: var(--cp-accent);
   color: var(--cp-on-accent);
-  border: 2px solid var(--cp-surface);
+  border: 1.5px solid var(--cp-surface);
   line-height: 1;
   z-index: 1;
 }
 .records-current-info {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
-  padding: var(--sp-5);
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
   text-align: left;
   justify-content: center;
 }
 .records-current-name {
-  font-size: var(--fs-xl);
+  font-size: var(--fs-base);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 .records-current-name-link {
-  font-size: var(--fs-xl);
+  font-size: var(--fs-base);
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: var(--cp-white);
@@ -2321,16 +2321,16 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-time {
   font-family: var(--font-heading);
-  font-size: var(--fs-3xl);
+  font-size: var(--fs-xl);
   line-height: 1;
   color: var(--cp-accent);
   text-shadow: 0 0 30px rgba(63,191,106,0.2);
-  margin-bottom: var(--sp-2);
+  margin-bottom: var(--sp-1);
 }
 .records-current-details {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--sp-2) var(--sp-4);
+  gap: var(--sp-1) var(--sp-2);
   align-items: baseline;
 }
 .records-detail-row {
@@ -2338,13 +2338,13 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-detail-row dt {
   color: var(--cp-text-muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 .records-detail-row dd {
   margin: 0;
   color: var(--cp-white);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
 }
 .records-status-badge {
   display: inline-block;
@@ -2635,11 +2635,11 @@ input, textarea, select { font: inherit; color: inherit; }
   .records-hero-title { font-size: clamp(1.8rem, 7vw, 2.8rem); }
   .records-gender-bar { flex-wrap: wrap; }
   .records-gender-btn { width: 100%; justify-content: center; }
-  .records-current-grid { max-width: 340px; }
-  .records-current-time { font-size: var(--fs-2xl); }
+  .records-current-grid { max-width: 280px; }
+  .records-current-time { font-size: var(--fs-lg); }
   .records-current-details { grid-template-columns: 1fr; }
-  .records-detail-row { display: flex; justify-content: space-between; gap: var(--sp-2); }
-  .records-table th, .records-table td { padding: var(--sp-3) var(--sp-3); font-size: var(--fs-xs); }
+  .records-detail-row { display: flex; justify-content: space-between; gap: var(--sp-1); }
+  .records-table th, .records-table td { padding: var(--sp-2) var(--sp-2); font-size: var(--fs-xs); }
 }
 
 @media (max-width: 560px) {
