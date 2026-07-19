@@ -242,8 +242,15 @@ export function updateMainPage(data) { return apiFetch(`${BASE_URL}/main-page`, 
 export function getContactSettings() { return apiFetch(`${BASE_URL}/contact/settings`); }
 export function updateContactSettings(data) { return apiFetch(`${BASE_URL}/contact/settings`, { method: 'PUT', body: JSON.stringify(data) }); }
 
-// ── National Records ──
+// ── National Records (Data) ──
 export function getNationalRecords() { return apiFetch(`${BASE_URL}/national-records`); }
+export function createNationalRecord(data) { return apiFetch(`${BASE_URL}/national-records`, { method: 'POST', body: JSON.stringify(data) }); }
+export function updateNationalRecord(id, data) { return apiFetch(`${BASE_URL}/national-records/${id}`, { method: 'PUT', body: JSON.stringify(data) }); }
+export function deleteNationalRecord(id) { return apiFetch(`${BASE_URL}/national-records/${id}`, { method: 'DELETE' }); }
+
+// ── National Records (Page Settings) ──
+export function getRecordsPage() { return apiFetch(`${BASE_URL}/records-page`); }
+export function updateRecordsPage(data) { return apiFetch(`${BASE_URL}/records-page`, { method: 'PUT', body: JSON.stringify(data) }); }
 export function createNationalRecord(data) { return apiFetch(`${BASE_URL}/national-records`, { method: 'POST', body: JSON.stringify(data) }); }
 export function updateNationalRecord(id, data) { return apiFetch(`${BASE_URL}/national-records/${id}`, { method: 'PUT', body: JSON.stringify(data) }); }
 export function deleteNationalRecord(id) { return apiFetch(`${BASE_URL}/national-records/${id}`, { method: 'DELETE' }); }

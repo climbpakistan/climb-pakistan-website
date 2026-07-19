@@ -7,7 +7,8 @@ import Seo from '../../src/components/Seo';
 export { Page };
 
 function Page() {
-  const { records } = useData();
+  const { records, pageSettings } = useData();
+  const settings = pageSettings || {};
   const [gender, setGender] = useState('Men');
 
   const currentRecords = records?.[gender]?.current || [];
@@ -22,9 +23,9 @@ function Page() {
   return (
     <>
       <Seo
-        title="National Records — Speed Climbing"
-        description="Pakistan national speed climbing records — men's and women's current records and historical progression."
-        keywords="Pakistan speed climbing records, national records Pakistan climbing, speed climbing national record, Pakistan climbing records men women"
+        title={settings.seoTitle || 'National Records — Speed Climbing'}
+        description={settings.seoDescription || "Pakistan national speed climbing records — men's and women's current records and historical progression."}
+        keywords={settings.seoKeywords || 'Pakistan speed climbing records, national records Pakistan climbing, speed climbing national record, Pakistan climbing records men women'}
         path="/records"
       />
 
@@ -37,10 +38,10 @@ function Page() {
         <div className="container records-hero-inner">
           <div className={`records-hero-content ${heroVisible ? 'is-visible' : ''}`}>
             <h1 className="records-hero-title">
-              National <span className="records-hero-accent">Records</span>
+              {settings.heroTitle || 'National'} <span className="records-hero-accent">{settings.heroTitleAccent || 'Records'}</span>
             </h1>
             <p className="records-hero-sub">
-              Pakistan's fastest speed climbing times — men's and women's national records tracked from sanctioned competitions.
+              {settings.heroSubtitle || "Pakistan's fastest speed climbing times — men's and women's national records tracked from sanctioned competitions."}
             </p>
           </div>
         </div>

@@ -8,8 +8,11 @@ async function fetchJSON(url) {
 }
 
 async function data() {
-  const records = await fetchJSON(`${API_BASE}/national-records`).catch(() => ({}));
-  return { records };
+  const [records, pageSettings] = await Promise.all([
+    fetchJSON(`${API_BASE}/national-records`).catch(() => ({})),
+    fetchJSON(`${API_BASE}/records-page`).catch(() => ({})),
+  ]);
+  return { records, pageSettings };
 }
 
 export { data };

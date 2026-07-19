@@ -24,6 +24,7 @@ const navItems = [
   {
     section: 'Settings',
     links: [
+      { label: 'Records Page', to: '/records-page', icon: 'trophy' },
       { label: 'About', to: '/about', icon: 'about' },
       { label: 'Contact', to: '/contact', icon: 'contact' },
     ],
@@ -85,6 +86,14 @@ const iconMap = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" />
       <polyline points="21 15 16 10 5 21" />
+    </svg>
+  ),
+  trophy: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 8 8 12 8s5-4 7.5-4a2.5 2.5 0 0 1 0 5H18" />
+      <path d="M18 9v3a6 6 0 0 1-12 0V9" />
+      <path d="M12 15v5" />
+      <path d="M8 20h8" />
     </svg>
   ),
   contact: (
