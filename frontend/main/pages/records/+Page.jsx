@@ -36,7 +36,6 @@ function Page() {
         </div>
         <div className="container records-hero-inner">
           <div className={`records-hero-content ${heroVisible ? 'is-visible' : ''}`}>
-            <span className="records-hero-eyebrow">IFSC</span>
             <h1 className="records-hero-title">
               National <span className="records-hero-accent">Records</span>
             </h1>
