@@ -51,6 +51,7 @@ export async function loginAPI(email, password) {
 
 // ── Athletes ──
 export function getAthletes() { return apiFetch(`${BASE_URL}/athletes`); }
+export function getAthlete(slug) { return apiFetch(`${BASE_URL}/athletes/${slug}`); }
 export function createAthlete(data) { return apiFetch(`${BASE_URL}/athletes`, { method: 'POST', body: JSON.stringify(data) }); }
 export function updateAthlete(slug, data) { return apiFetch(`${BASE_URL}/athletes/${slug}`, { method: 'PUT', body: JSON.stringify(data) }); }
 export function deleteAthlete(slug) { return apiFetch(`${BASE_URL}/athletes/${slug}`, { method: 'DELETE' }); }

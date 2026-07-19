@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getNationalRecords, createNationalRecord, updateNationalRecord, deleteNationalRecord } from '../api';
+import { getNationalRecords, createNationalRecord, updateNationalRecord, deleteNationalRecord, getAthlete } from '../api';
 
 /* ── Default form states ── */
 const CURRENT_EMPTY = {
@@ -16,6 +16,7 @@ const CURRENT_EMPTY = {
 
 const PREVIOUS_ROW_EMPTY = {
   athleteName: '',
+  athleteSlug: '',
   recordTime: '',
   competition: '',
   year: '',
@@ -134,6 +135,23 @@ export default function NationalRecords() {
     setPreviousRows(previousRows.map((r) =>
       r._tempId === _tempId ? { ...r, [field]: value } : r
     ));
+
+    // When athlete slug changes, auto-fetch the athlete name from the API
+    if (field === 'athleteSlug' && value.trim()) {
+      getAthlete(value.trim())
+        .then((athlete) => {
+          if (athlete?.name) {
+            setPreviousRows((prev) =>
+              prev.map((r) =>
+                r._tempId === _tempId ? { ...r, athleteName: athlete.name } : r
+              )
+            );
+          }
+        })
+        .catch(() => {
+          // Slug not found — user can type name manually
+        });
+    }
   };
 
   const cancelPreviousEditor = () => {
@@ -155,6 +173,7 @@ export default function NationalRecords() {
         const payload = {
           gender: previousGender,
           athleteName: row.athleteName,
+          athleteSlug: row.athleteSlug || '',
           recordTime: row.recordTime,
           competition: row.competition,
           date: row.year ? new Date(parseInt(row.year), 0, 1).toISOString() : '',
@@ -182,6 +201,7 @@ export default function NationalRecords() {
         _tempId: Date.now(),
         _existingId: rec._id,
         athleteName: rec.athleteName,
+        athleteSlug: rec.athleteSlug || '',
         recordTime: rec.recordTime,
         competition: rec.competition || '',
         year: rec.date ? new Date(rec.date).getFullYear().toString() : '',
@@ -393,6 +413,7 @@ export default function NationalRecords() {
                 <tr>
                   <th style={{ width: 140 }}>Time</th>
                   <th>Athlete</th>
+                  <th>Athlete Slug</th>
                   <th>Competition</th>
                   <th style={{ width: 100 }}>Year</th>
                   <th style={{ width: 50 }}></th>
@@ -418,6 +439,24 @@ export default function NationalRecords() {
                         placeholder="Athlete name"
                         style={{ width: '100%', minWidth: 0 }}
                       />
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 'var(--sp-2)', alignItems: 'center' }}>
+                        <input
+                          className="form-input"
+                          value={row.athleteSlug}
+                          onChange={(e) => updatePreviousRow(row._tempId, 'athleteSlug', e.target.value)}
+                          placeholder="mir-abu-zar-faiz"
+                          style={{ width: '100%', minWidth: 0 }}
+                        />
+                        {row.athleteSlug && row.athleteName && (
+                          <span style={{ color: 'var(--success)', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }} title="Name auto-filled from slug">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td>
                       <input
