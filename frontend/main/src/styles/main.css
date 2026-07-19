@@ -2188,6 +2188,48 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-on-accent);
   box-shadow: 0 0 20px rgba(63,191,106,0.2);
 }
+
+/* Gender-specific button themes */
+.records-gender-btn-men.is-active {
+  --gender-accent: #3b82f6;
+  background: var(--gender-accent);
+  border-color: var(--gender-accent);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(59,130,246,0.3);
+}
+.records-gender-btn-women.is-active {
+  --gender-accent: #ec4899;
+  background: var(--gender-accent);
+  border-color: var(--gender-accent);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(236,72,153,0.3);
+}
+
+/* Gender theme accent overrides for card content */
+.records-theme-men .records-premium-value {
+  color: #3b82f6;
+  text-shadow: 0 0 30px rgba(59,130,246,0.2);
+}
+.records-theme-men .records-label-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 8px rgba(59,130,246,0.4);
+}
+.records-theme-men .records-table-time {
+  color: #3b82f6;
+}
+
+.records-theme-women .records-premium-value {
+  color: #ec4899;
+  text-shadow: 0 0 30px rgba(236,72,153,0.2);
+}
+.records-theme-women .records-label-dot {
+  background: #ec4899;
+  box-shadow: 0 0 8px rgba(236,72,153,0.4);
+}
+.records-theme-women .records-table-time {
+  color: #ec4899;
+}
+
 .records-gender-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
