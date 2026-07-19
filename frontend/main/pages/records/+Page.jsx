@@ -81,7 +81,6 @@ function Page() {
                 </svg>
               </div>
               <h3>No Records Yet</h3>
-              <p>National record data will appear here once added through the admin panel.</p>
             </div>
           ) : (
             <>
