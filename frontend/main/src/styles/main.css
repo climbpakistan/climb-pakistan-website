@@ -2224,42 +2224,34 @@ input, textarea, select { font: inherit; color: inherit; }
   box-shadow: 0 0 8px rgba(34,184,160,0.4);
 }
 
-/* Current record card (vertical layout) */
-.records-current-grid {
+/* ── Premium National Record Card ── */
+.records-premium-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--sp-4);
-}
-.records-current-card {
-  position: relative;
-  display: grid;
-  grid-template-columns: 28% 1fr;
   gap: var(--sp-6);
+}
+
+.records-premium-card {
+  display: grid;
+  grid-template-columns: 30% 1fr;
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
-  border-radius: var(--radius-lg);
+  border-radius: 14px;
   overflow: hidden;
-  transition: border-color 0.25s ease, transform 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
   isolation: isolate;
 }
-.records-current-card:hover {
+
+.records-premium-card:hover {
   border-color: var(--cp-accent);
-  transform: translateY(-3px);
+  box-shadow: 0 0 0 1px var(--cp-accent-soft);
 }
-.records-current-card-glow {
-  position: absolute;
-  top: -20%;
-  right: -20%;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(63,191,106,0.06) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-.records-current-media {
+
+/* Left: Image */
+.records-premium-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -2267,100 +2259,163 @@ input, textarea, select { font: inherit; color: inherit; }
   background: linear-gradient(135deg, var(--cp-surface-2), var(--cp-bg-alt));
   flex-shrink: 0;
 }
-.records-current-media img {
+
+.records-premium-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.records-current-avatar {
+
+.records-premium-initials {
   font-family: var(--font-heading);
-  font-size: var(--fs-hero);
+  font-size: var(--fs-2xl);
   font-weight: 700;
   color: var(--cp-accent);
-  background: linear-gradient(135deg, var(--cp-accent), var(--cp-accent-2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  opacity: 0.9;
 }
-.records-current-badge {
+
+.records-premium-badge {
   position: absolute;
-  top: var(--sp-2);
-  left: var(--sp-2);
-  font-size: 0.75rem;
+  top: var(--sp-3);
+  left: var(--sp-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.3em 0.8em;
-  border-radius: 100px;
-  background: var(--cp-accent);
-  color: var(--cp-on-accent);
-  border: 2px solid var(--cp-surface);
+  letter-spacing: 0.04em;
+  padding: 0.3em 0.7em;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
   line-height: 1;
   z-index: 1;
 }
-.records-current-info {
+
+.records-premium-badge svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0.8;
+}
+
+/* Right: Content */
+.records-premium-body {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-5) var(--sp-2) var(--sp-1);
+  justify-content: center;
+  padding: var(--sp-5) var(--sp-6) var(--sp-5) 0;
+  gap: var(--sp-1);
   text-align: left;
-  justify-content: flex-start;
 }
-.records-current-name {
-  font-size: var(--fs-2xl);
-  line-height: 1.15;
+
+.records-premium-discipline {
+  font-size: var(--fs-xs);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-.records-current-name-link {
-  font-size: var(--fs-2xl);
-  line-height: 1.15;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: var(--cp-white);
-  transition: color 0.15s ease;
-}
-.records-current-name-link:hover {
-  color: var(--cp-accent);
-}
-.records-current-time {
-  font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
-  line-height: 1;
-  color: var(--cp-accent);
-  text-shadow: 0 0 30px rgba(63,191,106,0.2);
+  letter-spacing: 0.08em;
+  color: var(--cp-text-muted);
   margin-bottom: var(--sp-1);
 }
-.records-current-details {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--sp-1) var(--sp-3);
-  align-items: baseline;
-}
-.records-detail-row {
-  display: contents;
-}
-.records-detail-row dt {
-  color: var(--cp-text-muted);
-  font-size: var(--fs-md);
-  font-weight: 600;
-}
-.records-detail-row dd {
-  margin: 0;
+
+.records-premium-name {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--cp-white);
-  font-size: var(--fs-md);
+  margin: 0;
 }
-.records-status-badge {
+
+.records-premium-name-link {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--cp-white);
+  transition: color 0.15s ease;
+  text-decoration: none;
+}
+
+.records-premium-name-link:hover {
+  color: var(--cp-accent);
+}
+
+.records-premium-value {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 5vw, 3.75rem);
+  line-height: 1;
+  font-weight: 700;
+  color: var(--cp-accent);
+  letter-spacing: -0.02em;
+  margin-top: var(--sp-1);
+}
+
+.records-premium-unit {
+  font-size: var(--fs-sm);
+  color: var(--cp-text-muted);
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
+.records-premium-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--cp-border);
+  border: 0;
+  margin-block: var(--sp-3);
+}
+
+.records-premium-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-2);
+}
+
+.records-premium-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.records-premium-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--cp-text-dim);
+  opacity: 0.7;
+}
+
+.records-premium-label {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--cp-text-muted);
+  min-width: 100px;
+}
+
+.records-premium-data {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--cp-white);
+}
+
+.records-premium-status {
   display: inline-block;
-  font-size: var(--fs-xs);
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.2em 0.7em;
+  letter-spacing: 0.04em;
+  padding: 0.25em 0.75em;
   border-radius: 100px;
-  background: var(--cp-accent-soft);
-  color: var(--cp-accent);
-  border: 1px solid rgba(63,191,106,0.3);
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--cp-success);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  line-height: 1.4;
 }
 
 /* Previous records table */
@@ -2639,10 +2694,10 @@ input, textarea, select { font: inherit; color: inherit; }
   .records-hero-title { font-size: clamp(1.8rem, 7vw, 2.8rem); }
   .records-gender-bar { flex-wrap: wrap; }
   .records-gender-btn { width: 100%; justify-content: center; }
-  .records-current-grid { max-width: 360px; }
-  .records-current-time { font-size: var(--fs-xl); }
-  .records-current-details { grid-template-columns: 1fr; }
-  .records-detail-row { display: flex; justify-content: space-between; gap: var(--sp-1); }
+  .records-premium-card { grid-template-columns: 1fr; }
+  .records-premium-media { aspect-ratio: 16 / 10; }
+  .records-premium-body { padding: var(--sp-4); gap: var(--sp-1); }
+  .records-premium-divider { margin-block: var(--sp-2); }
   .records-table th, .records-table td { padding: var(--sp-2) var(--sp-2); font-size: var(--fs-xs); }
 }
 

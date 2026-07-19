@@ -78,53 +78,78 @@ function Page() {
                       <span className="records-label-dot" />
                       Current Pakistan Speed Climbing {gender}’s Record
                     </div>
-                    <div className="records-current-grid">
+                    <div className="records-premium-grid">
                       {currentRecords.map((rec, i) => (
-                        <div className="records-current-card" key={rec._id || i}>
-                          <div className="records-current-card-glow" aria-hidden="true" />
-                          <div className="records-current-media">
+                        <article className="records-premium-card" key={rec._id || i}>
+                          <div className="records-premium-media">
                             {rec.athleteImageUrl ? (
-                              <img src={rec.athleteImageUrl} alt={rec.athleteName} />
+                              <img src={rec.athleteImageUrl} alt={`${rec.athleteName} — Pakistan National Record`} />
                             ) : (
-                              <div className="records-current-avatar">
+                              <span className="records-premium-initials">
                                 {rec.athleteName.split(' ').map(p => p[0]).slice(0, 2).join('')}
-                              </div>
+                              </span>
                             )}
-                            <div className="records-current-badge">National Record</div>
+                            <div className="records-premium-badge">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                              National Record
+                            </div>
                           </div>
-                          <div className="records-current-info">
-                            <div className="records-current-time">{rec.recordTime}</div>
+                          <div className="records-premium-body">
+                            <div className="records-premium-discipline">Speed Climbing</div>
                             {rec.athleteSlug ? (
-                              <a href={`/athletes/${rec.athleteSlug}`} className="records-current-name-link">{rec.athleteName}</a>
+                              <a href={`/athletes/${rec.athleteSlug}`} className="records-premium-name-link">{rec.athleteName}</a>
                             ) : (
-                              <h3 className="records-current-name">{rec.athleteName}</h3>
+                              <h3 className="records-premium-name">{rec.athleteName}</h3>
                             )}
-                            <dl className="records-current-details">
+                            <div className="records-premium-value">{rec.recordTime}</div>
+                            <div className="records-premium-unit">seconds</div>
+                            <hr className="records-premium-divider" role="separator" />
+                            <dl className="records-premium-meta">
                               {rec.competition && (
-                                <div className="records-detail-row">
-                                  <dt>Competition</dt>
-                                  <dd>{rec.competition}</dd>
+                                <div className="records-premium-row">
+                                  <svg className="records-premium-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="6" />
+                                    <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+                                  </svg>
+                                  <dt className="records-premium-label">Competition</dt>
+                                  <dd className="records-premium-data">{rec.competition}</dd>
                                 </div>
                               )}
                               {rec.venue && (
-                                <div className="records-detail-row">
-                                  <dt>Venue</dt>
-                                  <dd>{rec.venue}</dd>
+                                <div className="records-premium-row">
+                                  <svg className="records-premium-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                  </svg>
+                                  <dt className="records-premium-label">Venue</dt>
+                                  <dd className="records-premium-data">{rec.venue}</dd>
                                 </div>
                               )}
                               {rec.date && (
-                                <div className="records-detail-row">
-                                  <dt>Date</dt>
-                                  <dd>{new Date(rec.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</dd>
+                                <div className="records-premium-row">
+                                  <svg className="records-premium-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                  </svg>
+                                  <dt className="records-premium-label">Date</dt>
+                                  <dd className="records-premium-data">{new Date(rec.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</dd>
                                 </div>
                               )}
-                              <div className="records-detail-row">
-                                <dt>Status</dt>
-                                <dd><span className="records-status-badge">{rec.status}</span></dd>
+                              <div className="records-premium-row">
+                                <svg className="records-premium-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                  <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
+                                <dt className="records-premium-label">Status</dt>
+                                <dd className="records-premium-data"><span className="records-premium-status">{rec.status || 'Active Record'}</span></dd>
                               </div>
                             </dl>
                           </div>
-                        </div>
+                        </article>
                       ))}
                     </div>
                   </div>
