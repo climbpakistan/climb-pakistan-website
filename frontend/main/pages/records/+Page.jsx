@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useData } from 'vike-react/useData';
 import { AnimatedSection } from '../../src/hooks/animations';
-import { useInView } from '../../src/hooks/useInView';
 import Seo from '../../src/components/Seo';
 
 export { Page };
@@ -18,8 +17,6 @@ function Page() {
   const hasMenData = (records?.Men?.current?.length || 0) + (records?.Men?.previous?.length || 0) > 0;
   const hasWomenData = (records?.Women?.current?.length || 0) + (records?.Women?.previous?.length || 0) > 0;
 
-  const [heroRef, heroVisible] = useInView({ threshold: 0.1 });
-
   return (
     <>
       <Seo
@@ -29,18 +26,14 @@ function Page() {
         path="/records"
       />
 
-      {/* ── Premium Hero ── */}
-      <section className="records-hero" ref={heroRef}>
-        <div className="records-hero-bg" aria-hidden="true">
-          <div className="records-hero-grid"></div>
-          <div className="records-hero-glow"></div>
-        </div>
-        <div className="container records-hero-inner">
-          <div className={`records-hero-content ${heroVisible ? 'is-visible' : ''}`}>
-            <h1 className="records-hero-title">
-              {settings.heroTitle || 'National'} <span className="records-hero-accent">{settings.heroTitleAccent || 'Records'}</span>
+      {/* ── Page Header (matches rankings style) ── */}
+      <section className="page-header">
+        <div className="container">
+          <div className="hero-entrance">
+            <h1 className="page-title">
+              {settings.heroTitle || 'National'}<span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{settings.heroTitleAccent || 'Records'}</span>
             </h1>
-            <p className="records-hero-sub">
+            <p className="page-sub">
               {settings.heroSubtitle || "Pakistan's fastest speed climbing times — men's and women's national records tracked from sanctioned competitions."}
             </p>
           </div>
