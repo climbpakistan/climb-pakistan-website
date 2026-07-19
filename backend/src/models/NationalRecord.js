@@ -12,6 +12,7 @@ const nationalRecordSchema = new mongoose.Schema({
   venue: { type: String, default: '' },
   date: { type: String, default: '' },
   status: { type: String, default: 'Active', enum: ['Active', 'Historical'] },
+  tags: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

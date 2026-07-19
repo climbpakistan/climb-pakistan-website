@@ -12,6 +12,7 @@ const CURRENT_EMPTY = {
   venue: '',
   date: '',
   status: 'Active',
+  tags: '',
 };
 
 const PREVIOUS_ROW_EMPTY = {
@@ -20,6 +21,7 @@ const PREVIOUS_ROW_EMPTY = {
   recordTime: '',
   competition: '',
   year: '',
+  tags: '',
 };
 
 export default function NationalRecords() {
@@ -81,6 +83,7 @@ export default function NationalRecords() {
       venue: rec.venue || '',
       date: rec.date || '',
       status: rec.status,
+      tags: rec.tags ? rec.tags.join(', ') : '',
     });
     setShowCurrentForm(true);
   };
@@ -96,7 +99,13 @@ export default function NationalRecords() {
       return;
     }
     try {
-      const payload = { ...currentForm, recordType: 'current' };
+      const payload = {
+        ...currentForm,
+        tags: currentForm.tags
+          ? currentForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+          : [],
+        recordType: 'current',
+      };
       if (editingCurrentId === '__new__') {
         await createNationalRecord(payload);
       } else {
@@ -168,6 +177,12 @@ export default function NationalRecords() {
       alert('Add at least one row with athlete name and record time.');
       return;
     }
+
+    // Confirm gender choice before saving to prevent accidental mis-categorization
+    if (!confirm(`Save ${validRows.length} record(s) as ${previousGender === 'Women' ? '♀ Women' : '♂ Men'}? Click OK to confirm, Cancel to review.`)) {
+      return;
+    }
+
     try {
       for (const row of validRows) {
         const payload = {
@@ -177,6 +192,9 @@ export default function NationalRecords() {
           recordTime: row.recordTime,
           competition: row.competition,
           date: row.year ? new Date(parseInt(row.year), 0, 1).toISOString() : '',
+          tags: row.tags
+            ? row.tags.split(',').map(t => t.trim()).filter(Boolean)
+            : [],
           recordType: 'previous',
           status: 'Historical',
         };
@@ -205,6 +223,7 @@ export default function NationalRecords() {
         recordTime: rec.recordTime,
         competition: rec.competition || '',
         year: rec.date ? new Date(rec.date).getFullYear().toString() : '',
+        tags: rec.tags ? rec.tags.join(', ') : '',
       },
     ]);
     setShowPreviousEditor(true);
@@ -369,6 +388,15 @@ export default function NationalRecords() {
                 onChange={(e) => setCurrentForm({ ...currentForm, date: e.target.value })}
               />
             </div>
+            <div className="form-group">
+              <label className="form-label">Tags (comma-separated)</label>
+              <input
+                className="form-input"
+                value={currentForm.tags}
+                onChange={(e) => setCurrentForm({ ...currentForm, tags: e.target.value })}
+                placeholder="e.g. National, Speed, Men"
+              />
+            </div>
           </div>
           <div style={{ marginTop: 'var(--sp-4)' }}>
             <button className="btn btn-primary" type="button" onClick={saveCurrent}>
@@ -390,17 +418,36 @@ export default function NationalRecords() {
             <button className="btn btn-outline" type="button" onClick={cancelPreviousEditor}>Cancel</button>
           </div>
 
-          {/* Gender selector */}
-          <div style={{ marginBottom: 'var(--sp-4)' }}>
-            <label className="form-label">Gender</label>
-            <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-1)' }}>
+          {/* Gender selector — prominent, with helper text */}
+          <div style={{
+            marginBottom: 'var(--sp-4)',
+            padding: 'var(--sp-3)',
+            background: previousGender === 'Women' ? 'rgba(var(--accent-rgb, 99, 102, 241), 0.08)' : 'transparent',
+            borderRadius: 'var(--radius)',
+            border: '2px solid',
+            borderColor: previousGender === 'Women' ? 'var(--accent, #6366f1)' : 'var(--border, #e2e8f0)',
+            transition: 'border-color 0.2s, background 0.2s',
+          }}>
+            <label className="form-label" style={{ fontWeight: 700, fontSize: 'var(--fs-md)' }}>
+              Gender *
+            </label>
+            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', marginBottom: 'var(--sp-2)', marginTop: 'var(--sp-1)' }}>
+              Select the gender for these records. Default is Men — don't forget to switch to Women if needed!
+            </p>
+            <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
               {['Men', 'Women'].map((g) => (
                 <button
                   key={g}
                   className={`filter-chip${previousGender === g ? ' is-active' : ''}`}
                   onClick={() => setPreviousGender(g)}
+                  style={{
+                    ...(previousGender === g && g === 'Women' ? { background: 'var(--accent, #6366f1)', color: '#fff' } : {}),
+                    ...(previousGender === g && g === 'Men' ? { background: 'var(--primary, #2563eb)', color: '#fff' } : {}),
+                    padding: 'var(--sp-2) var(--sp-4)',
+                    fontWeight: 600,
+                  }}
                 >
-                  {g}
+                  {g === 'Women' ? '♀ ' : '♂ '}{g}
                 </button>
               ))}
             </div>
@@ -416,6 +463,7 @@ export default function NationalRecords() {
                   <th>Athlete Slug</th>
                   <th>Competition</th>
                   <th style={{ width: 100 }}>Year</th>
+                  <th>Tags</th>
                   <th style={{ width: 50 }}></th>
                 </tr>
               </thead>
@@ -478,6 +526,15 @@ export default function NationalRecords() {
                       />
                     </td>
                     <td>
+                      <input
+                        className="form-input"
+                        value={row.tags}
+                        onChange={(e) => updatePreviousRow(row._tempId, 'tags', e.target.value)}
+                        placeholder="National, Speed"
+                        style={{ width: '100%', minWidth: 0 }}
+                      />
+                    </td>
+                    <td>
                       <button
                         className="btn btn-outline"
                         style={{
@@ -498,9 +555,7 @@ export default function NationalRecords() {
                 ))}
               </tbody>
             </table>
-          </div>
-
-          <div style={{ display: 'flex', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
+          </div>            <div style={{ display: 'flex', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
             <button className="btn btn-outline" type="button" onClick={addPreviousRow}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 'var(--sp-1)' }}>
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -531,6 +586,7 @@ export default function NationalRecords() {
               <th>Time</th>
               <th>Competition</th>
               <th>Date</th>
+              <th>Tags</th>
               <th>Status</th>
               <th style={{ width: 100 }}>Actions</th>
             </tr>
@@ -538,7 +594,7 @@ export default function NationalRecords() {
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--sp-8)' }}>
+                <td colSpan={9} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--sp-8)' }}>
                   No records yet.
                 </td>
               </tr>
@@ -557,6 +613,15 @@ export default function NationalRecords() {
                 <td style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 'var(--fs-md)' }}>{rec.recordTime}</td>
                 <td>{rec.competition || '—'}</td>
                 <td>{rec.date ? new Date(rec.date).toLocaleDateString() : '—'}</td>
+                <td>
+                  {rec.tags?.length > 0
+                    ? rec.tags.map((tag, i) => (
+                        <span key={i} className="badge badge-info" style={{ marginRight: 'var(--sp-1)', marginBottom: 'var(--sp-1)' }}>
+                          {tag}
+                        </span>
+                      ))
+                    : '—'}
+                </td>
                 <td>
                   <span className={`badge ${rec.status === 'Active' ? 'badge-success' : 'badge-warning'}`}>
                     {rec.status}
