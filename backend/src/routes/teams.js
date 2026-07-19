@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Team from '../models/Team.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.post('/', async (req, res) => {
     const existing = await Team.findOne({ slug });
     if (existing) return res.status(409).json({ error: 'A team with this slug already exists' });
     const team = await Team.create({ slug, name, logoUrl, description, active });
+    triggerVercelRebuild();
     res.status(201).json(team);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -47,6 +49,7 @@ router.put('/:slug', async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!team) return res.status(404).json({ error: 'Team not found' });
+    triggerVercelRebuild();
     res.json(team);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -58,6 +61,7 @@ router.delete('/:slug', async (req, res) => {
   try {
     const team = await Team.findOneAndDelete({ slug: req.params.slug });
     if (!team) return res.status(404).json({ error: 'Team not found' });
+    triggerVercelRebuild();
     res.json({ message: 'Team deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

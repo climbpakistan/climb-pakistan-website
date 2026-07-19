@@ -241,3 +241,8 @@ export function updateMainPage(data) { return apiFetch(`${BASE_URL}/main-page`, 
 // ── Contact Settings ──
 export function getContactSettings() { return apiFetch(`${BASE_URL}/contact/settings`); }
 export function updateContactSettings(data) { return apiFetch(`${BASE_URL}/contact/settings`, { method: 'PUT', body: JSON.stringify(data) }); }
+
+// ── Vercel Rebuild ──
+export function rebuildSite() {
+  return apiFetch(`${BASE_URL}/rebuild`, { method: 'POST' });
+}

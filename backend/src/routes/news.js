@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import News from '../models/News.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.get('/:slug', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const article = await News.create(req.body);
+    triggerVercelRebuild();
     res.status(201).json(article);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -40,6 +42,7 @@ router.put('/:slug', async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!article) return res.status(404).json({ error: 'Article not found' });
+    triggerVercelRebuild();
     res.json(article);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -50,6 +53,7 @@ router.delete('/:slug', async (req, res) => {
   try {
     const article = await News.findOneAndDelete({ slug: req.params.slug });
     if (!article) return res.status(404).json({ error: 'Article not found' });
+    triggerVercelRebuild();
     res.json({ message: 'Article deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

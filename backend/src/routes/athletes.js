@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import XLSX from 'xlsx';
 import Athlete from '../models/Athlete.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 import {
   SHEETS, ATHLETE_COLUMNS, MEDAL_COLUMNS,
   parseAthleteRow, parseMedalRow,
@@ -37,6 +38,7 @@ router.get('/:slug', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const athlete = await Athlete.create(req.body);
+    triggerVercelRebuild();
     res.status(201).json(athlete);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -52,6 +54,7 @@ router.put('/:slug', async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!athlete) return res.status(404).json({ error: 'Athlete not found' });
+    triggerVercelRebuild();
     res.json(athlete);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -63,6 +66,7 @@ router.delete('/:slug', async (req, res) => {
   try {
     const athlete = await Athlete.findOneAndDelete({ slug: req.params.slug });
     if (!athlete) return res.status(404).json({ error: 'Athlete not found' });
+    triggerVercelRebuild();
     res.json({ message: 'Athlete deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -143,6 +147,7 @@ router.post('/import', upload.single('file'), async (req, res) => {
       }
     }
 
+    triggerVercelRebuild();
     res.json({
       message: 'Import complete',
       summary: { created, updated, errors, total: athletes.length },

@@ -1,17 +1,15 @@
 import { Fragment } from 'react';
-import { Link } from 'react-router-dom';
-import { ChampionCard } from '../components/AthleteCard';
-import NewsCard from '../components/NewsCard';
-import { useInView } from '../hooks/useInView';
-import { AnimatedSection, StaggeredGrid } from '../hooks/animations';
-import useFetch from '../hooks/useFetch';
-import { getAthletes, getNews, getMainPage } from '../api';
-import Seo from '../components/Seo';
+import { useData } from 'vike-react/useData';
+import { AnimatedSection, StaggeredGrid } from '../../src/hooks/animations';
+import { useInView } from '../../src/hooks/useInView';
+import { ChampionCard } from '../../src/components/AthleteCard';
+import NewsCard from '../../src/components/NewsCard';
+import Seo from '../../src/components/Seo';
 
-export default function Home() {
-  const { data: athletes } = useFetch(getAthletes, []);
-  const { data: articles } = useFetch(getNews, []);
-  const { data: mainPage } = useFetch(getMainPage, null);
+export { Page };
+
+function Page() {
+  const { athletes, articles, mainPage } = useData();
 
   const championEntries = mainPage?.champions?.filter((c) => c.slug) || [];
   const champions =
@@ -35,6 +33,7 @@ export default function Home() {
             }))
             .filter((item) => item.athlete)
         : athletes?.filter((a) => a.isChampion).map((a) => ({ athlete: a, title: a.championTitle, rank: 0, points: 0 })) || [];
+
   const newsCount = mainPage?.latestNewsCount || 3;
   const latestNews = articles?.slice(0, newsCount) || [];
 
@@ -51,7 +50,7 @@ export default function Home() {
         path="/"
       />
 
-      {/* ============ HERO ============ */}
+      {/* HERO */}
       <section className="hero">
         <div className="hero-bg" aria-hidden="true">
           <div className="hero-grid"></div>
@@ -67,18 +66,18 @@ export default function Home() {
             {mainPage?.heroSubtitle || 'News, rankings, athlete stories and competition coverage from the community pushing the sport forward.'}
           </p>
           <div className="hero-actions hero-entrance hero-entrance-delay-2">
-            <Link to={mainPage?.heroCtaLink || '/news'} className="btn btn-primary">{mainPage?.heroCtaText || 'Read the Latest'}</Link>
-            <Link to={mainPage?.heroCta2Link || '/athletes'} className="btn btn-outline">{mainPage?.heroCta2Text || 'Meet the Athletes'}</Link>
+            <a href={mainPage?.heroCtaLink || '/news'} className="btn btn-primary">{mainPage?.heroCtaText || 'Read the Latest'}</a>
+            <a href={mainPage?.heroCta2Link || '/athletes'} className="btn btn-outline">{mainPage?.heroCta2Text || 'Meet the Athletes'}</a>
           </div>
         </div>
       </section>
 
-      {/* ============ NATIONAL CHAMPIONS ============ */}
+      {/* NATIONAL CHAMPIONS */}
       <AnimatedSection className="section champions">
         <div className="container">
           <div className="section-head">
             <div><h2>Current National Champions</h2></div>
-            <Link to="/rankings" className="btn-ghost btn">View Full Rankings →</Link>
+            <a href="/rankings" className="btn-ghost btn">View Full Rankings →</a>
           </div>
           <StaggeredGrid className="champion-grid" baseDelay={0.05} stepDelay={0.07}>
             {champions.length === 0 && (
@@ -91,12 +90,12 @@ export default function Home() {
         </div>
       </AnimatedSection>
 
-      {/* ============ LATEST NEWS STRIP ============ */}
+      {/* LATEST NEWS */}
       <AnimatedSection className="section-tight latest-strip">
         <div className="container">
           <div className="section-head">
             <div><h2>Latest News</h2></div>
-            <Link to="/news" className="btn-ghost btn">All News →</Link>
+            <a href="/news" className="btn-ghost btn">All News →</a>
           </div>
           <StaggeredGrid className="news-grid" baseDelay={0.06} stepDelay={0.08}>
             {latestNews.length === 0 && (
@@ -109,30 +108,30 @@ export default function Home() {
         </div>
       </AnimatedSection>
 
-      {/* ============ WHAT WE COVER ============ */}
+      {/* WHAT WE COVER */}
       <AnimatedSection className="section coverage">
         <div className="container">
           <div className="section-head">
             <div><h2>What We Cover</h2></div>
           </div>
           <StaggeredGrid className="coverage-grid" baseDelay={0.04} stepDelay={0.06}>
-{(mainPage?.coverageSections?.length >= 4 ? mainPage.coverageSections : [
+            {(mainPage?.coverageSections?.length >= 4 ? mainPage.coverageSections : [
               { number: 1, title: 'Rankings', description: 'National standings for senior men and senior women, by discipline and by year.', link: '/rankings' },
               { number: 2, title: 'Competitions', description: 'Results and coverage from national championships and climbing events.', link: '/competitions' },
               { number: 3, title: 'Athletes', description: 'Profiles, achievements and stats for the climbers building Pakistan\'s scene.', link: '/athletes' },
               { number: 4, title: 'Learn Climbing', description: 'Guides and explainers for anyone curious about the sport.', link: '/learn' },
             ]).map((section) => (
-              <Link to={section.link} className="coverage-card" key={section.number}>
+              <a href={section.link} className="coverage-card" key={section.number}>
                 <span className="coverage-num">0{section.number}</span>
                 <h3>{section.title}</h3>
                 <p>{section.description}</p>
-              </Link>
+              </a>
             ))}
           </StaggeredGrid>
         </div>
       </AnimatedSection>
 
-      {/* ============ FOLLOW CTA ============ */}
+      {/* FOLLOW CTA */}
       <section ref={ctaRef} className={`follow-cta reveal ${ctaVisible ? 'is-visible' : ''}`}>
         <div className="container follow-cta-inner">
           <div>

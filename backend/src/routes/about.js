@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import AboutContent from '../models/AboutContent.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.put('/', async (req, res) => {
       Object.assign(content, req.body, { updatedAt: new Date() });
       await content.save();
     }
+    triggerVercelRebuild();
     res.json(content);
   } catch (err) {
     res.status(400).json({ error: err.message });

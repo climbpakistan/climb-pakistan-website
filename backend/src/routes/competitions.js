@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Competition from '../models/Competition.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 
 const router = Router();
 
@@ -25,6 +26,7 @@ router.get('/:slug', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const competition = await Competition.create(req.body);
+    triggerVercelRebuild();
     res.status(201).json(competition);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -39,6 +41,7 @@ router.put('/:slug', async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!competition) return res.status(404).json({ error: 'Competition not found' });
+    triggerVercelRebuild();
     res.json(competition);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -49,6 +52,7 @@ router.delete('/:slug', async (req, res) => {
   try {
     const competition = await Competition.findOneAndDelete({ slug: req.params.slug });
     if (!competition) return res.status(404).json({ error: 'Competition not found' });
+    triggerVercelRebuild();
     res.json({ message: 'Competition deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

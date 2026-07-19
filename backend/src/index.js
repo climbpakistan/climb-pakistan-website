@@ -21,6 +21,7 @@ import teamRankingRoutes from './routes/teamRankings.js';
 import teamRoutes from './routes/teams.js';
 import contactRoutes from './routes/contact.js';
 import pageViewRoutes from './routes/pageViews.js';
+import rebuildRoutes from './routes/rebuild.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -99,6 +100,10 @@ app.use('/api/contact', contactLimiter, contactRoutes);
 // ── Page Views ──
 // POST /api/page-views is public (tracking), GET /stats is protected inside the route
 app.use('/api/page-views', pageViewRoutes);
+
+// ── Vercel Rebuild Trigger ──
+// POST /api/rebuild triggers a Vercel deploy hook to rebuild the static site
+app.use('/api/rebuild', requireAdmin, rebuildRoutes);
 
 // Start server
 async function start() {

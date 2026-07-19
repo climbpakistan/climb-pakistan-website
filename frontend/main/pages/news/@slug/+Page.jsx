@@ -1,14 +1,13 @@
-import { Link, useParams } from 'react-router-dom';
-import useFetch from '../hooks/useFetch';
-import { getNews } from '../api';
-import NewsCard from '../components/NewsCard';
-import Seo from '../components/Seo';
-import { articleSchema } from '../utils/jsonLd';
+import { useData } from 'vike-react/useData';
+import NewsCard from '../../../src/components/NewsCard';
+import Seo from '../../../src/components/Seo';
+import { articleSchema } from '../../../src/utils/jsonLd';
+import { fetchJSON, API_BASE } from '../../data';
+
+export { Page };
 
 function renderFormattedText(text) {
   if (!text) return null;
-
-  // First pass: extract images
   const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
   const parts = [];
   let lastIndex = 0;
@@ -35,7 +34,6 @@ function renderFormattedText(text) {
       );
     }
 
-    // Parse [s1][/s1] through [s4][/s4] and **bold**
     const elements = [];
     const sizeRegex = /\[s([1-4])\](.*?)\[\/s\1\]/gs;
     let remaining = part.value;
@@ -47,9 +45,8 @@ function renderFormattedText(text) {
         elements.push(renderInlineText(remaining.slice(lastIdx, sizeMatch.index)));
       }
       const content = sizeMatch[2];
-      const size = parseInt(sizeMatch[1]);
       elements.push(
-        <span className={`font-size-${size}`} key={`s${i}-${sizeMatch.index}`}>
+        <span className={`font-size-${parseInt(sizeMatch[1])}`} key={`s${i}-${sizeMatch.index}`}>
           {renderInlineText(content)}
         </span>
       );
@@ -63,7 +60,6 @@ function renderFormattedText(text) {
   });
 }
 
-// Helper: renders text with **bold** and line breaks (no size tags)
 function renderInlineText(text) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((tp, j) => {
@@ -84,21 +80,8 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-export default function Article() {
-  const { slug } = useParams();
-  const { data: allArticles, loading } = useFetch(getNews, []);
-
-  if (loading) {
-    return (
-      <section className="page-header">
-        <div className="container">
-          <p style={{ color: 'var(--cp-text-muted)' }}>Loading article...</p>
-        </div>
-      </section>
-    );
-  }
-
-  const article = allArticles?.find((a) => a.slug === slug);
+function Page() {
+  const { article, allArticles, slug } = useData();
 
   if (!article) {
     return (
@@ -106,7 +89,7 @@ export default function Article() {
         <div className="container">
           <h1 className="page-title">Story Not Found</h1>
           <p className="page-sub">We couldn't find that article.</p>
-          <Link to="/news" className="btn btn-primary" style={{ marginTop: 'var(--sp-6)' }}>Back to News</Link>
+          <a href="/news" className="btn btn-primary" style={{ marginTop: 'var(--sp-6)' }}>Back to News</a>
         </div>
       </section>
     );
@@ -148,7 +131,6 @@ export default function Article() {
           )}
           <div className="article-body">
             {article.sections?.length > 0 ? (
-              // New section-based format
               article.sections.map((sec, i) => {
                 switch (sec.layout) {
                   case 'image-left':
@@ -187,7 +169,6 @@ export default function Article() {
                 }
               })
             ) : (
-              // Legacy format: body array of paragraphs
               article.body?.map((paragraph, i) => (
                 <p key={i}>{renderFormattedText(paragraph)}</p>
               ))

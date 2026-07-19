@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import MainPage from '../models/MainPage.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 
 const router = Router();
 
@@ -50,6 +51,7 @@ router.put('/', async (req, res) => {
       settings.updatedAt = new Date();
       await settings.save();
     }
+    triggerVercelRebuild();
     res.json(settings);
   } catch (err) {
     res.status(400).json({ error: err.message });

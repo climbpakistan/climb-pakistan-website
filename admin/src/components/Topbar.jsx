@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { rebuildSite } from '../api';
 
 const pageTitleMap = {
   '/': 'Dashboard',
@@ -20,6 +22,19 @@ export default function Topbar() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const pageTitle = pageTitleMap[location.pathname] || 'Dashboard';
+  const [rebuildState, setRebuildState] = useState('idle');
+
+  const handleRebuild = async () => {
+    setRebuildState('loading');
+    try {
+      await rebuildSite();
+      setRebuildState('success');
+      setTimeout(() => setRebuildState('idle'), 4000);
+    } catch {
+      setRebuildState('error');
+      setTimeout(() => setRebuildState('idle'), 4000);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -33,6 +48,33 @@ export default function Topbar() {
       </div>
 
       <div className="topbar-right">
+        {/* Rebuild Site */}
+        <button
+          className="topbar-btn"
+          type="button"
+          onClick={handleRebuild}
+          disabled={rebuildState === 'loading'}
+          title={rebuildState === 'success' ? 'Site rebuild triggered!' : rebuildState === 'error' ? 'Rebuild failed' : 'Trigger a Vercel rebuild to publish content changes'}
+          style={{
+            color: rebuildState === 'success' ? 'var(--success)' : rebuildState === 'error' ? 'var(--danger)' : undefined,
+          }}
+        >
+          {rebuildState === 'loading' ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 0.8s linear infinite' }}>
+              <line x1="12" y1="2" x2="12" y2="6" /><line x1="12" y1="18" x2="12" y2="22" />
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" /><line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
+              <line x1="2" y1="12" x2="6" y2="12" /><line x1="18" y1="12" x2="22" y2="12" />
+              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" /><line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
+          )}
+          {rebuildState === 'success' ? 'Deploying…' : rebuildState === 'error' ? 'Failed' : 'Rebuild Site'}
+        </button>
+
         {/* Theme toggle */}
         <button className="topbar-btn" type="button" onClick={toggleTheme} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
           {theme === 'dark' ? (

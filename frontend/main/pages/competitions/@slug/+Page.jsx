@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import useFetch from '../hooks/useFetch';
-import { getCompetition, getNews, getAthletes } from '../api';
-import { AnimatedSection } from '../hooks/animations';
-import NewsCard from '../components/NewsCard';
-import Seo from '../components/Seo';
-import { competitionSchema } from '../utils/jsonLd';
+import { useData } from 'vike-react/useData';
+import { AnimatedSection } from '../../../src/hooks/animations';
+import NewsCard from '../../../src/components/NewsCard';
+import Seo from '../../../src/components/Seo';
+import { competitionSchema } from '../../../src/utils/jsonLd';
+import { fetchJSON, API_BASE } from '../../data';
+
+export { Page };
 
 const TABS = ['overview', 'results', 'news', 'gallery'];
 const TAB_LABELS = { overview: 'Overview', news: 'News', results: 'Results', gallery: 'Gallery' };
@@ -16,18 +17,13 @@ function slugify(name) {
 
 function renderOverview(text) {
   if (!text) return null;
-  // 1. Split by double newlines into paragraphs (handles both \n and \r\n)
   const paragraphs = text.split(/\r?\n{2,}/).filter(Boolean);
   return paragraphs.map((block, i) => {
-    // 2. Split single newlines within a paragraph into <br/>
     const lines = block.split(/\r?\n/).filter(Boolean);
     const elements = lines.map((line, j) => {
-      // 3. Convert **text** to <strong>text</strong>
       const parts = line.split(/(\*\*[^*]+\*\*)/g);
       const content = parts.map((part, k) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={k}>{part.slice(2, -2)}</strong>;
-        }
+        if (part.startsWith('**') && part.endsWith('**')) return <strong key={k}>{part.slice(2, -2)}</strong>;
         return part;
       });
       return <span key={j}>{content}{j < lines.length - 1 && <br/>}</span>;
@@ -42,25 +38,11 @@ function formatRange(start, end) {
   return `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${e.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 }
 
-export default function Competition() {
-  const { slug } = useParams();
-  const { data: competition, loading } = useFetch(() => getCompetition(slug), [slug]);
-  const { data: allNews } = useFetch(getNews, []);
-  const { data: allAthletes } = useFetch(getAthletes, []);
-
+function Page() {
+  const { competition, slug, allNews, allAthletes } = useData();
   const [tab, setTab] = useState('overview');
   const [resultsDiscipline, setResultsDiscipline] = useState(competition?.disciplines?.[0] || 'Speed');
   const [resultsGender, setResultsGender] = useState('Men');
-
-  if (loading) {
-    return (
-      <section className="page-header">
-        <div className="container">
-          <p style={{ color: 'var(--cp-text-muted)' }}>Loading competition...</p>
-        </div>
-      </section>
-    );
-  }
 
   if (!competition) {
     return (
@@ -68,7 +50,7 @@ export default function Competition() {
         <div className="container">
           <h1 className="page-title">Competition Not Found</h1>
           <p className="page-sub">We couldn't find that competition.</p>
-          <Link to="/competitions" className="btn btn-primary" style={{ marginTop: 'var(--sp-6)' }}>Back to Competitions</Link>
+          <a href="/competitions" className="btn btn-primary" style={{ marginTop: 'var(--sp-6)' }}>Back to Competitions</a>
         </div>
       </section>
     );
@@ -108,13 +90,7 @@ export default function Competition() {
         <div className="container">
           <div className="comp-tabs">
             {TABS.map((t) => (
-              <button
-                key={t}
-                className={`comp-tab${tab === t ? ' is-active' : ''}`}
-                onClick={() => setTab(t)}
-              >
-                {TAB_LABELS[t]}
-              </button>
+              <button key={t} className={`comp-tab${tab === t ? ' is-active' : ''}`} onClick={() => setTab(t)}>{TAB_LABELS[t]}</button>
             ))}
           </div>
 
@@ -156,46 +132,25 @@ export default function Competition() {
                   <div className="comp-results-filters">
                     <div className="control-group" role="tablist" aria-label="Select gender">
                       {['Men', 'Women'].map((g) => (
-                        <button
-                          key={g}
-                          className={`filter-chip${resultsGender === g ? ' is-active' : ''}`}
-                          onClick={() => setResultsGender(g)}
-                        >
-                          {g}
-                        </button>
+                        <button key={g} className={`filter-chip${resultsGender === g ? ' is-active' : ''}`} onClick={() => setResultsGender(g)}>{g}</button>
                       ))}
                     </div>
                   </div>
                   <div className="filter-bar" role="tablist" aria-label="Select discipline">
                     {competition.disciplines?.map((d) => (
-                      <button
-                        key={d}
-                        className={`filter-chip${resultsDiscipline === d ? ' is-active' : ''}`}
-                        onClick={() => setResultsDiscipline(d)}
-                      >
-                        {d}
-                      </button>
+                      <button key={d} className={`filter-chip${resultsDiscipline === d ? ' is-active' : ''}`} onClick={() => setResultsDiscipline(d)}>{d}</button>
                     ))}
                   </div>
-
                   {resultRows.length === 0 ? (
                     <p style={{ color: 'var(--cp-text-muted)' }}>No results available yet for this category.</p>
                   ) : (
                     <table className="rankings-table">
-                      <thead>
-                        <tr><th>Rank</th><th>Athlete</th><th>Team</th><th>{resultsDiscipline === 'Speed' ? 'Time' : 'Points'}</th></tr>
-                      </thead>
+                      <thead><tr><th>Rank</th><th>Athlete</th><th>Team</th><th>{resultsDiscipline === 'Speed' ? 'Time' : 'Points'}</th></tr></thead>
                       <tbody>
                         {resultRows.map((row) => (
                           <tr key={row.rank} className={row.rank === 1 ? 'is-leader' : ''}>
                             <td className="rankings-rank">{row.rank}</td>
-                            <td>
-                              {allAthletes?.some((a) => a.name === row.name) ? (
-                                <Link to={`/athletes/${slugify(row.name)}`}>{row.name}</Link>
-                              ) : (
-                                row.name
-                              )}
-                            </td>
+                            <td>{allAthletes?.some((a) => a.name === row.name) ? <a href={`/athletes/${slugify(row.name)}`}>{row.name}</a> : row.name}</td>
                             <td>{row.team}</td>
                             <td>{row.mark}</td>
                           </tr>
@@ -222,9 +177,7 @@ export default function Competition() {
                         <div style={{ width: '100%', aspectRatio: '1', borderRadius: 8, overflow: 'hidden' }}>
                           <img src={url} alt={title || `${competition.name} gallery image ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
-                        {title && (
-                          <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--cp-text-dim)', marginTop: 'var(--sp-2)', textAlign: 'center', lineHeight: 1.4 }}>{title}</p>
-                        )}
+                        {title && <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--cp-text-dim)', marginTop: 'var(--sp-2)', textAlign: 'center', lineHeight: 1.4 }}>{title}</p>}
                       </div>
                     );
                   })}

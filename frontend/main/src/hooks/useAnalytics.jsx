@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 
 const AnalyticsContext = createContext(null);
 
@@ -53,18 +52,19 @@ function sendPageView(pathname) {
 // ── Provider ──────────────────────────────────────────────────────────
 
 export function AnalyticsProvider({ children }) {
-  const location = useLocation();
-
   useEffect(() => {
     injectGtag();
   }, []);
 
-  // Track page views on every route change
+  // Track page views on route changes via popstate (back/forward navigation)
   useEffect(() => {
-    // Delay slightly to let Helmet update the document title
-    const timer = setTimeout(() => sendPageView(location.pathname), 50);
-    return () => clearTimeout(timer);
-  }, [location.pathname]);
+    function handlePopState() {
+      const timer = setTimeout(() => sendPageView(window.location.pathname), 50);
+      return () => clearTimeout(timer);
+    }
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   return (
     <AnalyticsContext.Provider value={{ GA_MEASUREMENT_ID }}>

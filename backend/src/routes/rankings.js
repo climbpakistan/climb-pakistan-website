@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import XLSX from 'xlsx';
 import Ranking from '../models/Ranking.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 import { parseAthleteRankingWorkbook } from '../utils/athlete-ranking-xlsx-parser.js';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -83,6 +84,7 @@ router.put('/', async (req, res) => {
       doc.updatedAt = new Date();
       await doc.save();
     }
+    triggerVercelRebuild();
     res.json({ data: doc.data, tags: doc.tags || [] });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -143,6 +145,7 @@ router.post('/import', upload.single('file'), async (req, res) => {
     }
 
     res.json({
+      triggerVercelRebuild();
       message: 'Athlete rankings import complete',
       summary: {
         totalEntries,

@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react';
-import useFetch from '../hooks/useFetch';
-import { getAthletes } from '../api';
-import AthleteCard from '../components/AthleteCard';
-import { AnimatedSection, StaggeredGrid } from '../hooks/animations';
-import Seo from '../components/Seo';
+import { useData } from 'vike-react/useData';
+import AthleteCard from '../../src/components/AthleteCard';
+import { AnimatedSection, StaggeredGrid } from '../../src/hooks/animations';
+import Seo from '../../src/components/Seo';
+
+export { Page };
 
 const GENDER_FILTERS = ['All Genders', 'Male', 'Female'];
 const DISCIPLINE_FILTERS = ['All Disciplines', 'Speed Climbing', 'Lead Climbing', 'Boulder'];
 
-export default function Athletes() {
-  const { data: athletes, loading } = useFetch(getAthletes, []);
+function Page() {
+  const { athletes } = useData();
   const [gender, setGender] = useState('All Genders');
   const [discipline, setDiscipline] = useState('All Disciplines');
 
@@ -73,20 +74,16 @@ export default function Athletes() {
             ))}
           </div>
 
-          {loading ? (
-            <p style={{ color: 'var(--cp-text-muted)', padding: 'var(--sp-8)', textAlign: 'center' }}>Loading athletes...</p>
-          ) : (
-            <StaggeredGrid className="athlete-grid" baseDelay={0.04} stepDelay={0.07}>
-              {filtered.length === 0 && (
-                <p style={{ color: 'var(--cp-text-muted)', padding: 'var(--sp-8)', textAlign: 'center', gridColumn: '1 / -1' }}>
-                  No athletes match those filters.
-                </p>
-              )}
-              {filtered.map((athlete) => (
-                <AthleteCard athlete={athlete} key={athlete.slug} />
-              ))}
-            </StaggeredGrid>
-          )}
+          <StaggeredGrid className="athlete-grid" baseDelay={0.04} stepDelay={0.07}>
+            {filtered.length === 0 && (
+              <p style={{ color: 'var(--cp-text-muted)', padding: 'var(--sp-8)', textAlign: 'center', gridColumn: '1 / -1' }}>
+                No athletes match those filters.
+              </p>
+            )}
+            {filtered.map((athlete) => (
+              <AthleteCard athlete={athlete} key={athlete.slug} />
+            ))}
+          </StaggeredGrid>
         </div>
       </AnimatedSection>
     </>

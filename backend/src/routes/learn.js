@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import LearnSection from '../models/LearnSection.js';
+import { triggerVercelRebuild } from '../utils/rebuild.js';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.get('/:slug', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const section = await LearnSection.create(req.body);
+    triggerVercelRebuild();
     res.status(201).json(section);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -40,6 +42,7 @@ router.put('/:slug', async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!section) return res.status(404).json({ error: 'Section not found' });
+    triggerVercelRebuild();
     res.json(section);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -50,6 +53,7 @@ router.delete('/:slug', async (req, res) => {
   try {
     const section = await LearnSection.findOneAndDelete({ slug: req.params.slug });
     if (!section) return res.status(404).json({ error: 'Section not found' });
+    triggerVercelRebuild();
     res.json({ message: 'Section deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

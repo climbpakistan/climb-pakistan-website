@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom';
-import useFetch from '../hooks/useFetch';
-import { getAboutContent } from '../api';
-import { AnimatedSection } from '../hooks/animations';
-import Seo from '../components/Seo';
-import { aboutSchema } from '../utils/jsonLd';
+import { useData } from 'vike-react/useData';
+import { AnimatedSection } from '../../src/hooks/animations';
+import Seo from '../../src/components/Seo';
+import { aboutSchema } from '../../src/utils/jsonLd';
 
-export default function About() {
-  const { data: content, loading } = useFetch(getAboutContent, []);
+export { Page };
+
+function Page() {
+  const { content } = useData();
 
   const aboutDesc = content?.mission
     ? content.mission.slice(0, 160)
@@ -35,20 +35,11 @@ export default function About() {
 
       <AnimatedSection className="section-tight">
         <div className="container about-container">
-          {loading ? (
-            <p style={{ color: 'var(--cp-text-muted)' }}>Loading...</p>
-          ) : (
-            <>
-              <p className="about-lead">{content?.intro || ''}</p>
-
-              <h2 className="detail-heading">Our Mission</h2>
-              <p className="detail-text">{content?.mission || ''}</p>
-
-              <p className="detail-text">{content?.closing || ''}</p>
-            </>
-          )}
-
-          <Link to="/contact" className="btn btn-primary" style={{ marginTop: 'var(--sp-6)' }}>Get in Touch</Link>
+          <p className="about-lead">{content?.intro || ''}</p>
+          <h2 className="detail-heading">Our Mission</h2>
+          <p className="detail-text">{content?.mission || ''}</p>
+          <p className="detail-text">{content?.closing || ''}</p>
+          <a href="/contact" className="btn btn-primary" style={{ marginTop: 'var(--sp-6)' }}>Get in Touch</a>
         </div>
       </AnimatedSection>
     </>

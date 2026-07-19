@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+// Using <a> tags for navigation — Vike intercepts them for client-side routing
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -18,7 +18,7 @@ function renderFormattedText(text) {
 export default function NewsCard({ article }) {
   return (
     <article className="news-card">
-      <Link to={`/news/${article.slug}`} className="news-card-media placeholder-photo" aria-hidden="true">
+      <a href={`/news/${article.slug}`} className="news-card-media placeholder-photo" aria-hidden="true">
         {article.imageUrl ? (
           <img src={article.imageUrl} alt={article.title} style={{
             width: '100%',
@@ -31,10 +31,10 @@ export default function NewsCard({ article }) {
         ) : (
           <span>Photo</span>
         )}
-      </Link>
+      </a>
       <div className="news-card-body">
         <span className="tag">{article.tag}</span>
-        <h3><Link to={`/news/${article.slug}`}>{article.title}</Link></h3>
+        <h3><a href={`/news/${article.slug}`}>{article.title}</a>        </h3>
         <p>{renderFormattedText(article.excerpt)}</p>
         <span className="news-card-date">{formatDate(article.date)}</span>
       </div>

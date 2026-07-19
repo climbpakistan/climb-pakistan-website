@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { usePageContext } from 'vike-react/usePageContext';
+import { navigate } from 'vike/client/router';
 import { navLinks } from '../data/siteData';
 import useFetch from '../hooks/useFetch';
 import { getAthletes, getNews } from '../api';
@@ -7,7 +8,8 @@ import { useTheme } from '../hooks/ThemeContext';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
+  const pageContext = usePageContext();
+  const currentPath = pageContext?.urlPathname || '';
   const { data: athletes } = useFetch(getAthletes, []);
   const { data: newsArticles } = useFetch(getNews, []);
 
@@ -51,18 +53,26 @@ export default function Header() {
   return (
     <header className="site-header">
       <nav className="nav container">
-        <Link to="/" className="nav-logo" onClick={() => setMenuOpen(false)}>
+        <a href="/" className="nav-logo" onClick={() => setMenuOpen(false)}>
           <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
-        </Link>
+        </a>
 
         <ul className={`nav-links${menuOpen ? ' is-open' : ''}`} id="navLinks">
-          {navLinks.map((link) => (
-            <li key={link.to}>
-              <NavLink to={link.to} end={link.to === '/'} onClick={() => setMenuOpen(false)}>
-                {link.label}
-              </NavLink>
-            </li>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = link.to === '/' ? currentPath === '/' : currentPath.startsWith(link.to + '/') || currentPath === link.to;
+            return (
+              <li key={link.to}>
+                <a
+                  href={link.to}
+                  onClick={() => setMenuOpen(false)}
+                  className={isActive ? 'active' : ''}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {link.label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="nav-actions">

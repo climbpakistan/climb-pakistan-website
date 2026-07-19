@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+// Using <a> tags for navigation — Vike intercepts them for client-side routing
 import crownIcon from '../assets/crown-icon.webp';
 
 function initials(name) {
@@ -11,7 +11,7 @@ function initials(name) {
 
 export function ChampionCard({ athlete, disciplineTitle, rank, points }) {
   return (
-    <Link to={`/athletes/${athlete.slug}`} className="champion-card">
+    <a href={`/athletes/${athlete.slug}`} className="champion-card">
       <div className="champion-card-media" aria-hidden="true">
         {athlete.photoUrl ? (
           <img
@@ -43,13 +43,13 @@ export function ChampionCard({ athlete, disciplineTitle, rank, points }) {
           <span className="champion-view-arrow" aria-hidden="true">→</span>
         </span>
       </div>
-    </Link>
+    </a>
   );
 }
 
 export default function AthleteCard({ athlete }) {
   return (
-    <Link to={`/athletes/${athlete.slug}`} className="athlete-card">
+    <a href={`/athletes/${athlete.slug}`} className="athlete-card">
       <div className="athlete-card-media" aria-hidden="true">
         {athlete.photoUrl ? (
           <img
@@ -77,6 +77,6 @@ export default function AthleteCard({ athlete }) {
           ))}
         </div>
       </div>
-    </Link>
+    </a>
   );
 }

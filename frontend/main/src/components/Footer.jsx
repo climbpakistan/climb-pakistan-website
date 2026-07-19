@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+// Using <a> tags for navigation — Vike intercepts them for client-side routing
 import { footerLinks } from '../data/siteData';
 
 export default function Footer() {
@@ -7,9 +7,9 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div className="footer-brand">
-            <Link to="/" className="footer-logo">
+            <a href="/" className="footer-logo">
               <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
-            </Link>
+            </a>
             <p>Your source for climbing in Pakistan. An initiative supporting the development of sport climbing nationwide.</p>
             <a
               href="https://www.instagram.com/climb_pakistan/"
@@ -30,7 +30,7 @@ export default function Footer() {
             <h5>Explore</h5>
             <ul>
               {footerLinks.explore.map((l) => (
-                <li key={l.to}><Link to={l.to}>{l.label}</Link></li>
+                <li key={l.to}><a href={l.to}>{l.label}</a></li>
               ))}
             </ul>
           </div>
@@ -39,7 +39,7 @@ export default function Footer() {
             <h5>More</h5>
             <ul>
               {footerLinks.more.map((l) => (
-                <li key={l.to}><Link to={l.to}>{l.label}</Link></li>
+                <li key={l.to}><a href={l.to}>{l.label}</a></li>
               ))}
             </ul>
           </div>
@@ -55,7 +55,7 @@ export default function Footer() {
         <div className="footer-bottom">
           <p>© {new Date().getFullYear()} Climb Pakistan.</p>
           <div className="footer-legal">
-            <Link to="/contact">Contact</Link>
+            <a href="/contact">Contact</a>
           </div>
         </div>
       </div>
