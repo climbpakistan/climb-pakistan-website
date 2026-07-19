@@ -2233,7 +2233,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 .records-premium-card {
   display: grid;
-  grid-template-columns: 45% 1fr;
+  grid-template-columns: 30% 1fr;
   gap: 0;
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
