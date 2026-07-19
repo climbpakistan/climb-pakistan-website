@@ -16,7 +16,9 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [openDropdown, setOpenDropdown] = useState(null);
   const searchRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Close the search dropdown on outside click.
   useEffect(() => {
@@ -28,6 +30,18 @@ export default function Header() {
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
+
+  // Close dropdown on outside click.
+  useEffect(() => {
+    function onClick(e) {
+      if (openDropdown === null) return;
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpenDropdown(null);
+      }
+    }
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [openDropdown]);
 
   // Close mobile menu on route change would need location; simplest is to
   // close it whenever a link inside it is clicked (handled inline below).
@@ -60,16 +74,46 @@ export default function Header() {
         <ul className={`nav-links${menuOpen ? ' is-open' : ''}`} id="navLinks">
           {navLinks.map((link) => {
             const isActive = link.to === '/' ? currentPath === '/' : currentPath.startsWith(link.to + '/') || currentPath === link.to;
+            const hasChildren = link.children && link.children.length > 0;
+            const isDropdownOpen = openDropdown === link.to;
             return (
-              <li key={link.to}>
+              <li
+                key={link.to}
+                className={hasChildren ? 'nav-item--with-dropdown' : ''}
+                onMouseEnter={() => hasChildren && setOpenDropdown(link.to)}
+                onMouseLeave={() => hasChildren && setOpenDropdown(null)}
+                ref={hasChildren ? dropdownRef : undefined}
+              >
                 <a
                   href={link.to}
                   onClick={() => setMenuOpen(false)}
-                  className={isActive ? 'active' : ''}
+                  className={`${isActive ? 'active' : ''}${hasChildren ? ' nav-link--has-children' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
+                  aria-haspopup={hasChildren ? 'true' : undefined}
+                  aria-expanded={hasChildren ? isDropdownOpen : undefined}
                 >
                   {link.label}
+                  {hasChildren && (
+                    <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="12" height="12"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  )}
                 </a>
+                {hasChildren && isDropdownOpen && (
+                  <div className="nav-dropdown">
+                    {link.children.map((child) => {
+                      const isChildActive = child.to === '/' ? currentPath === '/' : currentPath.startsWith(child.to + '/') || currentPath === child.to;
+                      return (
+                        <a
+                          key={child.to}
+                          href={child.to}
+                          className={`nav-dropdown-item${isChildActive ? ' active' : ''}`}
+                          onClick={() => { setMenuOpen(false); setOpenDropdown(null); }}
+                        >
+                          {child.label}
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
               </li>
             );
           })}

@@ -8,7 +8,13 @@ export const navLinks = [
   { label: 'Home', to: '/' },
   { label: 'Latest News', to: '/news' },
   { label: 'Athletes', to: '/athletes' },
-  { label: 'Rankings', to: '/rankings' },
+  {
+    label: 'Rankings', to: '/rankings',
+    children: [
+      { label: 'Rankings', to: '/rankings' },
+      { label: 'National Records', to: '/records' },
+    ],
+  },
   { label: 'Competitions', to: '/competitions' },
   { label: 'Learn Climbing', to: '/learn' },
   { label: 'About', to: '/about' },

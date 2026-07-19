@@ -402,6 +402,67 @@ input, textarea, select { font: inherit; color: inherit; }
   border-radius: 2px;
 }
 
+/* Drop-down arrow on nav items with children */
+.nav-link--has-children {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.dropdown-arrow {
+  transition: transform 0.2s ease;
+}
+.nav-link--has-children[aria-expanded='true'] .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Dropdown container */
+.nav-item--with-dropdown {
+  position: relative;
+}
+
+.nav-dropdown {
+  position: absolute;
+  top: calc(100% - 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 180px;
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--cp-shadow);
+  padding: var(--sp-2);
+  animation: nav-dropdown-in 0.15s ease;
+  z-index: 200;
+}
+
+@keyframes nav-dropdown-in {
+  from { opacity: 0; margin-top: -6px; }
+  to { opacity: 1; margin-top: 0; }
+}
+
+.nav-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--cp-text);
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.nav-dropdown-item:hover {
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+}
+.nav-dropdown-item.active {
+  color: var(--cp-accent);
+  font-weight: 600;
+}
+.nav-dropdown-item.active::after {
+  display: none;
+}
+
 .nav-actions { display: flex; align-items: center; gap: var(--sp-3); }
 
 /* Theme toggle: shows moon in dark mode (click to go light), sun in light mode */
