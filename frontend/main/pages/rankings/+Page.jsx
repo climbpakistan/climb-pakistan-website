@@ -148,13 +148,14 @@ function Page() {
             </h1>
             <p className="page-sub">Senior men and senior women, ranked by discipline. Select a year to view historical standings.</p>
             <a href="/records" className="records-nav-link">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 20h12" /><path d="M12 4v12" /><path d="M8 12l4 4 4-4" />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 8 8 12 8s5-4 7.5-4a2.5 2.5 0 0 1 0 5H18" />
+                <path d="M18 9v3a6 6 0 0 1-12 0V9" />
+                <path d="M12 15v5" />
+                <path d="M8 20h8" />
               </svg>
-              National Records
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
-              </svg>
+              <span>National Records</span>
+              <span className="records-nav-badge">NEW</span>
             </a>
           </div>
         </div>
