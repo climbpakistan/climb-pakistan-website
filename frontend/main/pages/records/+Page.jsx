@@ -39,7 +39,7 @@ function Page() {
           </div>
           <div className="records-gender-bar">
             <button
-              className={`records-gender-btn records-gender-btn-men${gender === 'Men' ? ' is-active' : ''}`}
+              className={`records-gender-btn${gender === 'Men' ? ' is-active' : ''}`}
               onClick={() => setGender('Men')}
               disabled={!hasMenData}
             >
@@ -47,7 +47,7 @@ function Page() {
               Men's Records
             </button>
             <button
-              className={`records-gender-btn records-gender-btn-women${gender === 'Women' ? ' is-active' : ''}`}
+              className={`records-gender-btn${gender === 'Women' ? ' is-active' : ''}`}
               onClick={() => setGender('Women')}
               disabled={!hasWomenData}
             >
@@ -58,7 +58,7 @@ function Page() {
         </div>
       </section>
 
-      <section className={`section-tight records-theme-${gender.toLowerCase()}`} style={{ paddingTop: 0 }}>
+      <section className="section-tight" style={{ paddingTop: 0 }}>
         <div className="container">
           {!hasAnyData ? (
             <div className="records-empty">
