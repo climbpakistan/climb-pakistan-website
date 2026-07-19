@@ -106,8 +106,8 @@ router.post('/import', upload.single('file'), async (req, res) => {
 
     const totalEntries = sheetNames.reduce((sum, y) => sum + parsedData[y].length, 0);
 
+    triggerVercelRebuild();
     res.json({
-      triggerVercelRebuild();
       message: 'Team rankings import complete',
       summary: {
         yearsImported: sheetNames,

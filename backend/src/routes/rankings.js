@@ -144,8 +144,8 @@ router.post('/import', upload.single('file'), async (req, res) => {
       }
     }
 
+    triggerVercelRebuild();
     res.json({
-      triggerVercelRebuild();
       message: 'Athlete rankings import complete',
       summary: {
         totalEntries,
