@@ -13,6 +13,7 @@ function Page() {
       <Seo
         title="Latest News"
         description="Competition results, athlete spotlights and everything happening in Pakistan's sport climbing community."
+        keywords="sport climbing Pakistan news, climbing news Pakistan, Pakistani climbing competitions, climbing community Pakistan, Pakistan competition results, climbing athlete spotlights Pakistan"
         path="/news"
       />
 

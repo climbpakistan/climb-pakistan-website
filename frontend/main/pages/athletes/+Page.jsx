@@ -30,6 +30,7 @@ function Page() {
       <Seo
         title="Athlete Profiles"
         description="The climbers representing Pakistan across speed, lead and boulder — their stats, achievements and stories."
+        keywords="Pakistani climbers, climbers in Pakistan, Pakistan climbing athletes, sport climbing Pakistan, Pakistan climbing champions, speed climbing Pakistan, lead climbing Pakistan, boulder Pakistan"
         path="/athletes"
       />
 

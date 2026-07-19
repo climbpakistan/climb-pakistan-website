@@ -58,6 +58,7 @@ function Page() {
       <Seo
         title={section.title}
         description={section.subtitle || section.body?.slice(0, 160) || `A guide to ${section.title} for climbers in Pakistan.`}
+        keywords={[section.title, 'learn climbing Pakistan', 'climbing guide Pakistan', 'sport climbing tutorial', ...(section.tags || [])].filter(Boolean).join(', ')}
         ogImage={section.image}
         ogType="article"
         path={`/learn/${slug}`}

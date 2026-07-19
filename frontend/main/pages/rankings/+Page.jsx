@@ -133,6 +133,7 @@ function Page() {
       <Seo
         title={`National Rankings${headingYear ? ' ' + headingYear : ''}`}
         description="Senior men and senior women national rankings by discipline."
+        keywords="climbers rankings Pakistan, national climbing ranking Pakistan, sport climbing rankings Pakistan, Pakistan climbing standings, national rankings Pakistan climbing, speed climbing ranking Pakistan, lead climbing ranking Pakistan"
         path="/rankings"
         jsonLd={rankingsSchema(mode === 'Team Rankings' ? teamRankingsTags : rankingsTags)}
       />

@@ -81,6 +81,7 @@ function Page() {
       <Seo
         title="Contact"
         description="Get in touch with the Climb Pakistan team — story tips, athlete submissions, corrections, or general inquiries."
+        keywords="contact Climb Pakistan, climbing Pakistan contact, sport climbing Pakistan inquiries, Pakistan climbing team contact, story tip Pakistan climbing, athlete submission Pakistan climbing"
         path="/contact"
       />
 

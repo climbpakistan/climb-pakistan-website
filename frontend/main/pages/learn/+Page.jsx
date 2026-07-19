@@ -21,6 +21,7 @@ function Page() {
       <Seo
         title="New to Climbing?"
         description="A plain-language introduction to sport climbing in Pakistan — disciplines, scoring, training tips, and how to get started."
+        keywords="learn climbing Pakistan, how to start climbing Pakistan, climbing guide Pakistan, sport climbing tutorial Pakistan, indoor climbing Pakistan, rock climbing Pakistan, climbing disciplines explained, climbing scoring Pakistan"
         path="/learn"
       />
 

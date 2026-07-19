@@ -106,6 +106,7 @@ function Page() {
       <Seo
         title={article.title}
         description={articleDesc}
+        keywords={[`sport climbing ${article.tag?.toLowerCase() || 'news'} Pakistan`, ...(article.tags || [])].filter(Boolean).join(', ')}
         ogImage={article.imageUrl}
         ogType="article"
         path={`/news/${slug}`}

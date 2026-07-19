@@ -22,6 +22,7 @@ function Page() {
       <Seo
         title="Competitions"
         description="Coverage and results from national championships and sanctioned sport climbing events in Pakistan."
+        keywords="climbing competitions Pakistan, sport climbing events Pakistan, Pakistan climbing championships, national climbing competitions Pakistan, speed climbing Pakistan, lead climbing Pakistan, boulder competitions Pakistan"
         path="/competitions"
       />
 

@@ -68,6 +68,7 @@ function Page() {
       <Seo
         title={competition.name}
         description={compDesc}
+        keywords={[competition.name, 'climbing competition Pakistan', 'sport climbing event Pakistan', ...competition.disciplines?.map(d => `${d} Pakistan`) || [], ...(competition.tags || [])].filter(Boolean).join(', ')}
         ogImage={competition.imageUrl}
         ogType="article"
         path={`/competitions/${slug}`}

@@ -5,7 +5,7 @@ export { Page };
 function Page() {
   return (
     <>
-      <Seo title="Thank You" description="Your message has been received. We'll get back to you soon." noIndex />
+      <Seo title="Thank You" description="Your message has been received. We'll get back to you soon." keywords="Climb Pakistan contact, climbing Pakistan message sent, Pakistan climbing inquiry" noIndex />
       <section className="thanks-hero">
         <div className="container thanks-hero-inner">
           <div className="thanks-icon" aria-hidden="true">

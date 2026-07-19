@@ -59,6 +59,7 @@ function Page() {
       <Seo
         title={athlete.name}
         description={athleteDesc}
+        keywords={[athlete.name, 'Pakistani climber', 'climber in Pakistan', 'Pakistan climbing champion', ...(athlete.disciplines || []), ...(athlete.tags || [])].filter(Boolean).join(', ')}
         ogImage={athlete.photoUrl}
         ogType="profile"
         path={`/athletes/${slug}`}

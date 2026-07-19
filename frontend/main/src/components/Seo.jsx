@@ -29,6 +29,7 @@ function currentUrl(path) {
 export default function Seo({
   title,
   description,
+  keywords,
   ogImage,
   ogType = 'website',
   path,
@@ -49,6 +50,7 @@ export default function Seo({
       {/* ── Primary meta — only render <title> when explicitly provided ── */}
       {hasTitle && <title>{fullTitle}</title>}
       <meta name="description" content={desc} />
+      {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={url} />
 
       {noIndex && <meta name="robots" content="noindex,nofollow" />}
