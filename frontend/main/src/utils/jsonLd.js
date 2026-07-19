@@ -202,6 +202,103 @@ export function rankingsSchema(tags) {
 }
 
 /**
+ * Records page schema — describes national speed climbing records with
+ * Schema.org SportsRecord-compatible structured data for rich search results.
+ *
+ * @param {{ current: Array, previous: Array, gender: string }} records
+ * @param {Object} [settings] - Page settings from the admin panel
+ * @param {string[]} [settings.tags]
+ * @returns {Object|null} JSON-LD schema object
+ */
+export function recordsSchema(records, gender = 'Men', settings = {}) {
+  const current = records?.[gender]?.current || [];
+  const previous = records?.[gender]?.previous || [];
+  const allRecords = [...current, ...previous];
+
+  if (allRecords.length === 0) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'National Records — Climb Pakistan',
+      description: `Pakistan national speed climbing records — ${gender.toLowerCase()}'s current records and historical progression.`,
+      keywords: 'Pakistan speed climbing records, national records Pakistan climbing, sport climbing records Pakistan, Pakistani climbing athletes',
+    };
+  }
+
+  // Collect unique athlete names
+  const athleteNames = [...new Set(allRecords.map((r) => r.athleteName).filter(Boolean))];
+
+  // Build sport-specific keywords
+  const genderLabel = gender.toLowerCase() === 'women' ? "women's" : "men's";
+  const keywords = [
+    `Pakistan ${genderLabel} speed climbing records`,
+    `fastest climber Pakistan ${genderLabel}`,
+    `Pakistan national record speed climbing`,
+    `climbing record Pakistan ${genderLabel}`,
+    ...athleteNames.map((n) => `${n} climbing record`),
+    ...athleteNames.map((n) => `${n} Pakistan climber`),
+    'Pakistan climbing records list',
+    'sport climbing Pakistan records',
+    'speed climbing national record Pakistan',
+  ].join(', ');
+
+  // Build record list for schema
+  const recordItems = allRecords.map((rec, i) => ({
+    '@type': 'SportsRecord',
+    name: rec.athleteName
+      ? `${rec.athleteName} — ${rec.recordTime} seconds (${gender}’s Speed Climbing)`
+      : `${rec.recordTime} seconds (${gender}’s Speed Climbing)`,
+    description: rec.competition
+      ? `${gender}’s speed climbing record of ${rec.recordTime} seconds set by ${rec.athleteName} at ${rec.competition}${rec.venue ? `, ${rec.venue}` : ''}.`
+      : `${gender}’s speed climbing record of ${rec.recordTime} seconds set by ${rec.athleteName}.`,
+    dateCreated: rec.date || undefined,
+    location: rec.venue ? { '@type': 'Place', name: rec.venue } : undefined,
+    recordedBy: rec.athleteName ? { '@type': 'Person', name: rec.athleteName } : undefined,
+    identifier: rec._id || `record-${i}`,
+  }));
+
+  // Clean undefined values
+  recordItems.forEach((item) => {
+    Object.keys(item).forEach((key) => {
+      if (item[key] === undefined) delete item[key];
+    });
+  });
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${BASE_URL}/records`,
+        name: `National Records — ${gender}’s Speed Climbing — Climb Pakistan`,
+        description: athleteNames.length > 0
+          ? `Pakistan national speed climbing records — ${gender.toLowerCase()}’s records held by ${athleteNames.join(', ')}. Track the fastest climbing times in Pakistan.`
+          : `Pakistan national speed climbing records — ${gender.toLowerCase()}’s current records and historical progression.`,
+        keywords,
+        about: {
+          '@type': 'Thing',
+          name: 'Sport Climbing Records',
+          additionalType: 'https://en.wikipedia.org/wiki/Speed_climbing',
+        },
+      },
+      {
+        '@type': 'SportsOrganization',
+        name: 'Climb Pakistan',
+        url: 'https://www.climbpakistan.com',
+        sport: 'Speed Climbing',
+      },
+      ...recordItems,
+    ],
+  };
+
+  if (settings.tags?.length) {
+    schema['@graph'][0].keywords += ', ' + settings.tags.join(', ');
+  }
+
+  return schema;
+}
+
+/**
  * Person schema — for athlete profiles.
  */
 export function personSchema(athlete) {

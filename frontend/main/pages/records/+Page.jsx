@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useData } from 'vike-react/useData';
 import { AnimatedSection } from '../../src/hooks/animations';
 import Seo from '../../src/components/Seo';
+import { recordsSchema } from '../../src/utils/jsonLd';
 
 const API_BASE = import.meta.env.VITE_API_URL
   || 'https://climb-pakistan-backend.onrender.com/api';
@@ -14,6 +15,33 @@ function Page() {
   const [gender, setGender] = useState('Men');
   const [records, setRecords] = useState(initialRecords || {});
 
+  // Derive rich keywords and structured data from the current records
+  const currentRecords = records?.[gender]?.current || [];
+  const previousRecords = records?.[gender]?.previous || [];
+  const allNames = useMemo(() => {
+    const names = new Set();
+    [...currentRecords, ...previousRecords].forEach((r) => {
+      if (r.athleteName) names.add(r.athleteName);
+    });
+    return [...names];
+  }, [currentRecords, previousRecords]);
+
+  const genderLabel = gender === 'Women' ? "women's" : "men's";
+  const dynamicKeywords = [
+    `Pakistan ${genderLabel} speed climbing records`,
+    `fastest climber Pakistan ${genderLabel}`,
+    `Pakistan national record speed climbing`,
+    `climbing record Pakistan ${genderLabel}`,
+    ...allNames.map((n) => `${n} climbing record`),
+    ...allNames.map((n) => `${n} Pakistan climber`),
+    ...allNames.map((n) => `${n} speed climbing`),
+    ...allNames.map((n) => `Pakistani climber ${n}`),
+    'Pakistan climbing records',
+    'sport climbing Pakistan records',
+    'speed climbing national record Pakistan',
+    'Pakistan fastest climber',
+  ].filter(Boolean).join(', ');
+
   // Re-fetch records on the client side so admin additions (previous records,
   // new records) show immediately without waiting for a Vercel rebuild.
   useEffect(() => {
@@ -25,20 +53,23 @@ function Page() {
     return () => { cancelled = true; };
   }, []);
 
-  const currentRecords = records?.[gender]?.current || [];
-  const previousRecords = records?.[gender]?.previous || [];
   const hasAnyData = currentRecords.length > 0 || previousRecords.length > 0;
 
   const hasMenData = (records?.Men?.current?.length || 0) + (records?.Men?.previous?.length || 0) > 0;
   const hasWomenData = (records?.Women?.current?.length || 0) + (records?.Women?.previous?.length || 0) > 0;
 
+  const recordsDesc = allNames.length > 0
+    ? `Pakistan national speed climbing records — ${genderLabel}’s records held by ${allNames.join(', ')}. Track the fastest climbing times in Pakistan.`
+    : settings.seoDescription || `Pakistan national speed climbing records — ${genderLabel}’s current records and historical progression.`;
+
   return (
     <>
       <Seo
-        title={settings.seoTitle || 'National Records — Speed Climbing'}
-        description={settings.seoDescription || "Pakistan national speed climbing records — men's and women's current records and historical progression."}
-        keywords={settings.seoKeywords || 'Pakistan speed climbing records, national records Pakistan climbing, speed climbing national record, Pakistan climbing records men women'}
+        title={settings.seoTitle || `National Records — ${gender}’s Speed Climbing`}
+        description={recordsDesc}
+        keywords={settings.seoKeywords || dynamicKeywords}
         path="/records"
+        jsonLd={recordsSchema(records, gender, settings)}
       />
 
       {/* ── Page Header (matches rankings style) ── */}
