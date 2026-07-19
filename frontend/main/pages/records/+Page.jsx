@@ -93,12 +93,12 @@ function Page() {
                             <div className="records-current-badge">National Record</div>
                           </div>
                           <div className="records-current-info">
+                            <div className="records-current-time">{rec.recordTime}</div>
                             {rec.athleteSlug ? (
                               <a href={`/athletes/${rec.athleteSlug}`} className="records-current-name-link">{rec.athleteName}</a>
                             ) : (
                               <h3 className="records-current-name">{rec.athleteName}</h3>
                             )}
-                            <div className="records-current-time">{rec.recordTime}</div>
                             <dl className="records-current-details">
                               {rec.competition && (
                                 <div className="records-detail-row">

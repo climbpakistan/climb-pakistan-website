@@ -2232,7 +2232,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .records-current-card {
   position: relative;
   display: grid;
-  grid-template-columns: 30% 1fr;
+  grid-template-columns: 28% 1fr;
+  gap: var(--sp-5);
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
   border-radius: var(--radius-lg);
@@ -2300,19 +2301,19 @@ input, textarea, select { font: inherit; color: inherit; }
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
-  padding: var(--sp-2) var(--sp-5);
+  padding: var(--sp-2) var(--sp-5) var(--sp-2) 0;
   text-align: left;
   justify-content: flex-start;
 }
 .records-current-name {
-  font-size: 2.75rem;
-  line-height: 1.1;
+  font-size: var(--fs-2xl);
+  line-height: 1.15;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 .records-current-name-link {
-  font-size: 2.75rem;
-  line-height: 1.1;
+  font-size: var(--fs-2xl);
+  line-height: 1.15;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: var(--cp-white);
@@ -2323,7 +2324,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-time {
   font-family: var(--font-heading);
-  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
   line-height: 1;
   color: var(--cp-accent);
   text-shadow: 0 0 30px rgba(63,191,106,0.2);
@@ -2340,13 +2341,13 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-detail-row dt {
   color: var(--cp-text-muted);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 .records-detail-row dd {
   margin: 0;
   color: var(--cp-white);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
 }
 .records-status-badge {
   display: inline-block;
@@ -2638,7 +2639,7 @@ input, textarea, select { font: inherit; color: inherit; }
   .records-gender-bar { flex-wrap: wrap; }
   .records-gender-btn { width: 100%; justify-content: center; }
   .records-current-grid { max-width: 360px; }
-  .records-current-time { font-size: var(--fs-2xl); }
+  .records-current-time { font-size: var(--fs-xl); }
   .records-current-details { grid-template-columns: 1fr; }
   .records-detail-row { display: flex; justify-content: space-between; gap: var(--sp-1); }
   .records-table th, .records-table td { padding: var(--sp-2) var(--sp-2); font-size: var(--fs-xs); }
