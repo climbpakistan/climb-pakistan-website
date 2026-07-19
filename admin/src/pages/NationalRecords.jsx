@@ -14,12 +14,11 @@ const CURRENT_EMPTY = {
   status: 'Active',
 };
 
-const PREVIOUS_EMPTY = {
-  gender: 'Men',
+const PREVIOUS_ROW_EMPTY = {
   athleteName: '',
   recordTime: '',
-  year: '',
   competition: '',
+  year: '',
 };
 
 export default function NationalRecords() {
@@ -31,10 +30,10 @@ export default function NationalRecords() {
   const [editingCurrentId, setEditingCurrentId] = useState(null);
   const [showCurrentForm, setShowCurrentForm] = useState(false);
 
-  /* ── Previous records form state ── */
-  const [previousForm, setPreviousForm] = useState(PREVIOUS_EMPTY);
-  const [editingPreviousId, setEditingPreviousId] = useState(null);
-  const [showPreviousForm, setShowPreviousForm] = useState(false);
+  /* ── Previous records — inline rows ── */
+  const [previousRows, setPreviousRows] = useState([]);
+  const [previousGender, setPreviousGender] = useState('Men');
+  const [showPreviousEditor, setShowPreviousEditor] = useState(false);
 
   /* ── Filters ── */
   const [filterGender, setFilterGender] = useState('All');
@@ -109,55 +108,86 @@ export default function NationalRecords() {
     }
   };
 
-  /* ── Previous record helpers ── */
-  const openNewPrevious = () => {
-    setEditingPreviousId('__new__');
-    setPreviousForm(PREVIOUS_EMPTY);
-    setShowPreviousForm(true);
+  /* ── Previous records — inline row helpers ── */
+  const [editingPreviousId, setEditingPreviousId] = useState(null);
+
+  const openPreviousEditor = () => {
+    setEditingPreviousId(null);
+    setPreviousRows([
+      { _tempId: Date.now(), ...PREVIOUS_ROW_EMPTY },
+    ]);
+    setShowPreviousEditor(true);
+  };
+
+  const addPreviousRow = () => {
+    setPreviousRows([
+      ...previousRows,
+      { _tempId: Date.now() + Math.random(), ...PREVIOUS_ROW_EMPTY },
+    ]);
+  };
+
+  const removePreviousRow = (_tempId) => {
+    setPreviousRows(previousRows.filter((r) => r._tempId !== _tempId));
+  };
+
+  const updatePreviousRow = (_tempId, field, value) => {
+    setPreviousRows(previousRows.map((r) =>
+      r._tempId === _tempId ? { ...r, [field]: value } : r
+    ));
+  };
+
+  const cancelPreviousEditor = () => {
+    setShowPreviousEditor(false);
+    setPreviousRows([]);
+    setEditingPreviousId(null);
+  };
+
+  const saveAllPrevious = async () => {
+    const validRows = previousRows.filter(
+      (r) => r.athleteName.trim() && r.recordTime.trim()
+    );
+    if (validRows.length === 0) {
+      alert('Add at least one row with athlete name and record time.');
+      return;
+    }
+    try {
+      for (const row of validRows) {
+        const payload = {
+          gender: previousGender,
+          athleteName: row.athleteName,
+          recordTime: row.recordTime,
+          competition: row.competition,
+          date: row.year ? new Date(parseInt(row.year), 0, 1).toISOString() : '',
+          recordType: 'previous',
+          status: 'Historical',
+        };
+        if (row._existingId) {
+          await updateNationalRecord(row._existingId, payload);
+        } else {
+          await createNationalRecord(payload);
+        }
+      }
+      await loadRecords();
+      cancelPreviousEditor();
+    } catch (err) {
+      alert('Failed to save: ' + err.message);
+    }
   };
 
   const openEditPrevious = (rec) => {
     setEditingPreviousId(rec._id);
-    setPreviousForm({
-      gender: rec.gender,
-      athleteName: rec.athleteName,
-      recordTime: rec.recordTime,
-      year: rec.date ? new Date(rec.date).getFullYear().toString() : '',
-      competition: rec.competition || '',
-    });
-    setShowPreviousForm(true);
-  };
-
-  const cancelPrevious = () => {
-    setShowPreviousForm(false);
-    setEditingPreviousId(null);
-  };
-
-  const savePrevious = async () => {
-    if (!previousForm.athleteName.trim() || !previousForm.recordTime.trim()) {
-      alert('Athlete name and record time are required.');
-      return;
-    }
-    try {
-      const payload = {
-        gender: previousForm.gender,
-        athleteName: previousForm.athleteName,
-        recordTime: previousForm.recordTime,
-        recordType: 'previous',
-        competition: previousForm.competition,
-        date: previousForm.year ? new Date(previousForm.year, 0, 1).toISOString() : '',
-        status: 'Historical',
-      };
-      if (editingPreviousId === '__new__') {
-        await createNationalRecord(payload);
-      } else {
-        await updateNationalRecord(editingPreviousId, payload);
-      }
-      await loadRecords();
-      cancelPrevious();
-    } catch (err) {
-      alert('Failed to save: ' + err.message);
-    }
+    setPreviousGender(rec.gender);
+    setPreviousRows([
+      {
+        _tempId: Date.now(),
+        _existingId: rec._id,
+        athleteName: rec.athleteName,
+        recordTime: rec.recordTime,
+        competition: rec.competition || '',
+        year: rec.date ? new Date(rec.date).getFullYear().toString() : '',
+      },
+    ]);
+    setShowPreviousEditor(true);
   };
 
   /* ── Delete ── */
@@ -167,7 +197,6 @@ export default function NationalRecords() {
       await deleteNationalRecord(id);
       setAllRecords(allRecords.filter((r) => r._id !== id));
       if (editingCurrentId === id) { cancelCurrent(); }
-      if (editingPreviousId === id) { cancelPrevious(); }
     } catch (err) {
       alert('Failed to delete: ' + err.message);
     }
@@ -213,11 +242,11 @@ export default function NationalRecords() {
             </svg>
             Current Record
           </button>
-          <button className="btn btn-outline" type="button" onClick={openNewPrevious}>
+          <button className="btn btn-outline" type="button" onClick={openPreviousEditor}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Previous Record
+            Add Previous Records
           </button>
         </div>
       </div>
@@ -330,72 +359,122 @@ export default function NationalRecords() {
       )}
 
       {/* ════════════════════════════════════════════
-         FORM 2 — PREVIOUS NATIONAL RECORDS
+         FORM 2 — PREVIOUS NATIONAL RECORDS (inline rows)
          ════════════════════════════════════════════ */}
-      {showPreviousForm && (
+      {showPreviousEditor && (
         <div className="card" style={{ marginBottom: 'var(--sp-6)', borderLeft: '4px solid var(--warning)' }}>
           <div className="card-header">
             <h3 className="card-title">
-              {editingPreviousId === '__new__' ? 'New Previous Record' : 'Edit Previous Record'}
+              {editingPreviousId ? 'Edit Previous Record' : 'Add Previous Records'}
             </h3>
-            <button className="btn btn-outline" type="button" onClick={cancelPrevious}>Cancel</button>
+            <button className="btn btn-outline" type="button" onClick={cancelPreviousEditor}>Cancel</button>
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', marginBottom: 'var(--sp-4)' }}>
-            Fields marked * are required.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
-            <div className="form-group">
-              <label className="form-label">Gender *</label>
-              <select
-                className="form-input"
-                value={previousForm.gender}
-                onChange={(e) => setPreviousForm({ ...previousForm, gender: e.target.value })}
-              >
-                <option>Men</option><option>Women</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Athlete Name *</label>
-              <input
-                className="form-input"
-                value={previousForm.athleteName}
-                onChange={(e) => setPreviousForm({ ...previousForm, athleteName: e.target.value })}
-                placeholder="e.g. Previous record holder"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Record Time *</label>
-              <input
-                className="form-input"
-                value={previousForm.recordTime}
-                onChange={(e) => setPreviousForm({ ...previousForm, recordTime: e.target.value })}
-                placeholder="e.g. 6.54"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Year</label>
-              <input
-                className="form-input"
-                value={previousForm.year}
-                onChange={(e) => setPreviousForm({ ...previousForm, year: e.target.value })}
-                placeholder="e.g. 2023"
-                type="number"
-              />
-            </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Competition</label>
-              <input
-                className="form-input"
-                value={previousForm.competition}
-                onChange={(e) => setPreviousForm({ ...previousForm, competition: e.target.value })}
-                placeholder="e.g. National Championship 2023"
-              />
+
+          {/* Gender selector */}
+          <div style={{ marginBottom: 'var(--sp-4)' }}>
+            <label className="form-label">Gender</label>
+            <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-1)' }}>
+              {['Men', 'Women'].map((g) => (
+                <button
+                  key={g}
+                  className={`filter-chip${previousGender === g ? ' is-active' : ''}`}
+                  onClick={() => setPreviousGender(g)}
+                >
+                  {g}
+                </button>
+              ))}
             </div>
           </div>
-          <div style={{ marginTop: 'var(--sp-4)' }}>
-            <button className="btn btn-primary" type="button" onClick={savePrevious}>
-              {editingPreviousId === '__new__' ? 'Create Record' : 'Update Record'}
+
+          {/* Inline rows */}
+          <div className="table-container" style={{ marginBottom: 'var(--sp-4)' }}>
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ width: 140 }}>Time</th>
+                  <th>Athlete</th>
+                  <th>Competition</th>
+                  <th style={{ width: 100 }}>Year</th>
+                  <th style={{ width: 50 }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {previousRows.map((row, idx) => (
+                  <tr key={row.id}>
+                    <td>
+                      <input
+                        className="form-input"
+                        value={row.recordTime}
+                        onChange={(e) => updatePreviousRow(row.id, 'recordTime', e.target.value)}
+                        placeholder="e.g. 6.54"
+                        style={{ width: '100%', minWidth: 0 }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        className="form-input"
+                        value={row.athleteName}
+                        onChange={(e) => updatePreviousRow(row.id, 'athleteName', e.target.value)}
+                        placeholder="Athlete name"
+                        style={{ width: '100%', minWidth: 0 }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        className="form-input"
+                        value={row.competition}
+                        onChange={(e) => updatePreviousRow(row.id, 'competition', e.target.value)}
+                        placeholder="Competition"
+                        style={{ width: '100%', minWidth: 0 }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        className="form-input"
+                        value={row.year}
+                        onChange={(e) => updatePreviousRow(row.id, 'year', e.target.value)}
+                        placeholder="2024"
+                        type="number"
+                        style={{ width: '100%', minWidth: 0 }}
+                      />
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-outline"
+                        style={{
+                          fontSize: 'var(--fs-xs)',
+                          padding: 'var(--sp-1) var(--sp-2)',
+                          color: 'var(--error)',
+                          lineHeight: 1,
+                        }}
+                        onClick={() => removePreviousRow(row.id)}
+                        title="Remove row"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ display: 'flex', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
+            <button className="btn btn-outline" type="button" onClick={addPreviousRow}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 'var(--sp-1)' }}>
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add Row
             </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
+            <button className="btn btn-primary" type="button" onClick={saveAllPrevious}>
+              Save {previousRows.filter((r) => r.athleteName.trim() && r.recordTime.trim()).length} Records
+            </button>
+            <button className="btn btn-outline" type="button" onClick={cancelPreviousEditor}>Cancel</button>
           </div>
         </div>
       )}
