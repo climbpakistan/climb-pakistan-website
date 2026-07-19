@@ -2218,22 +2218,22 @@ input, textarea, select { font: inherit; color: inherit; }
   box-shadow: 0 0 8px rgba(34,184,160,0.4);
 }
 
-/* Current record card (hero-style) */
+/* Current record card (vertical layout) */
 .records-current-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--sp-6);
+  max-width: 420px;
+  margin-inline: auto;
 }
 .records-current-card {
   position: relative;
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: var(--sp-6);
+  display: flex;
+  flex-direction: column;
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  padding: var(--sp-6);
   transition: border-color 0.25s ease, transform 0.25s ease;
   isolation: isolate;
 }
@@ -2243,24 +2243,23 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-card-glow {
   position: absolute;
-  top: -50%;
+  top: -20%;
   right: -20%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(63,191,106,0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(63,191,106,0.06) 0%, transparent 70%);
   pointer-events: none;
+  z-index: 0;
 }
 .records-current-media {
   position: relative;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--cp-surface-2), var(--cp-bg-alt));
-  border: 2px solid var(--cp-border-strong);
   flex-shrink: 0;
 }
 .records-current-media img {
@@ -2270,7 +2269,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-avatar {
   font-family: var(--font-heading);
-  font-size: var(--fs-2xl);
+  font-size: var(--fs-3xl);
   font-weight: 700;
   color: var(--cp-accent);
   background: linear-gradient(135deg, var(--cp-accent), var(--cp-accent-2));
@@ -2280,8 +2279,8 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-current-badge {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
+  top: var(--sp-3);
+  left: var(--sp-3);
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -2292,12 +2291,14 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-on-accent);
   border: 2px solid var(--cp-surface);
   line-height: 1;
+  z-index: 1;
 }
 .records-current-info {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
-  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  text-align: center;
 }
 .records-current-name {
   font-size: var(--fs-xl);
@@ -2630,16 +2631,7 @@ input, textarea, select { font: inherit; color: inherit; }
   .records-hero-title { font-size: clamp(1.8rem, 7vw, 2.8rem); }
   .records-gender-bar { flex-wrap: wrap; }
   .records-gender-btn { width: 100%; justify-content: center; }
-  .records-current-card {
-    grid-template-columns: 1fr;
-    text-align: center;
-    padding: var(--sp-4);
-  }
-  .records-current-media {
-    width: 120px;
-    height: 120px;
-    margin-inline: auto;
-  }
+  .records-current-grid { max-width: 340px; }
   .records-current-time { font-size: var(--fs-2xl); }
   .records-current-details { grid-template-columns: 1fr; }
   .records-detail-row { display: flex; justify-content: space-between; gap: var(--sp-2); }
