@@ -31,19 +31,82 @@ router.post('/', async (req, res) => {
 
 /**
  * GET /api/page-views/stats
- * Admin-protected (via auth middleware). Returns total and today's page views.
+ * Admin-protected (via auth middleware). Returns detailed analytics data.
  */
 router.get('/stats', requireAdmin, async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
 
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - 6);
+    weekStart.setHours(0, 0, 0, 0);
+
+    // ── Total & today ──
     const [total, todayCount] = await Promise.all([
       PageView.countDocuments(),
-      PageView.countDocuments({ timestamp: { $gte: today } }),
+      PageView.countDocuments({ timestamp: { $gte: todayStart } }),
     ]);
 
-    res.json({ total, today: todayCount });
+    // ── Daily breakdown for last 7 days ──
+    const dailyAgg = await PageView.aggregate([
+      { $match: { timestamp: { $gte: weekStart } } },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$timestamp' },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // ── Top 10 pages ──
+    const topPagesAgg = await PageView.aggregate([
+      { $match: { timestamp: { $gte: weekStart } } },
+      { $group: { _id: '$path', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
+    // ── Recent 20 page views (with timestamps) ──
+    const recent = await PageView.find()
+      .sort({ timestamp: -1 })
+      .limit(20)
+      .select('path timestamp')
+      .lean();
+
+    // ── Active visitors in last 15 minutes ──
+    const activeThreshold = new Date(Date.now() - 15 * 60 * 1000);
+    const activeVisitors = await PageView.countDocuments({
+      timestamp: { $gte: activeThreshold },
+    });
+
+    // ── Unique pages today ──
+    const uniquePagesTodayAgg = await PageView.distinct('path', {
+      timestamp: { $gte: todayStart },
+    });
+
+    res.json({
+      total,
+      today: todayCount,
+      activeVisitors,
+      uniquePagesToday: uniquePagesTodayAgg.length,
+      daily: dailyAgg.map(d => ({
+        date: d._id,
+        count: d.count,
+      })),
+      topPages: topPagesAgg.map(p => ({
+        path: p._id,
+        count: p.count,
+      })),
+      recent: recent.map(r => ({
+        path: r.path,
+        timestamp: r.timestamp,
+      })),
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
