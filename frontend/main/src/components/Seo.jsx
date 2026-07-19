@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { Head } from 'vike-react/Head';
 
 const BASE_URL = 'https://www.climbpakistan.com';
 const SITE_NAME = 'Climb Pakistan';
@@ -17,6 +17,7 @@ function currentUrl(path) {
 /**
  * Seo — injects <title>, <meta>, Open Graph, Twitter Card, canonical URL,
  * and optional JSON-LD structured data into the document <head>.
+ * Uses vike-react/Head for proper Vike SSG support.
  *
  * Usage:
  *   <Seo
@@ -46,7 +47,7 @@ export default function Seo({
   const image = ogImage || DEFAULT_OG_IMAGE;
 
   return (
-    <Helmet>
+    <Head>
       {/* ── Primary meta — only render <title> when explicitly provided ── */}
       {hasTitle && <title>{fullTitle}</title>}
       <meta name="description" content={desc} />
@@ -81,6 +82,6 @@ export default function Seo({
       )}
 
       {children}
-    </Helmet>
+    </Head>
   );
 }
