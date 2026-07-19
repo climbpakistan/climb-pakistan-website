@@ -2234,6 +2234,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .records-premium-card {
   display: grid;
   grid-template-columns: 30% 1fr;
+  gap: var(--sp-4);
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
   border-radius: 14px;
@@ -2402,20 +2403,6 @@ input, textarea, select { font: inherit; color: inherit; }
   font-size: var(--fs-sm);
   font-weight: 500;
   color: var(--cp-white);
-}
-
-.records-premium-status {
-  display: inline-block;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.25em 0.75em;
-  border-radius: 100px;
-  background: rgba(74, 222, 128, 0.12);
-  color: var(--cp-success);
-  border: 1px solid rgba(74, 222, 128, 0.25);
-  line-height: 1.4;
 }
 
 /* Previous records table */

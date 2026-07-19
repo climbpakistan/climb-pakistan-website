@@ -74,10 +74,6 @@ function Page() {
               <AnimatedSection>
                 {currentRecords.length > 0 && (
                   <div className="records-current-section">
-                    <div className="records-section-label">
-                      <span className="records-label-dot" />
-                      Current Pakistan Speed Climbing {gender}’s Record
-                    </div>
                     <div className="records-premium-grid">
                       {currentRecords.map((rec, i) => (
                         <article className="records-premium-card" key={rec._id || i}>
@@ -93,11 +89,10 @@ function Page() {
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                               </svg>
-                              National Record
+                              Current Record
                             </div>
                           </div>
                           <div className="records-premium-body">
-                            <div className="records-premium-discipline">Speed Climbing</div>
                             {rec.athleteSlug ? (
                               <a href={`/athletes/${rec.athleteSlug}`} className="records-premium-name-link">{rec.athleteName}</a>
                             ) : (
@@ -139,14 +134,7 @@ function Page() {
                                   <dd className="records-premium-data">{new Date(rec.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</dd>
                                 </div>
                               )}
-                              <div className="records-premium-row">
-                                <svg className="records-premium-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                  <polyline points="22 4 12 14.01 9 11.01" />
-                                </svg>
-                                <dt className="records-premium-label">Status</dt>
-                                <dd className="records-premium-data"><span className="records-premium-status">{rec.status || 'Active Record'}</span></dd>
-                              </div>
+
                             </dl>
                           </div>
                         </article>
