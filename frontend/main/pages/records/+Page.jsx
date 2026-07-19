@@ -1,14 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useData } from 'vike-react/useData';
 import { AnimatedSection } from '../../src/hooks/animations';
 import Seo from '../../src/components/Seo';
 
+const API_BASE = import.meta.env.VITE_API_URL
+  || 'https://climb-pakistan-backend.onrender.com/api';
+
 export { Page };
 
 function Page() {
-  const { records, pageSettings } = useData();
+  const { records: initialRecords, pageSettings } = useData();
   const settings = pageSettings || {};
   const [gender, setGender] = useState('Men');
+  const [records, setRecords] = useState(initialRecords || {});
+
+  // Re-fetch records on the client side so admin additions (previous records,
+  // new records) show immediately without waiting for a Vercel rebuild.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_BASE}/national-records`)
+      .then(r => r.json())
+      .then(data => { if (!cancelled) setRecords(data); })
+      .catch(() => { /* keep initial prerendered data */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const currentRecords = records?.[gender]?.current || [];
   const previousRecords = records?.[gender]?.previous || [];
