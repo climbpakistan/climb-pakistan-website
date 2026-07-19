@@ -400,12 +400,12 @@ export default function NationalRecords() {
               </thead>
               <tbody>
                 {previousRows.map((row, idx) => (
-                  <tr key={row.id}>
+                  <tr key={row._tempId}>
                     <td>
                       <input
                         className="form-input"
                         value={row.recordTime}
-                        onChange={(e) => updatePreviousRow(row.id, 'recordTime', e.target.value)}
+                        onChange={(e) => updatePreviousRow(row._tempId, 'recordTime', e.target.value)}
                         placeholder="e.g. 6.54"
                         style={{ width: '100%', minWidth: 0 }}
                       />
@@ -414,7 +414,7 @@ export default function NationalRecords() {
                       <input
                         className="form-input"
                         value={row.athleteName}
-                        onChange={(e) => updatePreviousRow(row.id, 'athleteName', e.target.value)}
+                        onChange={(e) => updatePreviousRow(row._tempId, 'athleteName', e.target.value)}
                         placeholder="Athlete name"
                         style={{ width: '100%', minWidth: 0 }}
                       />
@@ -423,7 +423,7 @@ export default function NationalRecords() {
                       <input
                         className="form-input"
                         value={row.competition}
-                        onChange={(e) => updatePreviousRow(row.id, 'competition', e.target.value)}
+                        onChange={(e) => updatePreviousRow(row._tempId, 'competition', e.target.value)}
                         placeholder="Competition"
                         style={{ width: '100%', minWidth: 0 }}
                       />
@@ -432,7 +432,7 @@ export default function NationalRecords() {
                       <input
                         className="form-input"
                         value={row.year}
-                        onChange={(e) => updatePreviousRow(row.id, 'year', e.target.value)}
+                        onChange={(e) => updatePreviousRow(row._tempId, 'year', e.target.value)}
                         placeholder="2024"
                         type="number"
                         style={{ width: '100%', minWidth: 0 }}
@@ -447,7 +447,7 @@ export default function NationalRecords() {
                           color: 'var(--error)',
                           lineHeight: 1,
                         }}
-                        onClick={() => removePreviousRow(row.id)}
+                        onClick={() => removePreviousRow(row._tempId)}
                         title="Remove row"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
