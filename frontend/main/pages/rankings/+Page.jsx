@@ -141,21 +141,23 @@ function Page() {
       <section className="page-header">
         <div className="container">
           <div className="hero-entrance">
-            <h1 className="page-title">
-              National Rankings{!hasNoDataAtAll && headingYear && (
-                <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{headingYear}</span>
-              )}
-            </h1>
+            <div className="page-head-row">
+              <h1 className="page-title">
+                National Rankings{!hasNoDataAtAll && headingYear && (
+                  <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{headingYear}</span>
+                )}
+              </h1>
+              <a href="/records" className="records-nav-link">
+                <svg className="records-nav-flag" width="22" height="16" viewBox="0 0 24 16" fill="none">
+                  <rect x="0" y="0" width="24" height="16" fill="#01411C" />
+                  <rect x="0" y="0" width="6" height="16" fill="white" />
+                  <circle cx="12" cy="8" r="3.5" fill="white" opacity="0.95" />
+                  <path d="M13.2 5.5 L13.8 7.2 L15.5 7.2 L14.1 8.4 L14.7 10.2 L13.2 9.1 L11.7 10.2 L12.3 8.4 L10.9 7.2 L12.6 7.2 Z" fill="#01411C" />
+                </svg>
+                <span>National Records</span>
+              </a>
+            </div>
             <p className="page-sub">Senior men and senior women, ranked by discipline. Select a year to view historical standings.</p>
-            <a href="/records" className="records-nav-link">
-              <svg className="records-nav-flag" width="22" height="16" viewBox="0 0 24 16" fill="none">
-                <rect x="0" y="0" width="24" height="16" fill="#01411C" />
-                <rect x="0" y="0" width="6" height="16" fill="white" />
-                <circle cx="12" cy="8" r="3.5" fill="white" opacity="0.95" />
-                <path d="M13.2 5.5 L13.8 7.2 L15.5 7.2 L14.1 8.4 L14.7 10.2 L13.2 9.1 L11.7 10.2 L12.3 8.4 L10.9 7.2 L12.6 7.2 Z" fill="#01411C" />
-              </svg>
-              <span>National Records</span>
-            </a>
           </div>
         </div>
       </section>

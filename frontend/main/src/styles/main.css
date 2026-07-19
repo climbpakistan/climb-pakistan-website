@@ -2018,7 +2018,6 @@ input, textarea, select { font: inherit; color: inherit; }
   display: inline-flex;
   align-items: center;
   gap: var(--sp-3);
-  margin-top: var(--sp-4);
   padding: var(--sp-3) var(--sp-6);
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, var(--cp-accent), var(--cp-accent-2));
@@ -2495,6 +2494,13 @@ input, textarea, select { font: inherit; color: inherit; }
 .thanks-icon svg { width: 32px; height: 32px; }
 .thanks-sub { color: var(--cp-text-dim); font-size: var(--fs-md); margin-bottom: var(--sp-8); }
 .thanks-actions { display: flex; justify-content: center; gap: var(--sp-4); flex-wrap: wrap; }
+
+.page-head-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
 
 /* ---------- 14. Page header / misc ---------- */
 .page-header { padding-block: var(--sp-16) var(--sp-12); border-bottom: 1px solid var(--cp-border); }
