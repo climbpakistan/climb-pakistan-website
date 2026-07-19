@@ -242,6 +242,12 @@ export function updateMainPage(data) { return apiFetch(`${BASE_URL}/main-page`, 
 export function getContactSettings() { return apiFetch(`${BASE_URL}/contact/settings`); }
 export function updateContactSettings(data) { return apiFetch(`${BASE_URL}/contact/settings`, { method: 'PUT', body: JSON.stringify(data) }); }
 
+// ── National Records ──
+export function getNationalRecords() { return apiFetch(`${BASE_URL}/national-records`); }
+export function createNationalRecord(data) { return apiFetch(`${BASE_URL}/national-records`, { method: 'POST', body: JSON.stringify(data) }); }
+export function updateNationalRecord(id, data) { return apiFetch(`${BASE_URL}/national-records/${id}`, { method: 'PUT', body: JSON.stringify(data) }); }
+export function deleteNationalRecord(id) { return apiFetch(`${BASE_URL}/national-records/${id}`, { method: 'DELETE' }); }
+
 // ── Page View Analytics ──
 export function getPageViewStats() {
   return apiFetch(`${BASE_URL}/page-views/stats`);

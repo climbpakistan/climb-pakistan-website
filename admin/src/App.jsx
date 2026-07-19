@@ -7,6 +7,7 @@ import MainPage from './pages/MainPage';
 import LatestNews from './pages/LatestNews';
 import Athletes from './pages/Athletes';
 import Rankings from './pages/Rankings';
+import NationalRecords from './pages/NationalRecords';
 import Teams from './pages/Teams';
 import Competitions from './pages/Competitions';
 import LearnClimbing from './pages/LearnClimbing';
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/latest-news" element={<LatestNews />} />
         <Route path="/athletes" element={<Athletes />} />
         <Route path="/rankings" element={<Rankings />} />
+        <Route path="/national-records" element={<NationalRecords />} />
         <Route path="/teams" element={<Teams />} />
         <Route path="/competitions" element={<Competitions />} />
         <Route path="/learn-climbing" element={<LearnClimbing />} />

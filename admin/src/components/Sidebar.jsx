@@ -14,6 +14,7 @@ const navItems = [
       { label: 'Latest News', to: '/latest-news', icon: 'news' },
       { label: 'Athletes', to: '/athletes', icon: 'athletes' },
       { label: 'Rankings', to: '/rankings', icon: 'rankings' },
+      { label: 'National Records', to: '/national-records', icon: 'rankings' },
       { label: 'Teams', to: '/teams', icon: 'athletes' },
       { label: 'Competitions', to: '/competitions', icon: 'competitions' },
       { label: 'Learn Climbing', to: '/learn-climbing', icon: 'learn' },

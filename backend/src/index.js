@@ -22,6 +22,7 @@ import teamRoutes from './routes/teams.js';
 import contactRoutes from './routes/contact.js';
 import pageViewRoutes from './routes/pageViews.js';
 import rebuildRoutes from './routes/rebuild.js';
+import nationalRecordRoutes from './routes/nationalRecords.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -100,6 +101,10 @@ app.use('/api/contact', contactLimiter, contactRoutes);
 // ── Page Views ──
 // POST /api/page-views is public (tracking), GET /stats is protected inside the route
 app.use('/api/page-views', pageViewRoutes);
+
+// ── National Records ──
+// GET is public; POST / PUT / DELETE require admin auth
+app.use('/api/national-records', requireAdmin, nationalRecordRoutes);
 
 // ── Vercel Rebuild Trigger ──
 // POST /api/rebuild triggers a Vercel deploy hook to rebuild the static site
