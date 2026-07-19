@@ -2252,7 +2252,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .records-premium-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -2307,7 +2307,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .records-premium-body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding: var(--sp-5) var(--sp-6) var(--sp-5) 0;
   gap: var(--sp-1);
   text-align: left;
@@ -2324,7 +2324,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 .records-premium-name {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.01em;
@@ -2334,7 +2334,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 .records-premium-name-link {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.01em;
@@ -2349,16 +2349,16 @@ input, textarea, select { font: inherit; color: inherit; }
 
 .records-premium-value {
   font-family: var(--font-heading);
-  font-size: clamp(3rem, 5vw, 3.75rem);
+  font-size: clamp(3.5rem, 6vw, 4.25rem);
   line-height: 1;
   font-weight: 700;
   color: var(--cp-accent);
   letter-spacing: -0.02em;
-  margin-top: var(--sp-1);
+  margin-top: 0;
 }
 
 .records-premium-unit {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   color: var(--cp-text-muted);
   font-weight: 500;
   text-transform: lowercase;
@@ -2393,14 +2393,14 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 
 .records-premium-label {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   font-weight: 500;
   color: var(--cp-text-muted);
   min-width: 100px;
 }
 
 .records-premium-data {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   font-weight: 500;
   color: var(--cp-white);
 }

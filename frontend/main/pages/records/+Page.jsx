@@ -93,13 +93,12 @@ function Page() {
                             </div>
                           </div>
                           <div className="records-premium-body">
+                            <div className="records-premium-value">{rec.recordTime} <span className="records-premium-unit">seconds</span></div>
                             {rec.athleteSlug ? (
                               <a href={`/athletes/${rec.athleteSlug}`} className="records-premium-name-link">{rec.athleteName}</a>
                             ) : (
                               <h3 className="records-premium-name">{rec.athleteName}</h3>
                             )}
-                            <div className="records-premium-value">{rec.recordTime}</div>
-                            <div className="records-premium-unit">seconds</div>
                             <hr className="records-premium-divider" role="separator" />
                             <dl className="records-premium-meta">
                               {rec.competition && (
