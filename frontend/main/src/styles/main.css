@@ -441,7 +441,9 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 
 .nav-dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
   width: 100%;
   padding: var(--sp-2) var(--sp-4);
   border-radius: var(--radius-sm);
@@ -461,6 +463,26 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .nav-dropdown-item.active::after {
   display: none;
+}
+
+/* "NEW" badge on dropdown items */
+.nav-dropdown-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 100px;
+  background: var(--cp-danger);
+  color: #fff;
+  margin-left: auto;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.08); }
 }
 
 .nav-actions { display: flex; align-items: center; gap: var(--sp-3); }
@@ -663,7 +685,11 @@ input, textarea, select { font: inherit; color: inherit; }
 /* ---------- 6. Home page ---------- */
 .hero {
   position: relative;
-  padding-block: var(--sp-24) var(--sp-20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 72px);
+  padding-block: var(--sp-12);
   overflow: hidden;
   isolation: isolate;
 }
@@ -688,6 +714,9 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .hero-inner { text-align: center; max-width: 780px; margin-inline: auto; }
 .hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-size: var(--fs-hero);
   line-height: 1.05;
   text-transform: uppercase;
@@ -695,6 +724,9 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-white);
 }
 .hero-title-accent { color: var(--cp-accent); }
+.hero-title-line {
+  white-space: nowrap;
+}
 .hero-sub {
   color: var(--cp-text-dim);
   font-size: var(--fs-md);
@@ -2141,6 +2173,21 @@ input, textarea, select { font: inherit; color: inherit; }
   z-index: 1;
   border-radius: 2px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* Red NEW badge on the National Records button in the Rankings page */
+.records-nav-badge {
+  position: relative;
+  z-index: 1;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 100px;
+  background: #e53e3e;
+  color: #fff;
+  animation: badge-pulse 2s ease-in-out infinite;
 }
 
 /* ---------- 11.5 National Records ---------- */

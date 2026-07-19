@@ -12,7 +12,7 @@ export const navLinks = [
     label: 'Rankings', to: '/rankings',
     children: [
       { label: 'Rankings', to: '/rankings' },
-      { label: 'National Records', to: '/records' },
+      { label: 'National Records', to: '/records', badge: 'NEW' },
     ],
   },
   { label: 'Competitions', to: '/competitions' },

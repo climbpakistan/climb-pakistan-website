@@ -58,9 +58,11 @@ function Page() {
         </div>
         <div className="container hero-inner">
           <h1 className="hero-title hero-entrance">
-            {mainPage?.heroTitle ? mainPage.heroTitle.split('<br />').map((part, i) => i === 1 ? <Fragment key={i}><br /><span className="hero-title-accent">{part}</span></Fragment> : part) : <>
-              Your Source For<br />
-              <span className="hero-title-accent">Climbing in Pakistan</span>
+            {mainPage?.heroTitle ? mainPage.heroTitle.split('<br />').map((part, i) => (
+              <span key={i} className={`hero-title-line${i === 1 ? ' hero-title-accent' : ''}`}>{part}</span>
+            )) : <>
+              <span className="hero-title-line">Your Source For</span>
+              <span className="hero-title-line hero-title-accent">Climbing in Pakistan</span>
             </>}
           </h1>
           <p className="hero-sub hero-entrance hero-entrance-delay-1">

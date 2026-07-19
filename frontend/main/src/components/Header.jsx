@@ -109,6 +109,9 @@ export default function Header() {
                           onClick={() => { setMenuOpen(false); setOpenDropdown(null); }}
                         >
                           {child.label}
+                          {child.badge && (
+                            <span className="nav-dropdown-badge">{child.badge}</span>
+                          )}
                         </a>
                       );
                     })}

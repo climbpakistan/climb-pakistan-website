@@ -150,6 +150,7 @@ function Page() {
               <a href="/records" className="records-nav-link">
                 <img className="records-nav-flag" src="https://flagcdn.com/w80/pk.png" width="24" height="16" alt="Pakistan flag" />
                 <span>National Records</span>
+                <span className="records-nav-badge">NEW</span>
               </a>
             </div>
             <p className="page-sub">Senior men and senior women, ranked by discipline. Select a year to view historical standings.</p>
