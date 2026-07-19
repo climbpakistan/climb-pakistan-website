@@ -2252,7 +2252,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .records-premium-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   display: flex;
   align-items: center;
