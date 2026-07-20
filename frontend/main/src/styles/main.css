@@ -1517,7 +1517,7 @@ input, textarea, select { font: inherit; color: inherit; }
   transition: padding 0.2s ease;
 }
 .rankings-table tr:last-child td { border-bottom: 0; }
-.rankings-table tr:hover td { background: var(--cp-surface-2); }
+.rankings-table tr:hover td { background: var(--cp-accent-soft); }
 .rankings-table a:hover { color: var(--cp-accent); }
 
 /* All rows share the same padding now that every row shows an avatar */
