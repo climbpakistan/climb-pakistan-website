@@ -27,6 +27,14 @@ function Page() {
     return [...names];
   }, [currentRecords, previousRecords]);
 
+  const allTags = useMemo(() => {
+    const tags = new Set();
+    [...currentRecords, ...previousRecords].forEach((r) => {
+      (r.tags || []).forEach((t) => t.trim() && tags.add(t.trim()));
+    });
+    return [...tags];
+  }, [currentRecords, previousRecords]);
+
   const genderLabel = gender === 'Women' ? "women's" : "men's";
   const dynamicKeywords = [
     `Pakistan ${genderLabel} speed climbing records`,
@@ -37,6 +45,7 @@ function Page() {
     ...allNames.map((n) => `${n} Pakistan climber`),
     ...allNames.map((n) => `${n} speed climbing`),
     ...allNames.map((n) => `Pakistani climber ${n}`),
+    ...allTags,
     'Pakistan sport climbing records',
     'sport climbing Pakistan records',
     'speed climbing national record Pakistan',

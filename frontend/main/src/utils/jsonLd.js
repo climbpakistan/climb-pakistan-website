@@ -225,8 +225,9 @@ export function recordsSchema(records, gender = 'Men', settings = {}) {
     };
   }
 
-  // Collect unique athlete names
+  // Collect unique athlete names and tags
   const athleteNames = [...new Set(allRecords.map((r) => r.athleteName).filter(Boolean))];
+  const recordTags = [...new Set(allRecords.flatMap((r) => r.tags || []))].filter(Boolean);
 
   // Build sport-specific keywords
   const genderLabel = gender.toLowerCase() === 'women' ? "women's" : "men's";
@@ -237,6 +238,7 @@ export function recordsSchema(records, gender = 'Men', settings = {}) {
     `climbing record Pakistan ${genderLabel}`,
     ...athleteNames.map((n) => `${n} climbing record`),
     ...athleteNames.map((n) => `${n} Pakistan climber`),
+    ...recordTags,
     'Pakistan sport climbing records list',
     'sport climbing Pakistan records',
     'speed climbing national record Pakistan',
