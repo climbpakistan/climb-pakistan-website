@@ -36,7 +36,7 @@ function Page() {
     ...allNames.map((n) => `${n} Pakistan climber`),
     ...allNames.map((n) => `${n} speed climbing`),
     ...allNames.map((n) => `Pakistani climber ${n}`),
-    'Pakistan climbing records',
+    'Pakistan sport climbing records',
     'sport climbing Pakistan records',
     'speed climbing national record Pakistan',
     'Pakistan fastest climber',

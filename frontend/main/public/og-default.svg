@@ -8,29 +8,32 @@
       <stop offset="0%" stop-color="#3fbf6a"/>
       <stop offset="100%" stop-color="#22b8a0"/>
     </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#3fbf6a" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#0a120d" stop-opacity="0"/>
+    </radialGradient>
   </defs>
+
   <!-- Background -->
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <!-- Topographic contour decoration -->
-  <ellipse cx="600" cy="100" rx="500" ry="80" fill="none" stroke="#3fbf6a" stroke-opacity="0.06" stroke-width="2"/>
-  <ellipse cx="600" cy="200" rx="550" ry="120" fill="none" stroke="#3fbf6a" stroke-opacity="0.05" stroke-width="2"/>
-  <ellipse cx="600" cy="350" rx="600" ry="160" fill="none" stroke="#3fbf6a" stroke-opacity="0.04" stroke-width="2"/>
-  <!-- Accent line -->
-  <rect x="80" y="250" width="200" height="4" rx="2" fill="url(#accent)"/>
-  <!-- Title -->
-  <text x="80" y="320" font-family="Oswald, Arial, sans-serif" font-size="86" font-weight="700" fill="#f3f7f3" letter-spacing="0.02">
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Accent line above logo -->
+  <rect x="480" y="210" width="240" height="4" rx="2" fill="url(#accent)"/>
+
+  <!-- Logo: "Climb Pakistan" -->
+  <text x="600" y="340" font-family="Oswald, Arial, sans-serif" font-size="120" font-weight="700" fill="#f3f7f3" text-anchor="middle" letter-spacing="0.02">
     Climb
     <tspan fill="#3fbf6a"> Pakistan</tspan>
   </text>
-  <!-- Subtitle -->
-  <text x="80" y="380" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="400" fill="#8ba090" letter-spacing="0.01">
-    Your Source for Climbing in Pakistan
+
+  <!-- Tagline -->
+  <text x="600" y="400" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="400" fill="#8ba090" text-anchor="middle" letter-spacing="0.01">
+    Sport Climbing in Pakistan
   </text>
-  <!-- Mountain silhouette -->
-  <path d="M0 630 L200 380 L320 480 L480 280 L600 420 L700 350 L850 480 L960 310 L1100 450 L1200 380 L1200 630 Z" fill="#131f18" opacity="0.5"/>
-  <path d="M0 630 L150 450 L280 520 L420 350 L540 460 L680 410 L820 520 L950 390 L1100 510 L1200 450 L1200 630 Z" fill="#19281f" opacity="0.35"/>
-  <!-- URL -->
-  <text x="80" y="560" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="500" fill="#62766a">
+
+  <!-- URL at bottom -->
+  <text x="600" y="540" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="500" fill="#62766a" text-anchor="middle">
     climbpakistan.com
   </text>
 </svg>

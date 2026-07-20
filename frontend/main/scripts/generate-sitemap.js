@@ -106,6 +106,7 @@ async function main() {
     { loc: '/news', priority: '0.9', changefreq: 'daily' },
     { loc: '/athletes', priority: '0.8', changefreq: 'weekly' },
     { loc: '/rankings', priority: '0.9', changefreq: 'weekly', lastmod: rankingsLastmod },
+    { loc: '/records', priority: '0.8', changefreq: 'weekly' },
     { loc: '/competitions', priority: '0.8', changefreq: 'weekly' },
     { loc: '/learn', priority: '0.7', changefreq: 'monthly' },
     { loc: '/about', priority: '0.6', changefreq: 'monthly' },

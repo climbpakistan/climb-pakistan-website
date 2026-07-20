@@ -27,7 +27,7 @@ export function websiteSchema() {
     '@type': 'WebSite',
     name: 'Climb Pakistan',
     url: BASE_URL,
-    description: "Your source for climbing in Pakistan.",
+    description: "Pakistan's source for sport climbing — news, rankings, athlete profiles, and competition coverage.",
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -152,7 +152,7 @@ export function learnSectionSchema(section) {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: section.title,
-    description: section.subtitle || section.body?.slice(0, 300) || `A guide to ${section.title} for climbers in Pakistan.`,
+    description: section.subtitle || section.body?.slice(0, 300) || `A guide to ${section.title} for sport climbers in Pakistan.`,
     image: section.image || `${BASE_URL}/og-default.png`,
     datePublished: section.createdAt || undefined,
     dateModified: section.updatedAt || section.createdAt || undefined,
@@ -237,7 +237,7 @@ export function recordsSchema(records, gender = 'Men', settings = {}) {
     `climbing record Pakistan ${genderLabel}`,
     ...athleteNames.map((n) => `${n} climbing record`),
     ...athleteNames.map((n) => `${n} Pakistan climber`),
-    'Pakistan climbing records list',
+    'Pakistan sport climbing records list',
     'sport climbing Pakistan records',
     'speed climbing national record Pakistan',
   ].join(', ');
@@ -307,7 +307,7 @@ export function personSchema(athlete) {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: athlete.name,
-    description: athlete.about || `${athlete.name} — climbing athlete from Pakistan.`,
+    description: athlete.about || `${athlete.name} — competitive sport climbing athlete from Pakistan.`,
     url: `${BASE_URL}/athletes/${athlete.slug}`,
     image: athlete.photoUrl || `${BASE_URL}/og-default.png`,
     gender: athlete.gender || undefined,

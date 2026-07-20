@@ -10,7 +10,7 @@ export default function Footer() {
             <a href="/" className="footer-logo">
               <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
             </a>
-            <p>Your source for climbing in Pakistan. An initiative supporting the development of sport climbing nationwide.</p>
+            <p>Your source for sport climbing in Pakistan. An initiative supporting the development of competitive climbing nationwide.</p>
             <a
               href="https://www.instagram.com/climb_pakistan/"
               className="btn-instagram"

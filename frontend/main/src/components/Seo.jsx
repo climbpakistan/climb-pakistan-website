@@ -41,7 +41,7 @@ export default function Seo({
   // If title is explicitly set to empty string (for Layout-only structured data),
   // don't render any title at all — let child pages set their own.
   const hasTitle = title !== undefined && title !== '';
-  const fullTitle = hasTitle ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — Your Source for Climbing in Pakistan`;
+  const fullTitle = hasTitle ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — Your Source for Sport Climbing in Pakistan`;
   const desc = description || 'Pakistan\'s dedicated sport climbing magazine — news, rankings, athlete profiles and competition coverage from the community pushing the sport forward.';
   const url = currentUrl(path);
   const image = ogImage || DEFAULT_OG_IMAGE;

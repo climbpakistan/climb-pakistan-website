@@ -39,7 +39,7 @@ function Page() {
 
   const [ctaRef, ctaVisible] = useInView({ threshold: 0.15 });
 
-  const heroTitle = mainPage?.heroTitle || 'Your Source For<br />Climbing in Pakistan';
+  const heroTitle = mainPage?.heroTitle || 'Your Source For<br />Sport Climbing in Pakistan';
   const heroSubtitle = mainPage?.heroSubtitle || 'News, rankings, athlete stories and competition coverage from the community pushing the sport forward.';
 
   return (
@@ -47,7 +47,7 @@ function Page() {
       <Seo
         title="Home"
         description={heroSubtitle.replace(/<[^>]*>/g, '')}
-        keywords="climbing in Pakistan, sport climbing Pakistan, Pakistan climbing magazine, rock climbing Pakistan, Pakistani climbers, climbing news Pakistan, Pakistan climbing community"
+        keywords="sport climbing Pakistan, competitive climbing Pakistan, Pakistan sport climbing magazine, Pakistani sport climbers, indoor climbing Pakistan, climbing competitions Pakistan, speed climbing Pakistan, lead climbing Pakistan, Pakistan climbing community"
         path="/"
       />
 
@@ -62,7 +62,7 @@ function Page() {
               <span key={i} className={`hero-title-line${i === 1 ? ' hero-title-accent' : ''}`}>{part}</span>
             )) : <>
               <span className="hero-title-line">Your Source For</span>
-              <span className="hero-title-line hero-title-accent">Climbing in Pakistan</span>
+              <span className="hero-title-line hero-title-accent">Sport Climbing in Pakistan</span>
             </>}
           </h1>
           <p className="hero-sub hero-entrance hero-entrance-delay-1">
@@ -139,7 +139,7 @@ function Page() {
         <div className="container follow-cta-inner">
           <div>
             <h2>Follow <span className="hero-title-accent">{mainPage?.ctaText || '#ClimbPakistan'}</span></h2>
-            <p className="follow-sub">{mainPage?.ctaSubtext || 'Stories, athletes and updates from Pakistan\'s climbing community — every week.'}</p>
+            <p className="follow-sub">{mainPage?.ctaSubtext || 'Stories, athletes and updates from Pakistan\'s sport climbing community — every week.'}</p>
           </div>
           <a href={`https://www.instagram.com/${mainPage?.ctaInstagramHandle || 'climb_pakistan'}/`} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
             @{mainPage?.ctaInstagramHandle || 'climb_pakistan'} on Instagram

@@ -9,6 +9,7 @@ import '../src/styles/main.css';
 import {
   organizationSchema,
   websiteSchema,
+  breadcrumbSchema,
 } from '../src/utils/jsonLd';
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -39,6 +40,7 @@ export default function Layout({ children }) {
             '@graph': [
               organizationSchema(),
               websiteSchema(),
+              breadcrumbSchema(currentPath),
             ].filter(Boolean),
           }}
         />

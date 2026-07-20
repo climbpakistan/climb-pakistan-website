@@ -26,6 +26,7 @@ export const footerLinks = {
     { label: 'Latest News', to: '/news' },
     { label: 'Athletes', to: '/athletes' },
     { label: 'Rankings', to: '/rankings' },
+    { label: 'National Records', to: '/records' },
     { label: 'Competitions', to: '/competitions' },
   ],
   more: [
