@@ -15,9 +15,10 @@ function Page() {
   const [gender, setGender] = useState('Men');
   const [records, setRecords] = useState(initialRecords || {});
 
-  // Derive rich keywords and structured data from the current records
-  const currentRecords = records?.[gender]?.current || [];
-  const previousRecords = records?.[gender]?.previous || [];
+  // Sort records by time ascending — fastest (lowest number) on top
+  const sortByTime = (list) => [...list].sort((a, b) => parseFloat(a.recordTime) - parseFloat(b.recordTime));
+  const currentRecords = useMemo(() => sortByTime(records?.[gender]?.current || []), [records, gender]);
+  const previousRecords = useMemo(() => sortByTime(records?.[gender]?.previous || []), [records, gender]);
   const allNames = useMemo(() => {
     const names = new Set();
     [...currentRecords, ...previousRecords].forEach((r) => {
