@@ -727,6 +727,12 @@ input, textarea, select { font: inherit; color: inherit; }
 .hero-title-line {
   white-space: nowrap;
 }
+
+@media (max-width: 480px) {
+  .hero-title-line {
+    white-space: normal;
+  }
+}
 .hero-sub {
   color: var(--cp-text-dim);
   font-size: var(--fs-md);
