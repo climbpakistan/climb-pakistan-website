@@ -20,7 +20,7 @@ const PREVIOUS_ROW_EMPTY = {
   athleteSlug: '',
   recordTime: '',
   competition: '',
-  year: '',
+  date: '',
   tags: '',
 };
 
@@ -191,7 +191,7 @@ export default function NationalRecords() {
           athleteSlug: row.athleteSlug || '',
           recordTime: row.recordTime,
           competition: row.competition,
-          date: row.year ? new Date(parseInt(row.year), 0, 1).toISOString() : '',
+          date: row.date || '',
           tags: row.tags
             ? row.tags.split(',').map(t => t.trim()).filter(Boolean)
             : [],
@@ -222,7 +222,7 @@ export default function NationalRecords() {
         athleteSlug: rec.athleteSlug || '',
         recordTime: rec.recordTime,
         competition: rec.competition || '',
-        year: rec.date ? new Date(rec.date).getFullYear().toString() : '',
+        date: rec.date ? rec.date.split('T')[0] : '',
         tags: rec.tags ? rec.tags.join(', ') : '',
       },
     ]);
@@ -462,7 +462,7 @@ export default function NationalRecords() {
                   <th>Athlete</th>
                   <th>Athlete Slug</th>
                   <th>Competition</th>
-                  <th style={{ width: 100 }}>Year</th>
+                  <th style={{ width: 140 }}>Date</th>
                   <th>Tags</th>
                   <th style={{ width: 50 }}></th>
                 </tr>
@@ -518,10 +518,9 @@ export default function NationalRecords() {
                     <td>
                       <input
                         className="form-input"
-                        value={row.year}
-                        onChange={(e) => updatePreviousRow(row._tempId, 'year', e.target.value)}
-                        placeholder="2024"
-                        type="number"
+                        value={row.date}
+                        onChange={(e) => updatePreviousRow(row._tempId, 'date', e.target.value)}
+                        type="date"
                         style={{ width: '100%', minWidth: 0 }}
                       />
                     </td>
@@ -584,8 +583,7 @@ export default function NationalRecords() {
               <th>Type</th>
               <th>Athlete</th>
               <th>Time</th>
-              <th>Competition</th>
-              <th>Date</th>
+              <th>Competition</th>                  <th>Date</th>
               <th>Tags</th>
               <th>Status</th>
               <th style={{ width: 100 }}>Actions</th>
@@ -612,7 +610,7 @@ export default function NationalRecords() {
                 <td style={{ fontWeight: 500 }}>{rec.athleteName}</td>
                 <td style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 'var(--fs-md)' }}>{rec.recordTime}</td>
                 <td>{rec.competition || '—'}</td>
-                <td>{rec.date ? new Date(rec.date).toLocaleDateString() : '—'}</td>
+                <td>{rec.date ? new Date(rec.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—'}</td>
                 <td>
                   {rec.tags?.length > 0
                     ? rec.tags.map((tag, i) => (

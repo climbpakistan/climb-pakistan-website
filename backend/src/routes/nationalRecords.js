@@ -10,7 +10,9 @@ const router = Router();
  */
 router.get('/', async (req, res) => {
   try {
-    const records = await NationalRecord.find().sort({ createdAt: -1 });
+    // Fetch all, then sort numerically by recordTime so "10.0" > "6.36"
+    let records = await NationalRecord.find();
+    records.sort((a, b) => parseFloat(a.recordTime) - parseFloat(b.recordTime));
 
     // Group into Men/Women → current/previous
     const grouped = { Men: { current: [], previous: [] }, Women: { current: [], previous: [] } };

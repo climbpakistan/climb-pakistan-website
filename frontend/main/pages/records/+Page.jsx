@@ -210,7 +210,7 @@ function Page() {
                           <tr>
                             <th>Time</th>
                             <th>Athlete</th>
-                            <th>Year</th>
+                            <th>Date</th>
                             <th>Competition</th>
                           </tr>
                         </thead>
@@ -226,7 +226,7 @@ function Page() {
                                 )}
                               </td>
                               <td className="records-table-year">
-                                {rec.date ? new Date(rec.date).getFullYear() : '—'}
+                                {rec.date ? new Date(rec.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                               </td>
                               <td>{rec.competition || '—'}</td>
                             </tr>
