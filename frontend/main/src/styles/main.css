@@ -2908,9 +2908,9 @@ input, textarea, select { font: inherit; color: inherit; }
   .records-premium-name { font-size: var(--fs-lg); }
   .records-premium-name-link { font-size: var(--fs-lg); }
   .records-premium-row { flex-wrap: nowrap; gap: var(--sp-2); align-items: flex-start; }
-  .records-premium-label { font-size: var(--fs-xs); min-width: auto; flex-shrink: 0; }
+  .records-premium-label { font-size: var(--fs-xs); min-width: 80px; flex-shrink: 0; }
   .records-premium-data { font-size: var(--fs-sm); }
-  .records-premium-icon { width: 14px; height: 14px; margin-top: 1px; }
+  .records-premium-icon { width: 14px; height: 14px; margin-top: 1px; flex-shrink: 0; }
   /* Force table wider than screen so horizontal scroll is natural */
   .records-table { min-width: 480px; }
   .records-table th, .records-table td { padding: var(--sp-2) var(--sp-3); font-size: 0.7rem; white-space: nowrap; }
