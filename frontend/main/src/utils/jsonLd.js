@@ -11,6 +11,7 @@ export function organizationSchema() {
     url: BASE_URL,
     logo: `${BASE_URL}/favicon.png`,
     description: "Pakistan's dedicated sport climbing magazine — news, rankings, athlete profiles and competition coverage.",
+    sport: ['Sport Climbing', 'Speed Climbing', 'Lead Climbing', 'Bouldering', 'Competition Climbing'],
     sameAs: [
       'https://www.instagram.com/climb_pakistan/',
     ],
@@ -28,6 +29,12 @@ export function websiteSchema() {
     name: 'Climb Pakistan',
     url: BASE_URL,
     description: "Pakistan's source for sport climbing — news, rankings, athlete profiles, and competition coverage.",
+    sport: ['Sport Climbing', 'Speed Climbing', 'Lead Climbing', 'Bouldering', 'Competition Climbing'],
+    about: {
+      '@type': 'Thing',
+      name: 'Sport Climbing in Pakistan',
+      additionalType: 'https://en.wikipedia.org/wiki/Sport_climbing',
+    },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -287,7 +294,7 @@ export function recordsSchema(records, gender = 'Men', settings = {}) {
         '@type': 'SportsOrganization',
         name: 'Climb Pakistan',
         url: 'https://www.climbpakistan.com',
-        sport: 'Speed Climbing',
+        sport: ['Sport Climbing', 'Speed Climbing', 'Lead Climbing', 'Bouldering', 'Competition Climbing'],
       },
       ...recordItems,
     ],

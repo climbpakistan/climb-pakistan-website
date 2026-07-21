@@ -17,7 +17,7 @@ function Page() {
       <Seo
         title="About"
         description={aboutDesc}
-        keywords="about Climb Pakistan, Pakistan climbing magazine, climbing community Pakistan, sport climbing Pakistan platform, Pakistan climbing news, climbing coverage Pakistan"
+        keywords="about Climb Pakistan, Pakistan sport climbing platform, Pakistan climbing magazine, sport climbing community Pakistan, climbing development Pakistan, Pakistan climbing news, climbing coverage Pakistan, Pakistani sport climbers"
         path="/about"
         jsonLd={aboutSchema(content)}
       />

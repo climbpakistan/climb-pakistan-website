@@ -93,10 +93,15 @@ function Page() {
     ...allNames.map((n) => `${n} speed climbing`),
     ...allNames.map((n) => `Pakistani climber ${n}`),
     ...allTags,
-    'Pakistan sport climbing records',
+    'Pakistan sport climbing records list',
     'sport climbing Pakistan records',
     'speed climbing national record Pakistan',
     'Pakistan fastest climber',
+    'Pakistan climbing record holders',
+    'Pakistani speed climbing champions',
+    'official Pakistan climbing records',
+    'Pakistan speed climbing history',
+    'Pakistan climbing sports records',
   ].filter(Boolean).join(', ');
 
   // Re-fetch records on the client side so admin additions (previous records,

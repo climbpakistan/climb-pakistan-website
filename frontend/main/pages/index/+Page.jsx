@@ -47,7 +47,7 @@ function Page() {
       <Seo
         title="Home"
         description={heroSubtitle.replace(/<[^>]*>/g, '')}
-        keywords="sport climbing Pakistan, competitive climbing Pakistan, Pakistan sport climbing magazine, Pakistani sport climbers, indoor climbing Pakistan, climbing competitions Pakistan, speed climbing Pakistan, lead climbing Pakistan, Pakistan climbing community"
+        keywords="sport climbing Pakistan, rock climbing Pakistan, competitive climbing Pakistan, Pakistan sport climbing magazine, Pakistani sport climbers, indoor climbing Pakistan, climbing gyms Pakistan, climbing competitions Pakistan, speed climbing Pakistan, lead climbing Pakistan, bouldering Pakistan, Pakistan climbing community, climbing Islamabad, climbing Lahore, Pakistan climbing news"
         path="/"
       />
 
