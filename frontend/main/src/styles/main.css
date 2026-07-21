@@ -2529,9 +2529,38 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .records-table-wrap {
   overflow-x: auto;
-  background: var(--cp-surface);
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  background:
+    linear-gradient(to right, var(--cp-surface) 30%, transparent),
+    linear-gradient(to left, var(--cp-surface) 10%, transparent),
+    var(--cp-surface);
+  background-attachment: local, scroll, scroll;
   border: 1px solid var(--cp-border);
   border-radius: var(--radius-md);
+}
+.records-table-wrap::-webkit-scrollbar {
+  height: 4px;
+}
+.records-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+.records-table-wrap::-webkit-scrollbar-thumb {
+  background: var(--cp-border-strong);
+  border-radius: 4px;
+}
+
+/* Scroll hint shown below the table on small screens */
+.records-table-scroll-hint {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  font-size: var(--fs-xs);
+  color: var(--cp-text-muted);
+  animation: fadeIn 1s ease 1s both;
 }
 .records-table {
   width: 100%;
@@ -2859,6 +2888,15 @@ input, textarea, select { font: inherit; color: inherit; }
   }
 
   /* --- National Records --- */
+  .page-header .page-title {
+    word-break: break-word;
+    font-size: clamp(1.6rem, 6vw, 2rem);
+  }
+  .page-header .page-sub {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+  .records-gender-bar { margin-top: var(--sp-4); }
   .records-premium-value { font-size: clamp(2.2rem, 10vw, 2.8rem); }
   .records-premium-unit { font-size: var(--fs-xs); }
   .records-premium-name { font-size: var(--fs-lg); }
@@ -2867,9 +2905,12 @@ input, textarea, select { font: inherit; color: inherit; }
   .records-premium-row { flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); }
   .records-premium-label { font-size: var(--fs-xs); }
   .records-premium-data { font-size: var(--fs-sm); }
-  .records-table th, .records-table td { padding: var(--sp-1) var(--sp-2); font-size: 0.65rem; }
+  /* Force table wider than screen so horizontal scroll is natural */
+  .records-table { min-width: 480px; }
+  .records-table th, .records-table td { padding: var(--sp-2) var(--sp-3); font-size: 0.7rem; white-space: nowrap; }
   .records-table-time { font-size: var(--fs-sm); }
   .records-table-year { font-size: var(--fs-sm); }
+  .records-table-scroll-hint { display: flex; }
   .records-previous-section { margin-top: var(--sp-8); }
   .records-section-label { font-size: var(--fs-xs); gap: var(--sp-2); margin-bottom: var(--sp-4); }
 

@@ -7,6 +7,53 @@ import { recordsSchema } from '../../src/utils/jsonLd';
 const API_BASE = import.meta.env.VITE_API_URL
   || 'https://climb-pakistan-backend.onrender.com/api';
 
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+/** Format a date string as "10 Mar 2024" (short month) */
+function formatDateShort(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/** Format a date string as "10 March 2024" (full month) */
+function formatDateFull(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return `${d.getDate()} ${MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/** Scroll hint that auto-hides after first scroll or 5 seconds */
+function ScrollHint() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 5000);
+    const onScroll = () => setVisible(false);
+    const wrap = document.querySelector('.records-table-wrap');
+    if (wrap) wrap.addEventListener('scroll', onScroll, { once: true });
+    return () => {
+      clearTimeout(timer);
+      if (wrap) wrap.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="records-table-scroll-hint" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+      <span>Swipe to see full rows</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </div>
+  );
+}
+
 export { Page };
 
 function Page() {
@@ -186,7 +233,7 @@ function Page() {
                                     <line x1="3" y1="10" x2="21" y2="10" />
                                   </svg>
                                   <dt className="records-premium-label">Date</dt>
-                                  <dd className="records-premium-data">{new Date(rec.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</dd>
+                                  <dd className="records-premium-data">{formatDateFull(rec.date)}</dd>
                                 </div>
                               )}
 
@@ -226,7 +273,7 @@ function Page() {
                                 )}
                               </td>
                               <td className="records-table-year">
-                                {rec.date ? new Date(rec.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                                {rec.date ? formatDateShort(rec.date) : '—'}
                               </td>
                               <td>{rec.competition || '—'}</td>
                             </tr>
@@ -234,6 +281,7 @@ function Page() {
                         </tbody>
                       </table>
                     </div>
+                    <ScrollHint />
                   </div>
                 )}
               </AnimatedSection>
