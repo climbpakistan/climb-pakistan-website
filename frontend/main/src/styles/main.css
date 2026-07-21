@@ -1556,8 +1556,8 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .ranking-avatar {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1569,15 +1569,12 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-on-accent);
 }
 
-.rank-1 .ranking-avatar {
-  width: 68px;
-  height: 68px;
+.rank-1 .ranking-avatar,
+.rank-2 .ranking-avatar,
+.rank-3 .ranking-avatar {
+  width: 60px;
+  height: 60px;
   font-size: var(--fs-lg);
-}
-.rank-2 .ranking-avatar {
-  width: 56px;
-  height: 56px;
-  font-size: var(--fs-md);
 }
 
 .leaderboard-note { margin-top: var(--sp-6); color: var(--cp-text-muted); font-size: var(--fs-xs); text-align: center; }
@@ -2809,9 +2806,10 @@ input, textarea, select { font: inherit; color: inherit; }
   .rankings-table th,
   .rankings-table td { padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); }
   .rankings-rank { width: 36px; font-size: var(--fs-md); }
-  .rank-1 .ranking-avatar { width: 48px; height: 48px; font-size: var(--fs-md); }
-  .rank-2 .ranking-avatar { width: 42px; height: 42px; font-size: var(--fs-sm); }
-  .ranking-avatar:not(.rank-1 .ranking-avatar):not(.rank-2 .ranking-avatar) { width: 36px; height: 36px; font-size: var(--fs-xs); }
+  .rank-1 .ranking-avatar,
+  .rank-2 .ranking-avatar,
+  .rank-3 .ranking-avatar { width: 48px; height: 48px; font-size: var(--fs-md); }
+  .ranking-avatar:not(.rank-1 .ranking-avatar):not(.rank-2 .ranking-avatar):not(.rank-3 .ranking-avatar) { width: 40px; height: 40px; font-size: var(--fs-xs); }
 
   /* --- Footer --- */
   .footer-logo { font-size: calc(var(--fs-md) * 2); }
@@ -2921,9 +2919,10 @@ input, textarea, select { font: inherit; color: inherit; }
   .rankings-table td:nth-child(3),
   .rankings-table th:nth-child(3) { display: none; }
   .rankings-athlete-cell { gap: var(--sp-2); }
-  .ranking-avatar { width: 32px; height: 32px; font-size: 0.625rem; }
-  .rank-1 .ranking-avatar { width: 40px; height: 40px; font-size: var(--fs-sm); }
-  .rank-2 .ranking-avatar { width: 36px; height: 36px; font-size: 0.625rem; }
+  .ranking-avatar { width: 34px; height: 34px; font-size: 0.625rem; }
+  .rank-1 .ranking-avatar,
+  .rank-2 .ranking-avatar,
+  .rank-3 .ranking-avatar { width: 40px; height: 40px; font-size: var(--fs-sm); }
 
   /* --- Competitions --- */
   .comp-list-body h3 { font-size: var(--fs-md); }
