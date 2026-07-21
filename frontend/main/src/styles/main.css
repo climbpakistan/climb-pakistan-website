@@ -1577,6 +1577,11 @@ input, textarea, select { font: inherit; color: inherit; }
   font-size: var(--fs-lg);
 }
 
+.team-ranking-logo {
+  transition: width 0.2s ease, height 0.2s ease;
+}
+.team-ranking-logo--podium {}
+
 .leaderboard-note { margin-top: var(--sp-6); color: var(--cp-text-muted); font-size: var(--fs-xs); text-align: center; }
 
 /* ---------- 10. Competitions (list + tabs) ---------- */
@@ -2810,6 +2815,8 @@ input, textarea, select { font: inherit; color: inherit; }
   .rank-2 .ranking-avatar,
   .rank-3 .ranking-avatar { width: 48px; height: 48px; font-size: var(--fs-md); }
   .ranking-avatar:not(.rank-1 .ranking-avatar):not(.rank-2 .ranking-avatar):not(.rank-3 .ranking-avatar) { width: 40px; height: 40px; font-size: var(--fs-xs); }
+  .team-ranking-logo--podium { width: 48px !important; height: 48px !important; }
+  .team-ranking-logo:not(.team-ranking-logo--podium) { width: 40px !important; height: 40px !important; }
 
   /* --- Footer --- */
   .footer-logo { font-size: calc(var(--fs-md) * 2); }
@@ -2895,14 +2902,15 @@ input, textarea, select { font: inherit; color: inherit; }
     overflow-wrap: break-word;
   }
   .records-gender-bar { margin-top: var(--sp-4); }
-  .records-premium-value { font-size: clamp(2.2rem, 10vw, 2.8rem); }
-  .records-premium-unit { font-size: var(--fs-xs); }
+  .records-premium-body { text-align: left; padding: var(--sp-3); gap: var(--sp-2); }
+  .records-premium-value { font-size: clamp(2.2rem, 10vw, 2.8rem); line-height: 1.1; display: flex; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; }
+  .records-premium-unit { font-size: var(--fs-xs); vertical-align: baseline; }
   .records-premium-name { font-size: var(--fs-lg); }
   .records-premium-name-link { font-size: var(--fs-lg); }
-  .records-premium-body { padding: var(--sp-3); gap: var(--sp-2); }
-  .records-premium-row { flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); }
-  .records-premium-label { font-size: var(--fs-xs); }
+  .records-premium-row { flex-wrap: nowrap; gap: var(--sp-2); align-items: flex-start; }
+  .records-premium-label { font-size: var(--fs-xs); min-width: auto; flex-shrink: 0; }
   .records-premium-data { font-size: var(--fs-sm); }
+  .records-premium-icon { width: 14px; height: 14px; margin-top: 1px; }
   /* Force table wider than screen so horizontal scroll is natural */
   .records-table { min-width: 480px; }
   .records-table th, .records-table td { padding: var(--sp-2) var(--sp-3); font-size: 0.7rem; white-space: nowrap; }
@@ -2919,6 +2927,8 @@ input, textarea, select { font: inherit; color: inherit; }
   .rankings-table td:nth-child(3),
   .rankings-table th:nth-child(3) { display: none; }
   .rankings-athlete-cell { gap: var(--sp-2); }
+  .team-ranking-logo--podium { width: 40px !important; height: 40px !important; }
+  .team-ranking-logo:not(.team-ranking-logo--podium) { width: 34px !important; height: 34px !important; }
   .ranking-avatar { width: 34px; height: 34px; font-size: 0.625rem; }
   .rank-1 .ranking-avatar,
   .rank-2 .ranking-avatar,

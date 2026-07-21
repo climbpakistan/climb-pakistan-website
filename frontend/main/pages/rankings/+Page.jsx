@@ -237,14 +237,16 @@ function Page() {
                   <tbody>
                     {teamList.map((team, idx) => {
                       const tInfo = resolveTeamInfo(team);
-                      const logoSize = team.displayRank === 1 ? 68 : team.displayRank === 2 ? 56 : team.displayRank === 3 ? 48 : 36;
+                      const isPodium = team.displayRank <= 3;
+                      const logoSize = isPodium ? 60 : 50;
                       const svgSize = Math.round(logoSize * 0.5);
+                      const logoClass = `team-ranking-logo${isPodium ? ' team-ranking-logo--podium' : ''}`;
                       return (
                         <tr key={idx} className={`${team.displayRank === 1 ? 'is-leader ' : ''}${getRankClass(team.displayRank)}`}>
                           <td className="rankings-rank">{team.displayRank}</td>
                           <td style={{ fontWeight: 600, color: 'var(--cp-white)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
-                              <div style={{ width: logoSize, height: logoSize, flexShrink: 0, borderRadius: logoSize > 36 ? 10 : 6, overflow: 'hidden', background: tInfo.logoUrl ? 'none' : 'var(--cp-surface-2)', border: tInfo.logoUrl ? 'none' : '1px solid var(--cp-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <div className={logoClass} style={{ width: logoSize, height: logoSize, flexShrink: 0, borderRadius: 10, overflow: 'hidden', background: tInfo.logoUrl ? 'none' : 'var(--cp-surface-2)', border: tInfo.logoUrl ? 'none' : '1px solid var(--cp-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {tInfo.logoUrl ? <img src={tInfo.logoUrl} alt={tInfo.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : (
                                   <svg width={svgSize} height={svgSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cp-text-muted)', opacity: 0.35 }}>
                                     <circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 0 0-16 0" />

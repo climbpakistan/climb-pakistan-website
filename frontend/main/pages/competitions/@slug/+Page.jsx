@@ -101,13 +101,13 @@ function Page() {
                 {competition.imageUrl && (
                   <img src={competition.imageUrl} alt={competition.name} style={{ width: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 12, marginBottom: 'var(--sp-6)' }} />
                 )}
-                {renderOverview(competition.overview)}
-                <dl className="info-list" style={{ marginTop: 'var(--sp-6)' }}>
+                <dl className="info-list" style={{ marginBottom: 'var(--sp-6)' }}>
                   <div><dt>Location</dt><dd>{competition.location}</dd></div>
                   <div><dt>Dates</dt><dd>{formatRange(competition.startDate, competition.endDate)}</dd></div>
                   <div><dt>Disciplines</dt><dd>{competition.disciplines?.join(', ')}</dd></div>
                   <div><dt>Status</dt><dd>{competition.status}</dd></div>
                 </dl>
+                {renderOverview(competition.overview)}
               </div>
             </div>
           )}
