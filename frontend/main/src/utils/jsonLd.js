@@ -309,9 +309,21 @@ export function recordsSchema(records, gender = 'Men', settings = {}) {
 
 /**
  * Person schema — for athlete profiles.
+ * Includes sameAs links to Instagram and IFSC World Climbing for
+ * enhanced Google rich results (Knowledge Panel-style).
  */
 export function personSchema(athlete) {
   if (!athlete) return null;
+
+  // Build sameAs array from available social / official links
+  const sameAs = [];
+  if (athlete.instagram) {
+    sameAs.push(`https://instagram.com/${athlete.instagram}`);
+  }
+  if (athlete.worldClimbingUrl) {
+    sameAs.push(athlete.worldClimbingUrl);
+  }
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -320,12 +332,17 @@ export function personSchema(athlete) {
     url: `${BASE_URL}/athletes/${athlete.slug}`,
     image: athlete.photoUrl || `${BASE_URL}/og-default.png`,
     gender: athlete.gender || undefined,
-    knowsAbout: athlete.disciplines || undefined,
+    sameAs: sameAs.length > 0 ? sameAs : undefined,
     affiliation: athlete.team ? {
       '@type': 'SportsTeam',
       name: athlete.team,
     } : undefined,
     award: athlete.medals?.map((m) => `${m.medal} — ${m.competition} (${m.discipline})`) || undefined,
+    // Indicate the athlete's main sport discipline
+    knowsAbout: athlete.disciplines?.map((d) => ({
+      '@type': 'Thing',
+      name: d,
+    })) || undefined,
   };
 
   // Clean undefined values

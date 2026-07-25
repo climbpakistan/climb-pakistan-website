@@ -79,12 +79,13 @@ function urlElement(loc, { lastmod, changefreq, priority } = {}) {
 async function main() {
   console.log('[sitemap] Generating sitemap…');
 
-  const [athletes, articles, competitions, learnSections, teamRankings] = await Promise.all([
+  const [athletes, articles, competitions, learnSections, teamRankings, rankings] = await Promise.all([
     fetchJSON('/athletes'),
     fetchJSON('/news?status=Published'),
     fetchJSON('/competitions'),
     fetchJSON('/learn?status=Published'),
     fetchJSON('/team-rankings'),
+    fetchJSON('/rankings'),
   ]);
 
   const urls = [];
@@ -144,6 +145,47 @@ async function main() {
       changefreq: 'monthly',
       priority: '0.6',
     }));
+  }
+
+  // ── Player ranking category/discipline/year combinations ──
+  const rankData = rankings?.data || rankings;
+  if (rankData) {
+    const CATEGORIES = ['Men', 'Women'];
+    const DISCIPLINES = ['Speed', 'Lead', 'Boulder'];
+    for (const cat of CATEGORIES) {
+      for (const disc of DISCIPLINES) {
+        const years = rankData[cat]?.[disc] || {};
+        for (const y of Object.keys(years)) {
+          if (Array.isArray(years[y]) && years[y].length > 0) {
+            urls.push(urlElement(
+              `${SITE_URL}/rankings/${cat.toLowerCase()}/${disc.toLowerCase()}/${y}`,
+              {
+                lastmod: w3cDate(`${y}-12-31`),
+                changefreq: 'weekly',
+                priority: '0.7',
+              }
+            ));
+          }
+        }
+      }
+    }
+
+    // ── Team ranking year pages ──
+    const teamData = teamRankings?.data || teamRankings;
+    if (teamData && typeof teamData === 'object') {
+      for (const y of Object.keys(teamData)) {
+        if (Array.isArray(teamData[y]) && teamData[y].length > 0) {
+          urls.push(urlElement(
+            `${SITE_URL}/rankings/teams/${y}`,
+            {
+              lastmod: w3cDate(`${y}-12-31`),
+              changefreq: 'weekly',
+              priority: '0.7',
+            }
+          ));
+        }
+      }
+    }
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
