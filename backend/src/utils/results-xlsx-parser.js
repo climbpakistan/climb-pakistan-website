@@ -3,7 +3,7 @@
 //
 // Row 1: Competition title (e.g. "National Championship 2024")
 // Rows 2-4: Empty
-// Row 5 (headers): competition-slug | Year | Discipline | Category | Position | Athlete-Slug | Athlete Name | Team
+// Row 5 (headers): competition-slug | Year | Discipline | Category | Position | Athlete-Slug | Athlete Name | Team | Result
 // Row 6+: Data
 //
 // If athlete-slug is provided → slug-based entry (name/photo resolve from profile, team from Excel)
@@ -18,6 +18,7 @@ export const RESULTS_COLUMNS = {
   slug: 5,
   name: 6,
   team: 7,
+  result: 8,
   rank: 4,
   discipline: 2,
   category: 3,
@@ -74,6 +75,7 @@ export function parseResultRow(row) {
   const name = parseString(row[RESULTS_COLUMNS.name]);
   const rank = parseNumber(row[RESULTS_COLUMNS.rank]);
   const team = parseString(row[RESULTS_COLUMNS.team]);
+  const result = parseString(row[RESULTS_COLUMNS.result]);
 
   if (!slug && !name) return null;
   if (!rank && rank !== 0) return null;
@@ -84,11 +86,12 @@ export function parseResultRow(row) {
 
   if (!gender || !discipline || !year) return null;
 
-  // Build entry — always store team from the Excel sheet
+  // Build entry — always store team and result from the Excel sheet
+  const entryBase = { rank, team, result: result || '' };
   if (slug) {
-    return { gender, discipline, year, entry: { rank, slug, team } };
+    return { gender, discipline, year, entry: { ...entryBase, slug } };
   } else {
-    return { gender, discipline, year, entry: { rank, name: name || 'Unknown', team } };
+    return { gender, discipline, year, entry: { ...entryBase, name: name || 'Unknown' } };
   }
 }
 
