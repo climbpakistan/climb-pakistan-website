@@ -104,25 +104,26 @@ function Page() {
       />
 
       <section className="page-header">
-        <div className="container">
-          <div className="hero-entrance">
-            <div className="page-head-row">
-              <h1 className="page-title">
-                National Championship Results
-                {hasData && effectiveYear && (
-                  <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{effectiveYear}</span>
-                )}
-              </h1>
-              <a href="/records" className="records-nav-link">
-                <img className="records-nav-flag" src="https://flagcdn.com/w80/pk.png" width="24" height="16" alt="Pakistan flag" />
-                <span>National Records</span>
-                <span className="records-nav-badge">NEW</span>
-              </a>
+        <div className="container">            <div className="hero-entrance">
+              <div className="page-head-row">
+                <h1 className="page-title">
+                  National Championship Results
+                  {hasData && effectiveYear && (
+                    <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{effectiveYear}</span>
+                  )}
+                </h1>
+              </div>
+              <div className="page-sub-row">
+                <p className="page-sub">
+                  Final standings from national sport climbing championships — Senior Men and Senior Women across all disciplines.
+                </p>
+                <a href="/records" className="records-nav-link">
+                  <img className="records-nav-flag" src="https://flagcdn.com/w80/pk.png" width="24" height="16" alt="Pakistan flag" />
+                  <span>National Records</span>
+                  <span className="records-nav-badge">NEW</span>
+                </a>
+              </div>
             </div>
-            <p className="page-sub">
-              Final standings from national sport climbing championships — Senior Men and Senior Women across all disciplines.
-            </p>
-          </div>
         </div>
       </section>
 

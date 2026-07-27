@@ -36,7 +36,11 @@ export default function NewsCard({ article }) {
         <span className="tag">{article.tag}</span>
         <h3><a href={`/news/${article.slug}`}>{article.title}</a>        </h3>
         <p>{renderFormattedText(article.excerpt)}</p>
-        <span className="news-card-date">{formatDate(article.date)}</span>
+        <span className="news-card-date">
+          <time dateTime={article.date || article.createdAt}>
+            {formatDate(article.date)}
+          </time>
+        </span>
       </div>
     </article>
   );

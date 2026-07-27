@@ -2712,6 +2712,16 @@ input, textarea, select { font: inherit; color: inherit; }
   margin-bottom: var(--sp-3);
 }
 .page-sub { color: var(--cp-text-dim); font-size: var(--fs-md); max-width: 60ch; }
+.page-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-top: var(--sp-3);
+}
+.page-sub-row .page-sub { margin: 0; }
+.page-sub-row .records-nav-link { flex-shrink: 0; }
 
 .page-header--enhanced { position: relative; overflow: hidden; isolation: isolate; }
 .page-header-bg-grid {
@@ -2821,6 +2831,10 @@ input, textarea, select { font: inherit; color: inherit; }
   /* --- Footer --- */
   .footer-logo { font-size: calc(var(--fs-md) * 2); }
   .footer-brand p { font-size: var(--fs-sm); }
+
+  /* --- Results page --- */
+  .rankings-filters .filter-chip { padding: var(--sp-2) var(--sp-4); }
+  .rankings-filters .filter-bar { margin-bottom: var(--sp-4); }
 
   /* --- Medal rows --- */
   .medal-row { padding: var(--sp-3); gap: var(--sp-3); }
@@ -2967,6 +2981,20 @@ input, textarea, select { font: inherit; color: inherit; }
   /* --- Pagination --- */
   .pagination { gap: var(--sp-1); }
   .page-btn { width: 34px; height: 34px; font-size: var(--fs-sm); }
+
+  /* --- Results page mobile --- */
+  .page-sub-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-3);
+  }
+  .page-sub-row .page-sub { max-width: 100%; }
+  .page-sub-row .records-nav-link {
+    justify-content: center;
+    width: 100%;
+  }
+  .rankings-filters .filter-bar { margin-bottom: var(--sp-3); gap: var(--sp-1); }
+  .rankings-filters .filter-chip { padding: var(--sp-2) var(--sp-3); font-size: var(--fs-xs); }
 
   /* --- Medal rows --- */
   .medal-count { padding: var(--sp-1) var(--sp-3); }

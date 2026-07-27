@@ -112,13 +112,19 @@ function Page() {
         ogType="article"
         path={`/news/${slug}`}
         jsonLd={articleSchema(article)}
+        articlePublishedTime={article.date || article.createdAt}
+        articleModifiedTime={article.updatedAt || article.date || article.createdAt}
       />
 
       <article className="article">
         <div className="container article-container">
           <span className="tag">{article.tag}</span>
           <h1 className="article-title">{article.title}</h1>
-          <p className="article-meta">{formatDate(article.date)}</p>
+          <p className="article-meta">
+            <time dateTime={article.date || article.createdAt}>
+              {formatDate(article.date)}
+            </time>
+          </p>
           {article.imageUrl ? (
             <div className="article-media">
               <img src={article.imageUrl} alt={article.title} style={{

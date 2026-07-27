@@ -36,6 +36,8 @@ export default function Seo({
   path,
   noIndex = false,
   jsonLd,
+  articlePublishedTime,
+  articleModifiedTime,
   children,
 }) {
   // If title is explicitly set to empty string (for Layout-only structured data),
@@ -66,6 +68,14 @@ export default function Seo({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:locale" content="en_US" />
+
+      {/* ── Article-specific OG tags ── */}
+      {ogType === 'article' && articlePublishedTime && (
+        <meta property="article:published_time" content={articlePublishedTime} />
+      )}
+      {ogType === 'article' && articleModifiedTime && (
+        <meta property="article:modified_time" content={articleModifiedTime} />
+      )}
 
       {/* ── Twitter Card ── */}
       <meta name="twitter:card" content="summary_large_image" />

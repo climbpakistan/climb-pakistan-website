@@ -1,6 +1,7 @@
 import { useData } from 'vike-react/useData';
 import { AnimatedSection, StaggeredGrid } from '../../src/hooks/animations';
 import Seo from '../../src/components/Seo';
+import { learnFAQSchema } from '../../src/utils/jsonLd';
 
 export { Page };
 
@@ -23,6 +24,7 @@ function Page() {
         description="A plain-language introduction to sport climbing in Pakistan — disciplines, scoring, training tips, and how to get started."
         keywords="learn sport climbing Pakistan, how to start sport climbing Pakistan, sport climbing guide Pakistan, sport climbing tutorial Pakistan, indoor climbing Pakistan, competitive climbing Pakistan, climbing disciplines explained, climbing scoring explained Pakistan, beginner climbing Pakistan, sport climbing techniques, climbing training Pakistan, climbing safety Pakistan, how to lead climb, how to boulder"
         path="/learn"
+        jsonLd={learnFAQSchema(sections)}
       />
 
       <section className="page-header page-header--enhanced">
