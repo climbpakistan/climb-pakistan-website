@@ -96,7 +96,7 @@ function Page() {
   return (
     <>
       <Seo
-        title={`Championship Results${effectiveYear ? ' ' + effectiveYear : ''}`}
+        title={`National Championship Results${effectiveYear ? ' ' + effectiveYear : ''}`}
         description="National sport climbing championship results — Senior Men and Senior Women across Speed, Lead, and Boulder disciplines. Complete podium and final standings from Pakistan's premier climbing competitions."
         keywords="Pakistan national championship results, sport climbing results Pakistan, national championships climbing Pakistan, Pakistan speed climbing results, Pakistan lead climbing results, Pakistan bouldering results, national champions Pakistan climbing, Pakistani climbing competition results, senior men climbing results Pakistan, senior women climbing results Pakistan"
         path="/results"
@@ -107,7 +107,7 @@ function Page() {
         <div className="container">
           <div className="hero-entrance">
             <h1 className="page-title">
-              Championship Results
+              National Championship Results
               {hasData && effectiveYear && (
                 <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{effectiveYear}</span>
               )}
