@@ -11,6 +11,17 @@ export { Page };
 const TABS = ['overview', 'results', 'news', 'gallery'];
 const TAB_LABELS = { overview: 'Overview', news: 'News', results: 'Results', gallery: 'Gallery' };
 
+function initials(name) {
+  return name.split(' ').map((p) => p[0]).slice(0, 2).join('');
+}
+
+function getRankClass(rank) {
+  if (rank === 1) return 'rank-1';
+  if (rank === 2) return 'rank-2';
+  if (rank === 3) return 'rank-3';
+  return 'rank-rest';
+}
+
 function slugify(name) {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
@@ -39,7 +50,7 @@ function formatRange(start, end) {
 }
 
 function Page() {
-  const { competition, slug, allNews, allAthletes } = useData();
+  const { competition, slug, allNews, allAthletes, championshipResults } = useData();
   const [tab, setTab] = useState('overview');
   const [resultsDiscipline, setResultsDiscipline] = useState(competition?.disciplines?.[0] || 'Speed');
   const [resultsGender, setResultsGender] = useState('Men');
@@ -57,7 +68,31 @@ function Page() {
   }
 
   const relatedNews = allNews?.filter((n) => competition.newsSlugs?.includes(n.slug)) || [];
-  const resultRows = competition.results?.[resultsDiscipline]?.[resultsGender] || [];
+  // Use Championship Results data when available (richer format with athlete slugs/photos)
+  // Fall back to competition.results for manually entered results
+  const champRows = championshipResults?.[resultsDiscipline]?.[resultsGender] || [];
+  const hasChampData = championshipResults && champRows.length > 0;
+  const resultRows = hasChampData ? champRows : (competition.results?.[resultsDiscipline]?.[resultsGender] || []);
+
+  function resolveChampRow(row) {
+    if (row.slug) {
+      const a = allAthletes?.find((x) => x.slug === row.slug);
+      return {
+        name: a?.name || `@${row.slug}`,
+        team: row.team || '—',
+        photoUrl: a?.photoUrl || '',
+        slug: row.slug,
+        result: row.result || '—',
+      };
+    }
+    return {
+      name: row.name || '—',
+      team: row.team || '—',
+      photoUrl: '',
+      slug: '',
+      result: row.result || row.mark || '—',
+    };
+  }
 
   const compDesc = competition.overview
     ? competition.overview.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').slice(0, 160)
@@ -126,7 +161,7 @@ function Page() {
 
           {tab === 'results' && (
             <div className="comp-tab-content is-active entrance-right">
-              {!competition.results || Object.keys(competition.results).length === 0 ? (
+              {(!championshipResults && (!competition.results || Object.keys(competition.results).length === 0)) ? (
                 <p style={{ color: 'var(--cp-text-muted)' }}>No results available yet.</p>
               ) : (
                 <>
@@ -145,19 +180,52 @@ function Page() {
                   {resultRows.length === 0 ? (
                     <p style={{ color: 'var(--cp-text-muted)' }}>No results available yet for this category.</p>
                   ) : (
-                    <table className="rankings-table">
-                      <thead><tr><th>Position</th><th>Athlete</th><th>Team</th><th>Result</th></tr></thead>
-                      <tbody>
-                        {resultRows.map((row) => (
-                          <tr key={row.rank} className={row.rank === 1 ? 'is-leader' : ''}>
-                            <td className="rankings-rank">{row.rank}</td>
-                            <td>{allAthletes?.some((a) => a.name === row.name) ? <a href={`/athletes/${slugify(row.name)}`}>{row.name}</a> : row.name}</td>
-                            <td>{row.team}</td>
-                            <td>{row.mark}</td>
+                    <div className="rankings-table-wrap">
+                      <table className="rankings-table">
+                        <thead>
+                          <tr>
+                            <th>Position</th>
+                            <th>Athlete</th>
+                            <th>Team</th>
+                            <th>Result</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {resultRows.map((row, idx) => {
+                            const info = hasChampData ? resolveChampRow(row) : {
+                              name: row.name || '—',
+                              team: row.team || '—',
+                              photoUrl: '',
+                              slug: '',
+                              result: row.mark || '—',
+                            };
+                            const avatarContent = info.photoUrl ? (
+                              <img src={info.photoUrl} alt={info.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                            ) : initials(info.name);
+                            return (
+                              <tr key={idx} className={`${row.rank === 1 && idx === 0 ? 'is-leader ' : ''}${getRankClass(row.rank)}`}>
+                                <td className="rankings-rank">{row.rank}</td>
+                                <td>
+                                  <div className="rankings-athlete-cell">
+                                    {info.slug ? (
+                                      <a href={`/athletes/${info.slug}`} className="ranking-avatar" aria-hidden="true"
+                                        style={info.photoUrl ? { background: 'none', padding: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' } : undefined}>
+                                        {avatarContent}
+                                      </a>
+                                    ) : (
+                                      <div className="ranking-avatar" aria-hidden="true">{avatarContent}</div>
+                                    )}
+                                    {info.slug ? <a href={`/athletes/${info.slug}`}>{info.name}</a> : info.name}
+                                  </div>
+                                </td>
+                                <td>{info.team}</td>
+                                <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{info.result}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </>
               )}
