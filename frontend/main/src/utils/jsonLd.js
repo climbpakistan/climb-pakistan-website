@@ -9,7 +9,7 @@ export function organizationSchema() {
     '@type': 'Organization',
     name: 'Climb Pakistan',
     url: BASE_URL,
-    logo: `${BASE_URL}/favicon.png`,
+    logo: `${BASE_URL}/logo.svg`,
     description: "Pakistan's dedicated sport climbing magazine — news, rankings, athlete profiles and competition coverage.",
     sport: ['Sport Climbing', 'Speed Climbing', 'Lead Climbing', 'Bouldering', 'Competition Climbing'],
     sameAs: [
@@ -91,7 +91,7 @@ export function articleSchema(article) {
     '@type': 'NewsArticle',
     headline: article.title,
     description: article.body?.[0] || article.sections?.[0]?.text || '',
-    image: article.imageUrl || `${BASE_URL}/og-default.png`,
+    image: article.imageUrl || `${BASE_URL}/og-default.svg`,
     datePublished: article.date || article.createdAt,
     dateModified: article.updatedAt || article.date || article.createdAt,
     author: {
@@ -104,7 +104,7 @@ export function articleSchema(article) {
       name: 'Climb Pakistan',
       logo: {
         '@type': 'ImageObject',
-        url: `${BASE_URL}/favicon.png`,
+        url: `${BASE_URL}/logo.svg`,
       },
     },
     mainEntityOfPage: {
@@ -135,7 +135,7 @@ export function competitionSchema(competition) {
     startDate: competition.startDate || undefined,
     endDate: competition.endDate || undefined,
     url: `${BASE_URL}/competitions/${competition.slug}`,
-    image: competition.imageUrl || `${BASE_URL}/og-default.png`,
+    image: competition.imageUrl || `${BASE_URL}/og-default.svg`,
   };
   if (competition.tags?.length) {
     schema.keywords = competition.tags.join(', ');
@@ -160,7 +160,7 @@ export function learnSectionSchema(section) {
     '@type': 'Article',
     headline: section.title,
     description: section.subtitle || section.body?.slice(0, 300) || `A guide to ${section.title} for sport climbers in Pakistan.`,
-    image: section.image || `${BASE_URL}/og-default.png`,
+    image: section.image || `${BASE_URL}/og-default.svg`,
     datePublished: section.createdAt || undefined,
     dateModified: section.updatedAt || section.createdAt || undefined,
     url: `${BASE_URL}/learn/${section.slug}`,
@@ -394,7 +394,7 @@ export function personSchema(athlete) {
     name: athlete.name,
     description: athlete.about || `${athlete.name} — competitive sport climbing athlete from Pakistan.`,
     url: `${BASE_URL}/athletes/${athlete.slug}`,
-    image: athlete.photoUrl || `${BASE_URL}/og-default.png`,
+    image: athlete.photoUrl || `${BASE_URL}/og-default.svg`,
     gender: athlete.gender || undefined,
     sameAs: sameAs.length > 0 ? sameAs : undefined,
     affiliation: athlete.team ? {
