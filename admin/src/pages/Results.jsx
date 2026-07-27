@@ -49,7 +49,7 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [editingIndex, setEditingIndex] = useState(null);
   const [inputMode, setInputMode] = useState('slug');
-  const [editRow, setEditRow] = useState({ slug: '', name: '', team: '' });
+  const [editRow, setEditRow] = useState({ slug: '', name: '', team: '', result: '' });
   const [slugSuggestions, setSlugSuggestions] = useState([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
@@ -144,7 +144,7 @@ export default function Results() {
   };
 
   const addEntry = () => {
-    const newEntry = { rank: currentEntries.length + 1, slug: '' };
+    const newEntry = { rank: currentEntries.length + 1, slug: '', result: '' };
     setEntries({ ...entries, [currentKey]: [...currentEntries, newEntry] });
     setEditingIndex(currentEntries.length);
     setEditRow({ ...newEntry, name: '', team: '' });
@@ -160,6 +160,7 @@ export default function Results() {
       slug: entry.slug || '',
       name: entry.name || '',
       team: entry.team || '',
+      result: entry.result || '',
     });
     setSlugSuggestions([]);
   };
@@ -172,6 +173,7 @@ export default function Results() {
     const updated = [...currentEntries];
     const savedEntry = {
       rank: editingIndex + 1,
+      result: editRow.result,
     };
     if (inputMode === 'slug') {
       savedEntry.slug = editRow.slug.trim();
@@ -316,13 +318,14 @@ export default function Results() {
               <th style={{ width: 60 }}>Position</th>
               <th>Athlete</th>
               <th>Team</th>
+              <th style={{ width: 100 }}>Result</th>
               <th style={{ width: 130 }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentEntries.length === 0 && (
               <tr>
-                <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--sp-8)' }}>
+                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--sp-8)' }}>
                   No results yet for {gender} {discipline} {year}. Click "Add Entry" to begin, or import an Excel file.
                 </td>
               </tr>
@@ -372,6 +375,9 @@ export default function Results() {
                       <input className="form-input" value={editRow.team} onChange={(e) => setEditRow((prev) => ({ ...prev, team: e.target.value }))} placeholder="Team from Excel" style={{ fontSize: 'var(--fs-sm)' }} />
                     </td>
                     <td>
+                      <input className="form-input" value={editRow.result} onChange={(e) => setEditRow((prev) => ({ ...prev, result: e.target.value }))} placeholder="e.g. 6.85s, Top" style={{ width: 90, fontSize: 'var(--fs-sm)' }} />
+                    </td>
+                    <td>
                       <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
                         <button className="btn btn-primary" type="button" style={{ fontSize: 'var(--fs-xs)' }} onClick={saveEdit}>Save</button>
                         <button className="btn btn-outline" type="button" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => { setEditingIndex(null); setSlugSuggestions([]); }}>Cancel</button>
@@ -391,6 +397,7 @@ export default function Results() {
                       </div>
                     </td>
                     <td>{entryDisplayTeam(entry)}</td>
+                    <td><span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{entry.result || '—'}</span></td>
                     <td>
                       <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
                         <button className="btn btn-outline" type="button" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => startEdit(i)}>Edit</button>

@@ -176,6 +176,7 @@ function Page() {
                         <th>Position</th>
                         <th>Athlete</th>
                         <th>Team</th>
+                        <th>Result</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -202,7 +203,7 @@ function Page() {
                               </div>
                             </td>
                             <td>{info.team}</td>
-
+                            <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{row.result || '—'}</td>
                           </tr>
                         );
                       })}
