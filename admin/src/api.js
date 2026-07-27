@@ -256,6 +256,7 @@ export function updateRecordsPage(data) { return apiFetch(`${BASE_URL}/records-p
 // ── Championship Results ──
 export function getResults() { return apiFetch(`${BASE_URL}/results`); }
 export function updateResults(data) { return apiFetch(`${BASE_URL}/results`, { method: 'PUT', body: JSON.stringify(data) }); }
+export function getResultsByCompetition(slug) { return apiFetch(`${BASE_URL}/results/by-competition/${slug}`); }
 
 // ── Championship Results — Bulk import from Excel ──
 export async function importResultsExcel(file) {

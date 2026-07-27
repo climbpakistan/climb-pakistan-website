@@ -9,6 +9,43 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 
 const router = Router();
 
+// GET /api/results/by-competition/:slug — returns results filtered by competition-slug
+// Returns data in the same format as Competition model's results field:
+// { Speed: { Men: [...], Women: [...] }, Lead: {...}, Boulder: {...} }
+router.get('/by-competition/:slug', async (req, res) => {
+  try {
+    let doc = await ChampionshipResult.findOne();
+    if (!doc) {
+      return res.json({ Speed: { Men: [], Women: [] }, Lead: { Men: [], Women: [] }, Boulder: { Men: [], Women: [] } });
+    }
+
+    const targetSlug = req.params.slug;
+    const data = doc.data;
+    const result = { Speed: { Men: [], Women: [] }, Lead: { Men: [], Women: [] }, Boulder: { Men: [], Women: [] } };
+
+    // Iterate through the nested structure and collect entries matching competitionSlug
+    for (const gender of Object.keys(data)) {
+      for (const discipline of Object.keys(data[gender] || {})) {
+        for (const year of Object.keys(data[gender][discipline] || {})) {
+          const entries = data[gender][discipline][year] || [];
+          const matched = entries.filter((e) => {
+            return e.competitionSlug && e.competitionSlug.toLowerCase() === targetSlug.toLowerCase();
+          });
+          if (matched.length > 0) {
+            if (!result[discipline]) result[discipline] = { Men: [], Women: [] };
+            if (!result[discipline][gender]) result[discipline][gender] = [];
+            result[discipline][gender] = [...result[discipline][gender], ...matched];
+          }
+        }
+      }
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/results — returns all championship results
 router.get('/', async (req, res) => {
   try {

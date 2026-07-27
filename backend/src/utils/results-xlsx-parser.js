@@ -15,6 +15,7 @@
 // NOTE: sheet_to_json returns 0-indexed arrays. Row5 (headers) = index 4, Row6+ (data) = index 5+
 export const RESULTS_COLUMNS = {
   DATA_START: 5,
+  competitionSlug: 0,
   slug: 5,
   name: 6,
   team: 7,
@@ -76,6 +77,7 @@ export function parseResultRow(row) {
   const rank = parseNumber(row[RESULTS_COLUMNS.rank]);
   const team = parseString(row[RESULTS_COLUMNS.team]);
   const result = parseString(row[RESULTS_COLUMNS.result]);
+  const competitionSlug = parseString(row[RESULTS_COLUMNS.competitionSlug]);
 
   if (!slug && !name) return null;
   if (!rank && rank !== 0) return null;
@@ -86,8 +88,8 @@ export function parseResultRow(row) {
 
   if (!gender || !discipline || !year) return null;
 
-  // Build entry — always store team and result from the Excel sheet
-  const entryBase = { rank, team, result: result || '' };
+  // Build entry — always store team, result, and competitionSlug from the Excel sheet
+  const entryBase = { rank, team, result: result || '', competitionSlug };
   if (slug) {
     return { gender, discipline, year, entry: { ...entryBase, slug } };
   } else {

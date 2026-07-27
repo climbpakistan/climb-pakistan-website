@@ -146,7 +146,7 @@ function Page() {
                     <p style={{ color: 'var(--cp-text-muted)' }}>No results available yet for this category.</p>
                   ) : (
                     <table className="rankings-table">
-                      <thead><tr><th>Rank</th><th>Athlete</th><th>Team</th><th>{resultsDiscipline === 'Speed' ? 'Time' : 'Points'}</th></tr></thead>
+                      <thead><tr><th>Position</th><th>Athlete</th><th>Team</th><th>Result</th></tr></thead>
                       <tbody>
                         {resultRows.map((row) => (
                           <tr key={row.rank} className={row.rank === 1 ? 'is-leader' : ''}>

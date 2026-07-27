@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { getCompetitions, createCompetition, updateCompetition, deleteCompetition, getNews } from '../api';
+import { getCompetitions, createCompetition, updateCompetition, deleteCompetition, getNews, getResultsByCompetition, getAthletes } from '../api';
 
 const disciplineOpts = ['Speed', 'Lead', 'Boulder'];
 const statusOpts = ['Completed', 'Upcoming', 'Ongoing'];
@@ -26,10 +26,13 @@ export default function Competitions() {
   const [resultEditRow, setResultEditRow] = useState({ name: '', team: '', mark: '' });
   const [yearFilter, setYearFilter] = useState('all');
   const [allNews, setAllNews] = useState([]);
+  const [importingResults, setImportingResults] = useState(false);
+  const [allAthletes, setAllAthletes] = useState([]);
 
   useEffect(() => {
     getCompetitions().then(setCompetitions).finally(() => setLoading(false));
     getNews().then(setAllNews).catch(() => {});
+    getAthletes().then(setAllAthletes).catch(() => {});
   }, []);
 
   // Auto-generate year options from competition data
@@ -78,6 +81,46 @@ export default function Competitions() {
   };
 
   const cancelEdit = () => setEditingSlug(null);
+
+  const importFromChampionship = async () => {
+    const targetSlug = form.slug?.trim();
+    if (!targetSlug) {
+      alert('Please set a competition slug first before importing results.');
+      return;
+    }
+    setImportingResults(true);
+    try {
+      const data = await getResultsByCompetition(targetSlug);
+      // Transform Championship Results format into Competition model format
+      // Championship: { rank, slug?, name?, team, result } → Competition: { rank, name, team, mark }
+      const transformed = { Speed: { Men: [], Women: [] }, Lead: { Men: [], Women: [] }, Boulder: { Men: [], Women: [] } };
+      for (const discipline of ['Speed', 'Lead', 'Boulder']) {
+        for (const gender of ['Men', 'Women']) {
+          const entries = data[discipline]?.[gender] || [];
+          transformed[discipline][gender] = entries.map((e) => {
+            let name = e.name || '';
+            // Resolve slug to name if available
+            if (e.slug && !name) {
+              const a = allAthletes.find((x) => x.slug === e.slug);
+              name = a?.name || `@${e.slug}`;
+            }
+            return {
+              rank: e.rank,
+              name: name || 'Unknown',
+              team: e.team || '',
+              mark: e.result || '', // Map 'result' → 'mark' for competition model
+            };
+          });
+        }
+      }
+      setForm((prev) => ({ ...prev, results: transformed }));
+      alert(`Imported ${Object.values(transformed).reduce((sum, disc) => sum + disc.Men.length + disc.Women.length, 0)} entries from Championship Results for "${targetSlug}".`);
+    } catch (err) {
+      alert('Failed to import: ' + err.message);
+    } finally {
+      setImportingResults(false);
+    }
+  };
 
   const toggleDisc = (d) => {
     setForm((f) => ({
@@ -421,6 +464,21 @@ export default function Competitions() {
           <div style={{ marginTop: 'var(--sp-6)', borderTop: '1px solid var(--card-border)', paddingTop: 'var(--sp-6)' }}>
             <div className="card-header">
               <h3 className="card-title">Results</h3>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)', alignItems: 'center' }}>
+                <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>
+                  Slug: <code style={{ background: 'var(--surface-2)', padding: '1px 4px', borderRadius: 3 }}>{form.slug || '(not set)'}</code>
+                </span>
+                <button className="btn btn-outline" type="button"
+                  onClick={importFromChampionship}
+                  disabled={importingResults || !form.slug}
+                  style={{ fontSize: 'var(--fs-xs)', opacity: importingResults || !form.slug ? 0.5 : 1 }}>
+                  {importingResults ? (
+                    <><span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /> Importing...</>
+                  ) : (
+                    'Import from Championship Results'
+                  )}
+                </button>
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
