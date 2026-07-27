@@ -27,6 +27,7 @@ export default function Competitions() {
   const [yearFilter, setYearFilter] = useState('all');
   const [allNews, setAllNews] = useState([]);
   const [importingResults, setImportingResults] = useState(false);
+  const [importSlug, setImportSlug] = useState('');
   const [allAthletes, setAllAthletes] = useState([]);
 
   useEffect(() => {
@@ -62,11 +63,13 @@ export default function Competitions() {
     setTagInput('');
     setResultTabDisc('Speed');
     setResultTabGender('Men');
+    setImportSlug('');
     setEditingResultIdx(null);
   };
 
   const openEdit = (comp) => {
     setEditingSlug(comp.slug);
+    setImportSlug(comp.slug || '');
     setForm({
       ...comp,
       images: comp.images?.length > 0 ? comp.images.map(normalizeImage) : [{ url: '', title: '' }],
@@ -83,9 +86,9 @@ export default function Competitions() {
   const cancelEdit = () => setEditingSlug(null);
 
   const importFromChampionship = async () => {
-    const targetSlug = form.slug?.trim();
+    const targetSlug = importSlug?.trim();
     if (!targetSlug) {
-      alert('Please set a competition slug first before importing results.');
+      alert('Please enter a competition slug to import results from.');
       return;
     }
     setImportingResults(true);
@@ -464,14 +467,21 @@ export default function Competitions() {
           <div style={{ marginTop: 'var(--sp-6)', borderTop: '1px solid var(--card-border)', paddingTop: 'var(--sp-6)' }}>
             <div className="card-header">
               <h3 className="card-title">Results</h3>
-              <div style={{ display: 'flex', gap: 'var(--sp-2)', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)', alignItems: 'center', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>
-                  Slug: <code style={{ background: 'var(--surface-2)', padding: '1px 4px', borderRadius: 3 }}>{form.slug || '(not set)'}</code>
+                  Competition slug:
                 </span>
+                <input
+                  className="form-input"
+                  value={importSlug}
+                  onChange={(e) => setImportSlug(e.target.value)}
+                  placeholder="e.g. nch-2024"
+                  style={{ width: 150, fontSize: 'var(--fs-sm)', fontFamily: 'monospace' }}
+                />
                 <button className="btn btn-outline" type="button"
                   onClick={importFromChampionship}
-                  disabled={importingResults || !form.slug}
-                  style={{ fontSize: 'var(--fs-xs)', opacity: importingResults || !form.slug ? 0.5 : 1 }}>
+                  disabled={importingResults || !importSlug.trim()}
+                  style={{ fontSize: 'var(--fs-xs)', opacity: importingResults || !importSlug.trim() ? 0.5 : 1 }}>
                   {importingResults ? (
                     <><span style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} /> Importing...</>
                   ) : (
