@@ -113,7 +113,7 @@ function Page() {
                   <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{effectiveYear}</span>
                 )}
               </h1>
-              <a href="/records" className="records-nav-link">
+              <a href="/records" className="records-nav-link" style={{ marginLeft: 'auto' }}>
                 <img className="records-nav-flag" src="https://flagcdn.com/w80/pk.png" width="24" height="16" alt="Pakistan flag" />
                 <span>National Records</span>
                 <span className="records-nav-badge">NEW</span>
@@ -221,9 +221,6 @@ function Page() {
             </>
           )}
 
-          <p className="leaderboard-note">
-            Results from national sport climbing championships sanctioned by the Pakistan Climbing Federation.
-          </p>
         </div>
       </AnimatedSection>
     </>
