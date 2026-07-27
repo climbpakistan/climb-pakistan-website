@@ -106,23 +106,22 @@ function Page() {
       <section className="page-header">
         <div className="container">
           <div className="hero-entrance">
-            <h1 className="page-title">
-              National Championship Results
-              {hasData && effectiveYear && (
-                <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{effectiveYear}</span>
-              )}
-            </h1>
+            <div className="page-head-row">
+              <h1 className="page-title">
+                National Championship Results
+                {hasData && effectiveYear && (
+                  <span style={{ color: 'var(--cp-accent)', marginLeft: '0.25em' }}>{effectiveYear}</span>
+                )}
+              </h1>
+              <a href="/records" className="records-nav-link">
+                <img className="records-nav-flag" src="https://flagcdn.com/w80/pk.png" width="24" height="16" alt="Pakistan flag" />
+                <span>National Records</span>
+                <span className="records-nav-badge">NEW</span>
+              </a>
+            </div>
             <p className="page-sub">
               Final standings from national sport climbing championships — Senior Men and Senior Women across all disciplines.
             </p>
-          </div>
-          <div className="records-gender-bar" style={{ marginTop: 'var(--sp-4)' }}>
-            <a href="/records" className="records-gender-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 'var(--sp-2)' }}>
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              National Records
-            </a>
           </div>
         </div>
       </section>
