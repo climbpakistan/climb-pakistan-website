@@ -15,6 +15,7 @@ import LearnClimbing from './pages/LearnClimbing';
 import Photos from './pages/Photos';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Results from './pages/Results';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/national-records" element={<NationalRecords />} />
         <Route path="/records-page" element={<RecordsPage />} />
         <Route path="/teams" element={<Teams />} />
+        <Route path="/championship-results" element={<Results />} />
         <Route path="/competitions" element={<Competitions />} />
         <Route path="/learn-climbing" element={<LearnClimbing />} />
         <Route path="/photos" element={<Photos />} />

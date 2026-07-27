@@ -253,6 +253,37 @@ export function deleteNationalRecord(id) { return apiFetch(`${BASE_URL}/national
 export function getRecordsPage() { return apiFetch(`${BASE_URL}/records-page`); }
 export function updateRecordsPage(data) { return apiFetch(`${BASE_URL}/records-page`, { method: 'PUT', body: JSON.stringify(data) }); }
 
+// ── Championship Results ──
+export function getResults() { return apiFetch(`${BASE_URL}/results`); }
+export function updateResults(data) { return apiFetch(`${BASE_URL}/results`, { method: 'PUT', body: JSON.stringify(data) }); }
+
+// ── Championship Results — Bulk import from Excel ──
+export async function importResultsExcel(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = localStorage.getItem('admin-token');
+  const res = await fetch(`${BASE_URL}/results/import`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem('admin-token');
+    localStorage.removeItem('admin-user');
+    window.location.href = '/login';
+    throw new Error('Session expired');
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Import failed');
+  }
+
+  return res.json();
+}
+
 // ── Page View Analytics ──
 export function getPageViewStats() {
   return apiFetch(`${BASE_URL}/page-views/stats`);

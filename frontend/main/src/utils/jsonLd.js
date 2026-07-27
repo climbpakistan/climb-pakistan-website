@@ -176,6 +176,54 @@ export function learnSectionSchema(section) {
 }
 
 /**
+ * FAQPage schema — for the Learn section ("New to Climbing?").
+ * Generates FAQPage structured data from learn section entries,
+ * enabling Google to show expandable Q&A rich results in SERP.
+ *
+ * @param {Array} sections - Array of learn section objects with title, subtitle, body
+ * @returns {Object|null} JSON-LD FAQPage schema object
+ */
+export function learnFAQSchema(sections) {
+  if (!sections || sections.length === 0) return null;
+
+  // Clean markdown formatting for clean schema output
+  function cleanText(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/\*\*([^*]+)\*\*/g, '$1')     // **bold** → bold
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1') // ![alt](url) → alt
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [text](url) → text
+      .replace(/<[^>]*>/g, '')                    // strip HTML tags
+      .replace(/\s+/g, ' ')                       // collapse whitespace
+      .trim();
+  }
+
+  const mainEntity = sections
+    .filter((s) => s.title && (s.body || s.subtitle))
+    .map((s) => {
+      const answerText = cleanText(s.subtitle || s.body).slice(0, 500);
+      if (!answerText) return null;
+      return {
+        '@type': 'Question',
+        name: s.title,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: answerText,
+        },
+      };
+    })
+    .filter(Boolean);
+
+  if (mainEntity.length === 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity,
+  };
+}
+
+/**
  * AboutPage schema.
  */
 export function aboutSchema(content) {
@@ -188,6 +236,22 @@ export function aboutSchema(content) {
   };
   if (content.tags?.length) {
     schema.keywords = content.tags.join(', ');
+  }
+  return schema;
+}
+
+/**
+ * Championship Results page schema.
+ */
+export function resultsSchema(tags) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Championship Results — Climb Pakistan',
+    description: 'National sport climbing championship results — Senior Men and Senior Women across Speed, Lead, and Boulder disciplines. Complete podium and final standings from Pakistan\'s premier climbing competitions.',
+  };
+  if (tags?.length) {
+    schema.keywords = tags.join(', ');
   }
   return schema;
 }

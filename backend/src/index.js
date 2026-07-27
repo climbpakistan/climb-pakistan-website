@@ -24,6 +24,7 @@ import pageViewRoutes from './routes/pageViews.js';
 import rebuildRoutes from './routes/rebuild.js';
 import nationalRecordRoutes from './routes/nationalRecords.js';
 import recordsPageRoutes from './routes/recordsPage.js';
+import resultsRoutes from './routes/results.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -110,6 +111,10 @@ app.use('/api/national-records', requireAdmin, nationalRecordRoutes);
 // ── Records Page Settings ──
 // GET is public; PUT requires admin auth
 app.use('/api/records-page', requireAdmin, recordsPageRoutes);
+
+// ── Championship Results ──
+// GET is public; POST / PUT / DELETE require admin auth
+app.use('/api/results', requireAdmin, resultsRoutes);
 
 // ── Vercel Rebuild Trigger ──
 // POST /api/rebuild triggers a Vercel deploy hook to rebuild the static site

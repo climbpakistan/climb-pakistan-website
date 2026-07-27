@@ -13,6 +13,7 @@ export const navLinks = [
     children: [
       { label: 'Rankings', to: '/rankings' },
       { label: 'National Records', to: '/records', badge: 'NEW' },
+      { label: 'Championship Results', to: '/results' },
     ],
   },
   { label: 'Competitions', to: '/competitions' },
@@ -27,6 +28,7 @@ export const footerLinks = {
     { label: 'Athletes', to: '/athletes' },
     { label: 'Rankings', to: '/rankings' },
     { label: 'National Records', to: '/records' },
+    { label: 'Championship Results', to: '/results' },
     { label: 'Competitions', to: '/competitions' },
   ],
   more: [
