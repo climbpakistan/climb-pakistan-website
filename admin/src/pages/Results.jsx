@@ -49,7 +49,7 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [editingIndex, setEditingIndex] = useState(null);
   const [inputMode, setInputMode] = useState('slug');
-  const [editRow, setEditRow] = useState({ slug: '', name: '', team: '', mark: '' });
+  const [editRow, setEditRow] = useState({ slug: '', name: '', team: '' });
   const [slugSuggestions, setSlugSuggestions] = useState([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
@@ -73,7 +73,17 @@ export default function Results() {
   const availableYears = useMemo(() => extractYears(entries), [entries]);
 
   const currentKey = `${gender}|${discipline}|${year}`;
-  const currentEntries = entries[currentKey] || [];
+  const currentEntries = useMemo(() => {
+    const raw = entries[currentKey] || [];
+    // Deduplicate by slug+rank or name+team+rank to prevent accidental duplicates
+    const seen = new Set();
+    return raw.filter((e) => {
+      const key = e.slug ? `${e.slug}|${e.rank}` : `${e.name || ''}|${e.team || ''}|${e.rank}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [entries, currentKey]);
 
   function resolveAthlete(slug) {
     return athletes?.find((a) => a.slug === slug);
@@ -134,7 +144,7 @@ export default function Results() {
   };
 
   const addEntry = () => {
-    const newEntry = { rank: currentEntries.length + 1, slug: '', mark: '' };
+    const newEntry = { rank: currentEntries.length + 1, slug: '' };
     setEntries({ ...entries, [currentKey]: [...currentEntries, newEntry] });
     setEditingIndex(currentEntries.length);
     setEditRow({ ...newEntry, name: '', team: '' });
@@ -150,7 +160,6 @@ export default function Results() {
       slug: entry.slug || '',
       name: entry.name || '',
       team: entry.team || '',
-      mark: entry.mark || '',
     });
     setSlugSuggestions([]);
   };
@@ -163,7 +172,6 @@ export default function Results() {
     const updated = [...currentEntries];
     const savedEntry = {
       rank: editingIndex + 1,
-      mark: editRow.mark,
     };
     if (inputMode === 'slug') {
       savedEntry.slug = editRow.slug.trim();
@@ -305,17 +313,16 @@ export default function Results() {
         <table>
           <thead>
             <tr>
-              <th style={{ width: 60 }}>Rank</th>
+              <th style={{ width: 60 }}>Position</th>
               <th>Athlete</th>
               <th>Team</th>
-              <th style={{ width: 120 }}>Mark</th>
               <th style={{ width: 130 }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentEntries.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--sp-8)' }}>
+                <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--sp-8)' }}>
                   No results yet for {gender} {discipline} {year}. Click "Add Entry" to begin, or import an Excel file.
                 </td>
               </tr>
@@ -365,9 +372,6 @@ export default function Results() {
                       <input className="form-input" value={editRow.team} onChange={(e) => setEditRow((prev) => ({ ...prev, team: e.target.value }))} placeholder="Team from Excel" style={{ fontSize: 'var(--fs-sm)' }} />
                     </td>
                     <td>
-                      <input className="form-input" value={editRow.mark} onChange={(e) => setEditRow((prev) => ({ ...prev, mark: e.target.value }))} placeholder="e.g. 6.85s, Top, 42+" style={{ width: 110, fontSize: 'var(--fs-sm)' }} />
-                    </td>
-                    <td>
                       <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
                         <button className="btn btn-primary" type="button" style={{ fontSize: 'var(--fs-xs)' }} onClick={saveEdit}>Save</button>
                         <button className="btn btn-outline" type="button" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => { setEditingIndex(null); setSlugSuggestions([]); }}>Cancel</button>
@@ -387,7 +391,6 @@ export default function Results() {
                       </div>
                     </td>
                     <td>{entryDisplayTeam(entry)}</td>
-                    <td><span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{entry.mark || '—'}</span></td>
                     <td>
                       <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
                         <button className="btn btn-outline" type="button" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => startEdit(i)}>Edit</button>

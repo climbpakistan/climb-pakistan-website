@@ -58,9 +58,16 @@ function Page() {
   const effectiveYear = year || availableYears[0] || '';
   const rawList = results?.[category]?.[discipline]?.[effectiveYear] || [];
 
-  // Sort by rank ascending
+  // Deduplicate by slug+rank or name+team+rank, then sort by rank ascending
   const list = useMemo(() => {
-    return [...rawList].sort((a, b) => (a.rank || 999) - (b.rank || 999));
+    const seen = new Set();
+    const deduped = rawList.filter((e) => {
+      const key = e.slug ? `${e.slug}|${e.rank}` : `${e.name || ''}|${e.team || ''}|${e.rank}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return [...deduped].sort((a, b) => (a.rank || 999) - (b.rank || 999));
   }, [rawList]);
 
   function resolveRowInfo(row) {
@@ -166,10 +173,9 @@ function Page() {
                   <table className="rankings-table">
                     <thead>
                       <tr>
-                        <th>Rank</th>
+                        <th>Position</th>
                         <th>Athlete</th>
                         <th>Team</th>
-                        <th>Mark</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -196,7 +202,7 @@ function Page() {
                               </div>
                             </td>
                             <td>{info.team}</td>
-                            <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{row.mark || '—'}</td>
+
                           </tr>
                         );
                       })}
