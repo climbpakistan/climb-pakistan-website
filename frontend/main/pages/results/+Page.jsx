@@ -144,14 +144,15 @@ function Page() {
           ) : (
             <>
               <div className="rankings-filters">
-                <div className="filter-bar" role="tablist" aria-label="Select category">
-                  {CATEGORIES.map((c) => (
-                    <button key={c} className={`filter-chip${category === c ? ' is-active' : ''}`}
-                      role="tab" aria-selected={category === c}
-                      onClick={() => setCategory(c)}>
-                      Senior {c}
-                    </button>
-                  ))}
+                <div className="records-gender-bar" style={{ marginBottom: 'var(--sp-4)' }}>
+                  <button className={`records-gender-btn${category === 'Men' ? ' is-active' : ''}`} onClick={() => setCategory('Men')}>
+                    <img className="records-gender-flag" src="https://flagcdn.com/w80/pk.png" width="21" height="14" alt="" />
+                    Men's Results
+                  </button>
+                  <button className={`records-gender-btn${category === 'Women' ? ' is-active' : ''}`} onClick={() => setCategory('Women')}>
+                    <img className="records-gender-flag" src="https://flagcdn.com/w80/pk.png" width="21" height="14" alt="" />
+                    Women's Results
+                  </button>
                 </div>
                 <div className="filter-bar" role="tablist" aria-label="Select discipline">
                   {DISCIPLINES.map((d) => (
