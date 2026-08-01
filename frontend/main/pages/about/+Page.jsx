@@ -8,10 +8,10 @@ export { Page };
 function Page() {
   const { content } = useData();
 
-  const stats = content?.stats?.length ? content.stats : null;
+  const sections = content?.sections?.length ? content.sections : null;
 
-  const aboutDesc = content?.intro
-    ? content.intro.slice(0, 160)
+  const aboutDesc = sections
+    ? (sections[0]?.paragraphs?.[0] || '').slice(0, 160)
     : content?.mission
       ? content.mission.slice(0, 160)
       : "The story behind Pakistan's sport climbing platform — Climb Pakistan.";
@@ -39,28 +39,31 @@ function Page() {
 
       <AnimatedSection className="section-tight">
         <div className="container about-container">
-          {content?.intro ? <p className="about-lead">{content.intro}</p> : null}
-
-          {content?.mission ? (
+          {sections ? (
+            sections.map((section, i) => (
+              <div key={i} className="about-section">
+                {section.heading ? <h2 className="detail-heading">{section.heading}</h2> : null}
+                {(section.paragraphs || [])[0] ? <p className="detail-text">{(section.paragraphs || [])[0]}</p> : null}
+                {section.listItems?.length > 0 && (
+                  <ul className="about-list">
+                    {section.listItems.map((item, k) => (
+                      <li key={k}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+                {(section.paragraphs || []).slice(1).map((p, j) => (
+                  <p key={j} className="detail-text">{p}</p>
+                ))}
+              </div>
+            ))
+          ) : (
             <>
+              <p className="about-lead">{content?.intro || ''}</p>
               <h2 className="detail-heading">Our Mission</h2>
-              <p className="detail-text">{content.mission}</p>
+              <p className="detail-text">{content?.mission || ''}</p>
             </>
-          ) : null}
-
-          {stats && (
-            <div className="about-stats">
-              {stats.map((stat, i) => (
-                <div key={i} className="about-stat">
-                  <span className="about-stat-value">{stat.value}</span>
-                  <span className="about-stat-label">{stat.label}</span>
-                </div>
-              ))}
-            </div>
           )}
-
           {content?.closing ? <p className="about-closing">{content.closing}</p> : null}
-
           <a href="/contact" className="btn btn-primary" style={{ marginTop: 'var(--sp-6)' }}>Get in Touch</a>
         </div>
       </AnimatedSection>

@@ -2657,6 +2657,31 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .about-container .detail-text { margin-bottom: var(--sp-5); }
 
+.about-section + .about-section { margin-top: var(--sp-10); }
+.about-list {
+  list-style: none;
+  margin: 0 0 var(--sp-5);
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+}
+.about-list li {
+  position: relative;
+  padding-left: 1.75rem;
+  color: var(--cp-text);
+  line-height: 1.65;
+}
+.about-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--cp-accent);
+  box-shadow: 0 0 10px var(--cp-accent-soft);
+}
 .about-closing {
   font-size: var(--fs-md);
   font-weight: 600;
