@@ -2,7 +2,9 @@ import { Head } from 'vike-react/Head';
 
 const BASE_URL = 'https://www.climbpakistan.com';
 const SITE_NAME = 'Climb Pakistan';
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.svg`;
+// Note: must be a raster format (PNG/JPG) — WhatsApp & most social platforms
+// ignore SVG og:image files and will show no link preview thumbnail.
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
 const TWITTER_HANDLE = '@climb_pakistan';
 
 /**
