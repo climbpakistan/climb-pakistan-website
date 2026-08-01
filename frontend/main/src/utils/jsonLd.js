@@ -228,11 +228,15 @@ export function learnFAQSchema(sections) {
  */
 export function aboutSchema(content) {
   if (!content) return null;
+  const firstParagraph =
+    content.sections?.[0]?.paragraphs?.[0] ||
+    content.mission ||
+    "The story behind Pakistan's sport climbing platform.";
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
     name: 'About — Climb Pakistan',
-    description: content.mission?.slice(0, 300) || "The story behind Pakistan's sport climbing platform.",
+    description: firstParagraph.slice(0, 300),
   };
   if (content.tags?.length) {
     schema.keywords = content.tags.join(', ');

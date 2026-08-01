@@ -5,10 +5,21 @@ const statSchema = new mongoose.Schema({
   value: { type: String, required: true },
 }, { _id: false });
 
+// A content section: an optional H2 heading, one or more paragraphs,
+// and an optional bulleted list. Rendered as-is on the About page.
+const sectionSchema = new mongoose.Schema({
+  heading: { type: String, default: '' },
+  paragraphs: [{ type: String }],
+  listItems: [{ type: String }],
+}, { _id: false });
+
 const aboutContentSchema = new mongoose.Schema({
   intro: { type: String, default: '' },
   mission: { type: String, default: '' },
   closing: { type: String, default: '' },
+  // Structured sections (heading + paragraphs + optional bullet list).
+  // When present, the public page renders these instead of intro/mission.
+  sections: [sectionSchema],
   stats: [statSchema],
   tags: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
