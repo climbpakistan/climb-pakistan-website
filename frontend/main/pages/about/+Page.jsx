@@ -32,7 +32,6 @@ function Page() {
         <div className="container">
           <div className="hero-entrance">
             <h1 className="page-title">About Climb Pakistan</h1>
-            <p className="page-sub">Pakistan's sport climbing magazine and digital platform.</p>
           </div>
         </div>
       </section>
