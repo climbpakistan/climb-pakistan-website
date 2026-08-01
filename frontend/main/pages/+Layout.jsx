@@ -1,3 +1,4 @@
+import { Head } from 'vike-react/Head';
 import { usePageContext } from 'vike-react/usePageContext';
 import { useEffect } from 'react';
 import { ThemeProvider } from '../src/hooks/ThemeContext';
@@ -32,6 +33,13 @@ export default function Layout({ children }) {
   return (
     <ThemeProvider>
       <AnalyticsProvider>
+        {/* Brand favicon — declared here so it survives Vike's pre-render
+            (links in index.html are not preserved in the built head). */}
+        <Head>
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+          <link rel="icon" type="image/png" href="/favicon.png" />
+          <link rel="apple-touch-icon" href="/favicon.png" />
+        </Head>
         {/* Structured data — global for all pages */}
         <Seo
           title=""

@@ -22,7 +22,8 @@ admin/
 │   ├── components/
 │   │   ├── DashboardLayout.jsx   # Layout: Sidebar + Topbar + Outlet
 │   │   ├── Sidebar.jsx           # Navigation sidebar with icon links
-│   │   └── Topbar.jsx            # Top bar: page title, theme toggle, logout, avatar
+│   │   ├── Topbar.jsx            # Top bar: page title, theme toggle, logout, avatar
+│   │   └── ImagePositionPicker.jsx # Crop/position picker for hero images
 │   ├── contexts/
 │   │   ├── AuthContext.jsx       # Auth state (login/logout via backend API)
 │   │   └── ThemeContext.jsx      # Dark/light theme toggle
@@ -38,29 +39,36 @@ admin/
 │   │   ├── LearnClimbing.jsx     # Educational sections CRUD with gallery
 │   │   ├── Photos.jsx            # Media library with category filter + upload + competition filter
 │   │   ├── About.jsx             # About page content editor
-│   │   └── Contact.jsx           # Contact settings (notification email save/validate)
+│   │   ├── Contact.jsx           # Contact settings (notification email save/validate)
+│   │   ├── NationalRecords.jsx   # National speed climbing records CRUD with date picker
+│   │   ├── RecordsPage.jsx       # Records page SEO & hero content editor
+│   │   └── Results.jsx           # Championship results viewer (from Excel import)
 │   └── styles/
 │       └── global.css            # All admin styles (variables, layout, components)
 ├── vite.config.js                # Dev server on port 5174
+├── vercel.json                   # Vercel deployment config
 └── package.json
 ```
 
 ## Admin Pages
 
-| Route | Page | Description |
-|-------|------|-------------|
-| `/login` | Login | Email + password authentication |
-| `/` | Dashboard | Stats overview (live counts from API) |
-| `/main` | Homepage | Hero banner, CTA buttons, featured champions, latest news count, coverage sections, follow CTA |
-| `/latest-news` | Latest News | CRUD for news articles with publish/draft status, rich text body editor |
-| `/athletes` | Athletes | CRUD for athletes with medals, champion status, World Climbing URL |
-| `/rankings` | Rankings | **Individual Rankings**: slug/manual modes, year/gender/discipline. **Team Rankings**: slug/manual modes, men/women/total points |
-| `/teams` | Teams | Team profiles CRUD with name, slug, logo upload (Cloudinary), description, active status |
-| `/competitions` | Competitions | CRUD with results editor (Speed/Lead/Boulder × Men/Women), image links array, year filter |
-| `/learn-climbing` | Learn Climbing | CRUD for educational sections with gallery and rich text body editor |
-| `/photos` | Photos | Media library: add with name + category + upload, category filter, competition filter, edit/delete |
-| `/about` | About | Edit intro, mission, closing text |
-| `/contact` | Contact | Notification email management with validation, how-it-works info |
+| Route               | Page              | Description                                                          |
+| ------------------- | ----------------- | -------------------------------------------------------------------- |
+| `/login`            | Login             | Email + password authentication                                      |
+| `/`                 | Dashboard         | Stats overview (live counts from API)                                |
+| `/main`             | Homepage          | Hero banner, CTA buttons, featured champions, latest news count, coverage sections, follow CTA |
+| `/latest-news`      | Latest News       | CRUD for news articles with publish/draft status, rich text body editor |
+| `/athletes`         | Athletes          | CRUD for athletes with medals, champion status, World Climbing URL   |
+| `/rankings`         | Rankings          | **Individual Rankings**: slug/manual modes, year/gender/discipline. **Team Rankings**: slug/manual modes, men/women/total points |
+| `/teams`            | Teams             | Team profiles CRUD with name, slug, logo upload (Cloudinary), description, active status |
+| `/competitions`     | Competitions      | CRUD with results editor (Speed/Lead/Boulder × Men/Women), image links array, year filter, news linking |
+| `/learn-climbing`   | Learn Climbing    | CRUD for educational sections with gallery and rich text body editor |
+| `/photos`           | Photos            | Media library: add with name + category + upload, category filter, competition filter, edit/delete |
+| `/about`            | About             | Edit intro, mission, closing text                                    |
+| `/contact`          | Contact           | Notification email management with validation, how-it-works info     |
+| `/national-records` | National Records  | CRUD for speed climbing records: gender, discipline, athlete, time, competition, venue, date picker, tags, current/previous type |
+| `/records-page`     | Records Page      | Edit records page SEO settings: hero title, subtitle, meta title, meta description, keywords |
+| `/results`          | Results           | View championship results imported from Excel files                  |
 
 ## Getting Started
 
@@ -84,7 +92,7 @@ The admin panel connects to the backend at `http://localhost:3001/api` by defaul
 set VITE_API_URL=https://your-api.com && npm run dev
 
 # Windows (PowerShell)
-$env:VITE_API_URL="https://your-api.com"; npm run dev
+$env:VITE_API_URL=\"https://your-api.com\"; npm run dev
 ```
 
 ## Auth Flow
@@ -130,3 +138,17 @@ $env:VITE_API_URL="https://your-api.com"; npm run dev
 - **Team Profiles**: Name, unique slug, logo upload (→ Cloudinary), description, active toggle
 - **Reusable**: Team slug is used in Team Rankings for auto-resolution of name/logo
 - **CRUD**: Full create, view, edit, delete
+
+### National Records
+- **CRUD management**: Add/edit/delete speed climbing records
+- **Fields**: Gender (Men/Women), discipline, athlete name, image, slug, record time, competition, venue, date picker
+- **Record types**: Current vs Previous — mark records as current or historical
+- **Tags**: Free-form text tags for categorization and SEO
+
+### Records Page Settings
+- **SEO Management**: Edit hero title, accent title, subtitle, meta title, meta description, and keywords
+- **Hero Content**: Control how the records page header appears to visitors
+
+### Championship Results
+- **Viewer**: Display championship results imported from Excel files
+- **Integration**: Works with backend Excel parsing pipeline

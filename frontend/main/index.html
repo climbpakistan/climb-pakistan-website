@@ -3,6 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      ⚠️ FAVICON — READ BEFORE EDITING
+
+      These <link rel="icon"> tags are NOT included in the pre-rendered build.
+      Vike does not preserve the favicon <link> tags from this file during
+      `npm run build` (see dist/client/*.html) — the favicon is therefore
+      declared AGAIN in pages/+Layout.jsx via vike-react/Head (<Head>).
+
+      If you change the favicon (logo.svg / favicon.png), update BOTH places:
+      1. Here (used by the dev server / Vite directly), and
+      2. pages/+Layout.jsx — this is the version that actually ships.
+
+      Without the +Layout.jsx copy, browsers fall back to a cached/old
+      favicon and the site shows no icon on deployed pages.
+    -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
