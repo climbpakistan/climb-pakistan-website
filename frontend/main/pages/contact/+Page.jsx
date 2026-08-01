@@ -90,7 +90,6 @@ function Page() {
         <div className="page-header-glow"></div>
         <div className="container" style={{ textAlign: 'center' }}>
           <div className="hero-entrance">
-            <span className="eyebrow" style={{ marginBottom: 'var(--sp-2)', justifyContent: 'center' }}>Contact</span>
             <h1 className="page-title">Get in Touch</h1>
             <p className="page-sub" style={{ marginInline: 'auto' }}>We'd love to hear from you. Drop us a message and we'll get back to you.</p>
           </div>

@@ -229,7 +229,7 @@ export function learnFAQSchema(sections) {
 export function aboutSchema(content) {
   if (!content) return null;
   const firstParagraph =
-    content.sections?.[0]?.paragraphs?.[0] ||
+    content.intro ||
     content.mission ||
     "The story behind Pakistan's sport climbing platform.";
   const schema = {
