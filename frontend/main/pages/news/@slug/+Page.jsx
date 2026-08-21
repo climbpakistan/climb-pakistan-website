@@ -61,9 +61,34 @@ function renderFormattedText(text) {
   });
 }
 
+function renderLink(url, label, key) {
+  const external = /^https?:\/\//i.test(url);
+  return external ? (
+    <a key={key} href={url} target="_blank" rel="noopener noreferrer">{label}</a>
+  ) : (
+    <a key={key} href={url}>{label}</a>
+  );
+}
+
 function renderInlineText(text) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  const parts = text.split(/(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|https?:\/\/[^\s<>()[\]]+)/g);
   return parts.map((tp, j) => {
+    if (!tp) return null;
+    const linkMatch = tp.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
+    if (linkMatch) {
+      return renderLink(linkMatch[2], linkMatch[1], j);
+    }
+    if (/^https?:\/\//i.test(tp)) {
+      const url = tp.replace(/[.,;:!?)\]]+$/, '');
+      const trailing = tp.slice(url.length);
+      if (!trailing) return renderLink(tp, tp, j);
+      return (
+        <span key={j}>
+          {renderLink(url, url)}
+          {trailing}
+        </span>
+      );
+    }
     if (tp.startsWith('**') && tp.endsWith('**')) {
       return <strong key={j}>{tp.slice(2, -2)}</strong>;
     }

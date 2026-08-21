@@ -1079,6 +1079,15 @@ input, textarea, select { font: inherit; color: inherit; }
   font-size: var(--fs-base);
   line-height: 1.75;
 }
+.article-body a {
+  color: var(--cp-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-word;
+}
+.article-body a:hover {
+  opacity: 0.8;
+}
 .article-body .inline-image {
   margin-block: var(--sp-4);
   border-radius: var(--radius-md);

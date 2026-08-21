@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getNews, createNews, updateNews, deleteNews } from '../api';
 import ImagePositionPicker from '../components/ImagePositionPicker';
 
-const tagOptions = ['Competitions', 'Announcements', 'Athletes'];
+const tagOptions = ['Competitions', 'Announcements', 'Athletes', 'News', 'Rankings', 'Records', 'Highlights'];
 
 const LAYOUT_OPTIONS = [
   { value: 'image-left', label: 'Image Left + Text Right' },

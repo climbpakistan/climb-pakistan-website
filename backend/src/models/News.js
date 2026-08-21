@@ -18,7 +18,7 @@ const recommendationSchema = new mongoose.Schema({
 const newsSchema = new mongoose.Schema({
   slug: { type: String, required: true, unique: true, index: true },
   title: { type: String, required: true },
-  tag: { type: String, required: true, enum: ['Competitions', 'Announcements', 'Athletes'] },
+  tag: { type: String, required: true, enum: ['Competitions', 'Announcements', 'Athletes', 'News', 'Rankings', 'Records', 'Highlights'] },
   date: { type: String, required: true },
   excerpt: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
