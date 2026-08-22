@@ -20,7 +20,8 @@ export default function LatestNews() {
   const [loading, setLoading] = useState(true);
   const [editingSlug, setEditingSlug] = useState(null);
   const [form, setForm] = useState({
-    slug: '', title: '', tag: 'Competitions', date: '', excerpt: '', imageUrl: '', imagePosition: '50% 50%',
+    slug: '', title: '', tag: 'Competitions', date: '', excerpt: '', metaDescription: '', ogImage: '',
+    imageUrl: '', imagePosition: '50% 50%',
     contentSections: [emptySection()],
     tags: [],
     recommendations: [],
@@ -37,7 +38,7 @@ export default function LatestNews() {
     setEditingSlug('__new__');
     setForm({
       slug: '', title: '', tag: 'Competitions', date: new Date().toISOString().slice(0, 10),
-      excerpt: '', imageUrl: '', imagePosition: '50% 50%',
+      excerpt: '', metaDescription: '', ogImage: '', imageUrl: '', imagePosition: '50% 50%',
       contentSections: [emptySection()],
       tags: [],
       recommendations: [],
@@ -76,6 +77,8 @@ export default function LatestNews() {
       tag: article.tag,
       date: article.date,
       excerpt: article.excerpt || '',
+      metaDescription: article.metaDescription || '',
+      ogImage: article.ogImage || '',
       imageUrl: article.imageUrl || '',
       imagePosition: article.imagePosition || '50% 50%',
       contentSections: contentSections.map((s) => ({
@@ -152,6 +155,8 @@ export default function LatestNews() {
       tag: form.tag,
       date: form.date,
       excerpt: form.excerpt,
+      metaDescription: form.metaDescription,
+      ogImage: form.ogImage,
       imageUrl: form.imageUrl,
       imagePosition: form.imagePosition,
       body: sections.map((s) => s.text || ''),  // Keep body array for backward compat
@@ -254,8 +259,42 @@ export default function LatestNews() {
                 <option>Published</option>
               </select>
             </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">SEO Tags <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(hidden — used in structured data)</span></label>
+            {/* ── SEO & Sharing ── */}
+          <div style={{ gridColumn: '1 / -1', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--sp-4)', background: 'var(--surface-2)' }}>
+            <div style={{ marginBottom: 'var(--sp-3)' }}>
+              <strong style={{ fontSize: 'var(--fs-sm)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>SEO &amp; Sharing</strong>
+              <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', margin: 'var(--sp-1) 0 0' }}>
+                Controls how this article appears in Google search results and when shared on WhatsApp, Facebook or LinkedIn.
+              </p>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 'var(--sp-3)' }}>
+              <label className="form-label">Meta Description <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(shown in Google results — ~155 chars recommended)</span></label>
+              <textarea
+                className="form-input"
+                rows={3}
+                value={form.metaDescription}
+                onChange={(e) => setForm({ ...form, metaDescription: e.target.value })}
+                placeholder="A short, human summary of the story — what happened, where, and why it matters. Leave blank to auto-derive from the excerpt."
+                style={{ resize: 'vertical' }}
+              />
+              <div style={{ fontSize: 'var(--fs-xs)', color: form.metaDescription.length > 160 ? 'var(--error)' : 'var(--text-muted)', marginTop: 4, textAlign: 'right' }}>
+                {form.metaDescription.length}/160
+              </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 'var(--sp-3)' }}>
+              <label className="form-label">Open Graph Image URL <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(optional — share thumbnail, defaults to the featured image)</span></label>
+              <input className="form-input" value={form.ogImage} onChange={(e) => setForm({ ...form, ogImage: e.target.value })} placeholder="https://example.com/share-thumbnail.jpg" />
+              {form.ogImage && (
+                <div style={{ marginTop: 'var(--sp-2)', maxHeight: 100, overflow: 'hidden', borderRadius: 'var(--radius-sm)' }}>
+                  <img src={form.ogImage} alt="" style={{ width: 'auto', maxHeight: 100, objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none' }} />
+                </div>
+              )}
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">SEO Keywords (tags) <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 400 }}>(used in structured data — add 3–5 specific topics: athlete names, competitions, locations)</span></label>
               <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap', alignItems: 'center', marginBottom: 'var(--sp-2)' }}>
                 {form.tags.map((t) => (
                   <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 4, background: 'var(--accent-light)', fontSize: 'var(--fs-xs)', fontWeight: 500 }}>
@@ -270,15 +309,16 @@ export default function LatestNews() {
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagKeyDown}
-                  placeholder="Type a tag and press Enter..."
-                  style={{ flex: 1, maxWidth: 300, fontSize: 'var(--fs-sm)' }}
+                  placeholder="Type a tag and press Enter... (e.g. athlete names, competitions, cities)"
+                  style={{ flex: 1, maxWidth: 320, fontSize: 'var(--fs-sm)' }}
                 />
                 <button type="button" className="btn btn-outline" style={{ fontSize: 'var(--fs-xs)' }} onClick={() => addTag(tagInput)}>Add</button>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* ── Section Editor ── */}
+        {/* ── Section Editor ── */}
           <div className="form-group" style={{ marginTop: 'var(--sp-6)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-4)' }}>
               <label className="form-label" style={{ marginBottom: 0, fontSize: 'var(--fs-md)' }}>Content Sections</label>

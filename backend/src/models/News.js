@@ -23,6 +23,8 @@ const newsSchema = new mongoose.Schema({
   tag: { type: String, required: true, enum: ['Competitions', 'Announcements', 'Athletes', 'News', 'Rankings', 'Records', 'Highlights'] },
   date: { type: String, required: true },
   excerpt: { type: String, default: '' },
+  metaDescription: { type: String, default: '' },
+  ogImage: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
   imagePosition: { type: String, default: '50% 50%' },
   body: [{ type: String }],

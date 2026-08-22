@@ -47,10 +47,63 @@ export function websiteSchema() {
 }
 
 /**
+ * Strip markdown / editor markup out of a content string so it reads as
+ * plain prose for descriptions and structured data.
+ *
+ * Handles: ![alt](url) images, [label](url) links, **bold**, [s1]..[/s1]
+ * size spans, bare links, raw HTML, repeated whitespace.
+ */
+export function cleanText(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')          // markdown images
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')        // markdown links → label
+    .replace(/\[\/?s[1-4]\]/g, ' ')                 // size-markup tags
+    .replace(/\*\*([^*]+)\*\*/g, '$1')              // bold markers
+    .replace(/https?:\/\/[^\s<>()[\]]+/g, ' ')      // bare URLs
+    .replace(/<[^>]*>/g, ' ')                       // raw HTML tags
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Truncate a string to roughly `max` characters, cutting on a word boundary
+ * and appending an ellipsis when truncated.
+ */
+export function truncate(text, max = 155) {
+  const clean = cleanText(text);
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max + 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 40 ? cut.slice(0, lastSpace) : clean.slice(0, max)).replace(/[,\s]+$/, '')}…`;
+}
+
+/**
+ * Build a description for an article (meta description + structured data).
+ * Priority: explicit metaDescription → excerpt → first section text → first
+ * paragraph. Always cleaned and truncated.
+ */
+export function articleDescription(article, max = 155) {
+  if (!article) return '';
+  const candidates = [
+    article.metaDescription,
+    article.excerpt,
+    article.sections?.find((s) => s.text)?.text,
+    article.body?.[0],
+  ];
+  for (const c of candidates) {
+    if (cleanText(c)) return truncate(c, max);
+  }
+  return '';
+}
+
+/**
  * BreadcrumbList schema — generated from current path segments.
  * Example: /news/some-article → [Home, News, Some Article]
+ * Pass `lastLabel` (e.g. the article title) to override the last crumb's
+ * name instead of the slug-derived fallback.
  */
-export function breadcrumbSchema(pathname) {
+export function breadcrumbSchema(pathname, lastLabel) {
   if (!pathname || pathname === '/') return null;
 
   const segments = pathname.split('/').filter(Boolean);
@@ -59,12 +112,17 @@ export function breadcrumbSchema(pathname) {
   let accumulated = '';
   segments.forEach((seg, i) => {
     accumulated += `/${seg}`;
-    // Convert slug to human-readable label
-    const name = seg
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    const isLast = i === segments.length - 1;
+    let name;
+    if (isLast && lastLabel) {
+      name = lastLabel;
+    } else {
+      name = seg
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    }
     crumbs.push({
-      name: i === segments.length - 1 ? name : name,
+      name,
       url: `${BASE_URL}${accumulated}`,
     });
   });
@@ -82,18 +140,59 @@ export function breadcrumbSchema(pathname) {
 }
 
 /**
+ * Safely convert a raw date value (string or Date) to a W3C ISO-8601 string.
+ * Returns undefined for invalid/empty input so structured data stays clean.
+ */
+function isoDate(value) {
+  if (!value) return undefined;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
+/**
  * NewsArticle schema — for individual news articles.
+ * Follows Google's NewsArticle guidelines: proper ImageObject, keywords,
+ * articleSection, dates, and accessibility/free access hints.
  */
 export function articleSchema(article) {
   if (!article) return null;
+
+  const headline = article.title;
+  const desc = articleDescription(article, 300);
+  const published = isoDate(article.date || article.createdAt);
+  const modified = isoDate(article.updatedAt || article.date || article.createdAt);
+
+  // Word count from all textual content (used for accurate indexing)
+  let wordCount = 0;
+  const textCandidates = [
+    article.excerpt,
+    ...(article.sections?.map((s) => `${s.heading || ''} ${s.text || ''}`) || []),
+    ...(article.body || []),
+  ];
+  for (const t of textCandidates) {
+    if (t) wordCount += cleanText(t).split(/\s+/).filter(Boolean).length;
+  }
+
+  // Helper for generating a properly-shaped image value.
+  const makeImage = (url) => (url
+    ? { '@type': 'ImageObject', url, width: 1200, height: 630 }
+    : `${BASE_URL}/og-default.png`);
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
-    headline: article.title,
-    description: article.body?.[0] || article.sections?.[0]?.text || '',
-    image: article.imageUrl || `${BASE_URL}/og-default.png`,
-    datePublished: article.date || article.createdAt,
-    dateModified: article.updatedAt || article.date || article.createdAt,
+    '@id': `${BASE_URL}/news/${article.slug}`,
+    headline,
+    url: `${BASE_URL}/news/${article.slug}`,
+    description: desc,
+    image: makeImage(article.imageUrl),
+    thumbnailUrl: article.imageUrl || undefined,
+    datePublished: published,
+    dateModified: modified,
+    articleSection: article.tag || undefined,
+    inLanguage: 'en',
+    wordCount: wordCount || undefined,
+    isAccessibleForFree: true,
     author: {
       '@type': 'Organization',
       name: 'Climb Pakistan',
@@ -112,9 +211,16 @@ export function articleSchema(article) {
       '@id': `${BASE_URL}/news/${article.slug}`,
     },
   };
+
   if (article.tags?.length) {
     schema.keywords = article.tags.join(', ');
   }
+
+  // Clean undefined values so output stays compact and valid.
+  Object.keys(schema).forEach((key) => {
+    if (schema[key] === undefined) delete schema[key];
+  });
+
   return schema;
 }
 

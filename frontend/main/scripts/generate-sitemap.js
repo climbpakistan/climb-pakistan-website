@@ -62,7 +62,7 @@ function xmlEscape(str) {
     .replace(/'/g, '&apos;');
 }
 
-function urlElement(loc, { lastmod, changefreq, priority } = {}) {
+function urlElement(loc, { lastmod, changefreq, priority, images } = {}) {
   const parts = [
     '  <url>',
     `    <loc>${xmlEscape(loc)}</loc>`,
@@ -70,8 +70,24 @@ function urlElement(loc, { lastmod, changefreq, priority } = {}) {
   if (lastmod) parts.push(`    <lastmod>${lastmod}</lastmod>`);
   if (changefreq) parts.push(`    <changefreq>${changefreq}</changefreq>`);
   if (priority) parts.push(`    <priority>${priority}</priority>`);
+  // Google image sitemap extension — helps discovery via Google Images.
+  if (images?.length) {
+    for (const img of images) {
+      parts.push('    <image:image>');
+      parts.push(`      <image:loc>${xmlEscape(img.loc)}</image:loc>`);
+      if (img.title) parts.push(`      <image:title>${xmlEscape(img.title)}</image:title>`);
+      parts.push('    </image:image>');
+    }
+  }
   parts.push('  </url>');
   return parts.join('\n');
+}
+
+// Make an image URL absolute (sitemap loc values must be fully-qualified).
+function absoluteUrl(url) {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
 // ---- main ----------------------------------------------------------
@@ -129,8 +145,11 @@ async function main() {
   for (const article of articles) {
     urls.push(urlElement(`${SITE_URL}/news/${encodeURIComponent(article.slug)}`, {
       lastmod: w3cDate(article.updatedAt || article.date),
-      changefreq: 'monthly',
-      priority: '0.6',
+      changefreq: 'weekly',
+      priority: '0.8',
+      images: article.imageUrl
+        ? [{ loc: absoluteUrl(article.imageUrl), title: article.title }]
+        : undefined,
     }));
   }
   for (const comp of competitions) {
@@ -191,6 +210,7 @@ async function main() {
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">

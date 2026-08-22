@@ -40,15 +40,20 @@ export default function Layout({ children }) {
           <link rel="icon" type="image/png" href="/favicon.png" />
           <link rel="apple-touch-icon" href="/favicon.png" />
         </Head>
-        {/* Structured data — global for all pages */}
+        {/* Structured data — global for all pages.
+            structuredDataOnly keeps the Layout from emitting generic title/
+            og tags that would collide with page-level <Seo> meta. */}
         <Seo
-          title=""
+          structuredDataOnly
           jsonLd={{
             '@context': 'https://schema.org',
             '@graph': [
               organizationSchema(),
               websiteSchema(),
-              breadcrumbSchema(currentPath),
+              breadcrumbSchema(
+                currentPath,
+                pageContext?.data?.article?.title,  // real article title → breadcrumb
+              ),
             ].filter(Boolean),
           }}
         />

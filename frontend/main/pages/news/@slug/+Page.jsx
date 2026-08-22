@@ -2,8 +2,7 @@ import { useData } from 'vike-react/useData';
 import NewsCard from '../../../src/components/NewsCard';
 import RecommendationCard from '../../../src/components/RecommendationCard';
 import Seo from '../../../src/components/Seo';
-import { articleSchema } from '../../../src/utils/jsonLd';
-import { fetchJSON, API_BASE } from '../../data';
+import { articleSchema, articleDescription } from '../../../src/utils/jsonLd';
 
 export { Page };
 
@@ -123,9 +122,17 @@ function Page() {
 
   const related = allArticles?.filter((a) => a.slug !== article.slug).slice(0, 3) || [];
 
-  const articleDesc = article.body?.[0]
-    ? article.body[0].replace(/<[^>]*>/g, '').slice(0, 160)
-    : article.sections?.find((s) => s.text)?.text?.replace(/<[^>]*>/g, '').slice(0, 160) || '';
+  // Meta description: explicit metaDescription → excerpt → first section text →
+  // first paragraph. Always cleaned of markdown and truncated to ~155 chars.
+  const articleDesc = articleDescription(article, 155);
+  // Normalize to ISO-8601 (guarded — some legacy records may lack dates).
+  const safeIso = (v) => {
+    if (!v) return undefined;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? undefined : d.toISOString();
+  };
+  const publishedIso = safeIso(article.date || article.createdAt);
+  const modifiedIso = safeIso(article.updatedAt || article.date || article.createdAt);
 
   return (
     <>
@@ -133,12 +140,15 @@ function Page() {
         title={article.title}
         description={articleDesc}
         keywords={[`sport climbing ${article.tag?.toLowerCase() || 'news'} Pakistan`, ...(article.tags || [])].filter(Boolean).join(', ')}
-        ogImage={article.imageUrl}
+        ogImage={article.ogImage || article.imageUrl}
+        ogImageAlt={article.title}
         ogType="article"
         path={`/news/${slug}`}
         jsonLd={articleSchema(article)}
-        articlePublishedTime={article.date || article.createdAt}
-        articleModifiedTime={article.updatedAt || article.date || article.createdAt}
+        articlePublishedTime={publishedIso}
+        articleModifiedTime={modifiedIso}
+        articleSection={article.tag}
+        articleTags={article.tags}
       />
 
       <article className="article">
