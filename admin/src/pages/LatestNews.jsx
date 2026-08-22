@@ -5,13 +5,14 @@ import ImagePositionPicker from '../components/ImagePositionPicker';
 const tagOptions = ['Competitions', 'Announcements', 'Athletes', 'News', 'Rankings', 'Records', 'Highlights'];
 
 const LAYOUT_OPTIONS = [
+  { value: 'text-only', label: 'Text Only' },
   { value: 'image-left', label: 'Image Left + Text Right' },
   { value: 'image-center', label: 'Title & Image Center + Text Below' },
-  { value: 'text-only', label: 'Text Only' },
+  { value: 'table', label: 'Table' },
 ];
 
 function emptySection() {
-  return { layout: 'text-only', heading: '', imageUrl: '', text: '' };
+  return { layout: 'text-only', heading: '', imageUrl: '', text: '', tableHeaders: ['', ''], tableRows: [['', '']] };
 }
 
 export default function LatestNews() {
@@ -76,7 +77,11 @@ export default function LatestNews() {
       excerpt: article.excerpt || '',
       imageUrl: article.imageUrl || '',
       imagePosition: article.imagePosition || '50% 50%',
-      contentSections,
+      contentSections: contentSections.map((s) => ({
+        ...s,
+        tableHeaders: s.tableHeaders || ['', ''],
+        tableRows: s.tableRows || [['', '']],
+      })),
       tags: article.tags || [],
       recommendations: article.recommendations || [],
       status: article.status,
@@ -132,8 +137,11 @@ export default function LatestNews() {
     if (!form.title.trim()) return;
     const slug = form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    // Clean up empty text sections
-    const sections = form.contentSections.filter((s) => s.text.trim() || s.layout !== 'text-only');
+    // Clean up empty text sections, but always keep table sections
+    const sections = form.contentSections.filter((s) => {
+      if (s.layout === 'table') return true;
+      return s.text.trim() || s.layout !== 'text-only';
+    });
 
     const article = {
       slug,
@@ -355,7 +363,7 @@ export default function LatestNews() {
                 </div>
 
                 {/* Image URL - only for image-left and image-center */}
-                {section.layout !== 'text-only' && (
+                {(section.layout === 'image-left' || section.layout === 'image-center') && (
                   <div className="form-group" style={{ marginBottom: 'var(--sp-3)' }}>
                     <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Image URL</label>
                     <input
@@ -372,21 +380,118 @@ export default function LatestNews() {
                   </div>
                 )}
 
-                {/* Text content */}
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Text Content</label>
-                  <textarea
-                    className="form-input"
-                    rows={6}
-                    value={section.text}
-                    onChange={(e) => updateSection(i, 'text', e.target.value)}
-                    placeholder="Write your content here... **bold** for emphasis"
-                    style={{ fontFamily: 'monospace', fontSize: 'var(--fs-sm)', lineHeight: 1.6 }}
-                  />
-                </div>
+                {/* Text content - hidden for table layout */}
+                {section.layout !== 'table' && (
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Text Content</label>
+                    <textarea
+                      className="form-input"
+                      rows={6}
+                      value={section.text}
+                      onChange={(e) => updateSection(i, 'text', e.target.value)}
+                      placeholder="Write your content here... **bold** for emphasis"
+                      style={{ fontFamily: 'monospace', fontSize: 'var(--fs-sm)', lineHeight: 1.6 }}
+                    />
+                  </div>
+                )}
+
+                {/* ── Table Editor ── */}
+                {section.layout === 'table' && (
+                  <div className="form-group">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-2)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--fs-xs)', marginBottom: 0 }}>Table Data</label>
+                      <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+                        <button type="button" className="btn btn-outline" style={{ fontSize: 'var(--fs-xs)' }}
+                          onClick={() => {
+                            const headers = [...(section.tableHeaders || ['', '']), ''];
+                            const rows = (section.tableRows || [['', '']]).map((row) => [...row, '']);
+                            updateSection(i, 'tableHeaders', headers);
+                            updateSection(i, 'tableRows', rows);
+                          }}>
+                          + Add Column
+                        </button>
+                        <button type="button" className="btn btn-outline" style={{ fontSize: 'var(--fs-xs)' }}
+                          onClick={() => {
+                            const headers = section.tableHeaders || ['', ''];
+                            const rows = [...(section.tableRows || [['', '']]), headers.map(() => '')];
+                            updateSection(i, 'tableRows', rows);
+                          }}>
+                          + Add Row
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--fs-sm)' }}>
+                        <thead>
+                          <tr>
+                            {(section.tableHeaders || ['', '']).map((header, ci) => (
+                              <th key={ci} style={{ padding: 'var(--sp-2)', background: 'var(--surface)', borderBottom: '2px solid var(--border)', textAlign: 'left', position: 'relative' }}>
+                                <input
+                                  className="form-input"
+                                  value={header}
+                                  onChange={(e) => {
+                                    const headers = [...section.tableHeaders];
+                                    headers[ci] = e.target.value;
+                                    updateSection(i, 'tableHeaders', headers);
+                                  }}
+                                  placeholder={`Column ${ci + 1}`}
+                                  style={{ fontWeight: 700, fontSize: 'var(--fs-xs)', border: 'none', background: 'transparent', padding: 0, width: '100%' }}
+                                />
+                                {(section.tableHeaders || []).length > 1 && (
+                                  <button type="button" onClick={() => {
+                                    const headers = section.tableHeaders.filter((_, idx) => idx !== ci);
+                                    const rows = (section.tableRows || []).map((row) => row.filter((_, idx) => idx !== ci));
+                                    updateSection(i, 'tableHeaders', headers);
+                                    updateSection(i, 'tableRows', rows);
+                                  }} style={{ position: 'absolute', top: 2, right: 2, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 10, padding: '0 3px', lineHeight: 1 }} title="Remove column">×</button>
+                                )}
+                              </th>
+                            ))}
+                            <th style={{ width: 40, background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(section.tableRows || [['', '']]).map((row, ri) => (
+                            <tr key={ri}>
+                              {row.map((cell, ci) => (
+                                <td key={ci} style={{ padding: 'var(--sp-1) var(--sp-2)', borderBottom: '1px solid var(--border)' }}>
+                                  <input
+                                    className="form-input"
+                                    value={cell}
+                                    onChange={(e) => {
+                                      const rows = [...section.tableRows];
+                                      rows[ri] = [...rows[ri]];
+                                      rows[ri][ci] = e.target.value;
+                                      updateSection(i, 'tableRows', rows);
+                                    }}
+                                    placeholder="—"
+                                    style={{ fontSize: 'var(--fs-xs)', border: 'none', background: 'transparent', padding: 0, width: '100%' }}
+                                  />
+                                </td>
+                              ))}
+                              <td style={{ padding: 'var(--sp-1)', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
+                                {(section.tableRows || []).length > 1 && (
+                                  <button type="button" onClick={() => {
+                                    const rows = section.tableRows.filter((_, idx) => idx !== ri);
+                                    updateSection(i, 'tableRows', rows);
+                                  }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 11, padding: '2px 4px' }} title="Remove row">×</button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 'var(--sp-2)' }}>
+                      {(section.tableHeaders || []).length} column{(section.tableHeaders || []).length !== 1 ? 's' : ''}, {(section.tableRows || []).length} row{(section.tableRows || []).length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                )}
 
                 {/* Live preview hint */}
-                {section.layout !== 'text-only' && section.imageUrl && (
+                {section.layout !== 'text-only' && section.layout !== 'table' && section.imageUrl && (
                   <div style={{
                     marginTop: 'var(--sp-2)',
                     padding: 'var(--sp-3)',

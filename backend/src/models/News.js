@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
 
 const contentSectionSchema = new mongoose.Schema({
-  layout: { type: String, enum: ['image-left', 'image-center', 'text-only'], default: 'text-only' },
+  layout: { type: String, enum: ['image-left', 'image-center', 'text-only', 'table'], default: 'text-only' },
   heading: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
   text: { type: String, default: '' },
+  tableHeaders: [{ type: String, default: '' }],
+  tableRows: [[{ type: String, default: '' }]],
 }, { _id: false });
 
 const recommendationSchema = new mongoose.Schema({

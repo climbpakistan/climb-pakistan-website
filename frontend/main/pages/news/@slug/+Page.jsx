@@ -125,7 +125,7 @@ function Page() {
 
   const articleDesc = article.body?.[0]
     ? article.body[0].replace(/<[^>]*>/g, '').slice(0, 160)
-    : article.sections?.[0]?.text?.replace(/<[^>]*>/g, '').slice(0, 160) || '';
+    : article.sections?.find((s) => s.text)?.text?.replace(/<[^>]*>/g, '').slice(0, 160) || '';
 
   return (
     <>
@@ -190,6 +190,34 @@ function Page() {
                           </div>
                         )}
                         <p>{renderFormattedText(sec.text)}</p>
+                      </div>
+                    );
+                  case 'table':
+                    return (
+                      <div className="section-block" key={i}>
+                        {sec.heading && <h3 className="section-heading">{sec.heading}</h3>}
+                        {sec.tableHeaders?.length > 0 && (
+                          <div className="rankings-table-wrap">
+                            <table className="rankings-table">
+                              <thead>
+                                <tr>
+                                  {sec.tableHeaders.map((h, ci) => (
+                                    <th key={ci}>{h || `Column ${ci + 1}`}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {sec.tableRows?.map((row, ri) => (
+                                  <tr key={ri}>
+                                    {row.map((cell, ci) => (
+                                      <td key={ci}>{cell || '—'}</td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     );
                   default:
