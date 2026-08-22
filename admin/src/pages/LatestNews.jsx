@@ -98,8 +98,8 @@ export default function LatestNews() {
     setForm({ ...form, contentSections: updated });
   };
 
-  const addSection = () => {
-    setForm({ ...form, contentSections: [...form.contentSections, emptySection()] });
+  const addSection = (layout = 'text-only') => {
+    setForm({ ...form, contentSections: [...form.contentSections, { ...emptySection(), layout }] });
   };
 
   const removeSection = (index) => {
@@ -280,14 +280,20 @@ export default function LatestNews() {
           <div className="form-group" style={{ marginTop: 'var(--sp-6)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-4)' }}>
               <label className="form-label" style={{ marginBottom: 0, fontSize: 'var(--fs-md)' }}>Content Sections</label>
-              <button className="btn btn-primary" type="button" onClick={addSection} style={{ fontSize: 'var(--fs-xs)' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4 }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                Add Section
-              </button>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+                <button className="btn btn-outline" type="button" onClick={() => addSection('table')} style={{ fontSize: 'var(--fs-xs)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4 }}><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="12" y1="3" x2="12" y2="21" /></svg>
+                  Add Table
+                </button>
+                <button className="btn btn-primary" type="button" onClick={() => addSection()} style={{ fontSize: 'var(--fs-xs)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4 }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  Add Section
+                </button>
+              </div>
             </div>
 
             <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginBottom: 'var(--sp-3)' }}>
-              Each section is a separate content block. Choose a layout, add a heading, an image (optional), and write your text. Supports <strong>**bold**</strong>.
+              Each section is a separate content block. Click <strong>Add Table</strong> for a data table, or use <strong>Add Section</strong> and pick a layout (text, image left, image center). Text supports <strong>**bold**</strong>.
             </p>
 
             {form.contentSections.map((section, i) => (
