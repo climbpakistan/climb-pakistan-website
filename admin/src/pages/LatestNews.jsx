@@ -93,9 +93,11 @@ export default function LatestNews() {
   const cancelEdit = () => setEditingSlug(null);
 
   const updateSection = (index, field, value) => {
-    const updated = [...form.contentSections];
-    updated[index] = { ...updated[index], [field]: value };
-    setForm({ ...form, contentSections: updated });
+    setForm((prev) => {
+      const updated = [...prev.contentSections];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, contentSections: updated };
+    });
   };
 
   const addSection = (layout = 'text-only') => {
