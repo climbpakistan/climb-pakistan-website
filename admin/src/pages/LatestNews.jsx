@@ -52,6 +52,7 @@ export default function LatestNews() {
     // Convert old body array to sections if needed
     let contentSections = article.sections?.length
       ? article.sections.map((s) => ({
+          ...s,
           layout: s.layout || 'text-only',
           heading: s.heading || '',
           imageUrl: s.imageUrl || '',
@@ -151,7 +152,7 @@ export default function LatestNews() {
       excerpt: form.excerpt,
       imageUrl: form.imageUrl,
       imagePosition: form.imagePosition,
-      body: sections.map((s) => s.text),  // Keep body array for backward compat
+      body: sections.map((s) => s.text || ''),  // Keep body array for backward compat
       sections,
       tags: form.tags,
       recommendations: form.recommendations.filter((r) => r.title?.trim() && r.url?.trim()),
