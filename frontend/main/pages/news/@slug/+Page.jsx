@@ -1,4 +1,5 @@
 import { useData } from 'vike-react/useData';
+import ScrollableTable from '../../../src/components/ScrollableTable';
 import NewsCard from '../../../src/components/NewsCard';
 import RecommendationCard from '../../../src/components/RecommendationCard';
 import Seo from '../../../src/components/Seo';
@@ -207,7 +208,7 @@ function Page() {
                       <div className="section-block" key={i}>
                         {sec.heading && <h3 className="section-heading">{sec.heading}</h3>}
                         {sec.tableHeaders?.length > 0 && (
-                          <div className="rankings-table-wrap">
+                          <ScrollableTable>
                             <table className="rankings-table">
                               <thead>
                                 <tr>
@@ -226,7 +227,7 @@ function Page() {
                                 ))}
                               </tbody>
                             </table>
-                          </div>
+                          </ScrollableTable>
                         )}
                       </div>
                     );

@@ -1109,6 +1109,59 @@ input, textarea, select { font: inherit; color: inherit; }
   margin-top: var(--sp-2);
   font-style: italic;
 }
+
+/* --- Scrollable table: swipable wide tables with a progress "slider" --- */
+.table-scroll { max-width: 100%; }
+.table-scroll-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(to right, var(--cp-surface) 30%, transparent),
+    linear-gradient(to left, var(--cp-surface) 10%, transparent),
+    var(--cp-surface);
+  background-attachment: local, scroll, scroll;
+}
+.table-scroll-viewport::-webkit-scrollbar { height: 4px; }
+.table-scroll-viewport::-webkit-scrollbar-track { background: transparent; }
+.table-scroll-viewport::-webkit-scrollbar-thumb { background: var(--cp-border-strong); border-radius: 4px; }
+.table-scroll-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+  visibility: hidden;
+}
+.table-scroll-progress.is-active { visibility: visible; }
+.table-scroll-track {
+  position: relative;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--cp-border);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.table-scroll-progress.is-active .table-scroll-track { opacity: 1; }
+.table-scroll-bar {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: var(--cp-accent);
+  border-radius: 4px;
+}
+.table-scroll-hint {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--cp-text-muted);
+}
+.table-scroll-hint svg { flex-shrink: 0; }
 .related { border-top: 1px solid var(--cp-border); margin-top: var(--sp-16); padding-top: var(--sp-12); }
 
 /* ---------- 8. Athletes (grid, cards, profile page) ---------- */
@@ -2980,6 +3033,21 @@ input, textarea, select { font: inherit; color: inherit; }
   .rankings-table td:nth-child(3),
   .rankings-table th:nth-child(3) { display: none; }
   .rankings-athlete-cell { gap: var(--sp-2); }
+
+  /* --- Article tables (news): keep every column, fit natural width, swipe --- */
+  .article-body .rankings-table th:nth-child(3),
+  .article-body .rankings-table td:nth-child(3) { display: table-cell; }
+  .article-body .rankings-table {
+    width: auto;
+    min-width: max-content;
+    white-space: nowrap;
+  }
+  .article-body .rankings-table th,
+  .article-body .rankings-table td {
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--fs-sm);
+  }
+  .table-scroll-hint { display: flex; }
   .team-ranking-logo--podium { width: 40px !important; height: 40px !important; }
   .team-ranking-logo:not(.team-ranking-logo--podium) { width: 34px !important; height: 34px !important; }
   .ranking-avatar { width: 34px; height: 34px; font-size: 0.625rem; }
