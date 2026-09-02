@@ -4,3 +4,6 @@ dist
 
 # Build-time generated sitemap
 public/sitemap.xml
+
+# vite-plugin-vercel build output (Vercel Build Output API)
+.vercel

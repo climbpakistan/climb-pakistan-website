@@ -1,7 +1,3 @@
 {
-  "buildCommand": "node scripts/generate-sitemap.js && vike build",
-  "outputDirectory": "dist/client",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "buildCommand": "node scripts/generate-sitemap.js && vike build"
 }
