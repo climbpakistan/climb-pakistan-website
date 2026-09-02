@@ -256,6 +256,35 @@ router.post('/login', loginLimiter, async (req, res) => {
       if (!isMatch) {
         return res.status(401).json({ error: 'Incorrect username/email or password.' });
       }
+
+      // Self-healing admin promotion: if an EXISTING account authenticates with
+      // the exact legacy ADMIN_EMAIL + ADMIN_PASSWORD credentials (both must be
+      // configured AND both must match), keep that account promoted to admin so
+      // the Admin dashboard's DB-confirmed moderation routes keep working even
+      // if the account predates the role being set. Idempotent — only persists
+      // when a field actually changes. Strictly gated on the credential pair so
+      // an email match alone can never escalate a regular account.
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+      if (
+        adminEmail && adminPassword &&
+        loginField === adminEmail.toLowerCase() && password === adminPassword
+      ) {
+        let changed = false;
+        if (user.role !== 'admin') {
+          user.role = 'admin';
+          changed = true;
+        }
+        // A previously-suspended admin can still log in but is blocked from
+        // moderation, so restore an active status (banned accounts already
+        // returned a 403 above and are never resurrected here).
+        if (user.accountStatus === 'suspended') {
+          user.accountStatus = 'active';
+          user.restrictionReason = undefined;
+          changed = true;
+        }
+        if (changed) await user.save();
+      }
     }
 
     // Banned users cannot log in to the community.
