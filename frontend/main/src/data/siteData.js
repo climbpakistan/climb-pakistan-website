@@ -34,6 +34,6 @@ export const footerLinks = {
   ],
   about: [
     { label: 'About', to: '/about' },
-    { label: 'Contact', to: '/contact' },
+    { label: 'Contact Form', to: '/contact' },
   ],
 };

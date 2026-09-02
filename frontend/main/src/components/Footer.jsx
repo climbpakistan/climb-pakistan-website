@@ -52,13 +52,6 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-
-          <div className="footer-col">
-            <h5>Contact</h5>
-            <ul>
-              <li><a href="mailto:contact@climbpakistan.com">contact@climbpakistan.com</a></li>
-            </ul>
-          </div>
         </div>
 
         <div className="footer-bottom">
