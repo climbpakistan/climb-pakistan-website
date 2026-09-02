@@ -127,6 +127,8 @@ async function main() {
     { loc: '/results', priority: '0.8', changefreq: 'weekly' },
     { loc: '/competitions', priority: '0.8', changefreq: 'weekly' },
     { loc: '/learn', priority: '0.7', changefreq: 'monthly' },
+    { loc: '/community', priority: '0.7', changefreq: 'weekly' },
+    { loc: '/community/feed', priority: '0.7', changefreq: 'weekly' },
     { loc: '/about', priority: '0.6', changefreq: 'monthly' },
     { loc: '/contact', priority: '0.5', changefreq: 'monthly' },
   ];

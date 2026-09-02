@@ -5,9 +5,11 @@ import { navLinks } from '../data/siteData';
 import useFetch from '../hooks/useFetch';
 import { getAthletes, getNews } from '../api';
 import { useTheme } from '../hooks/ThemeContext';
+import { useCommunity } from '../hooks/CommunityContext';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
+  const { user, isGuest, initializing, signOut } = useCommunity();
   const pageContext = usePageContext();
   const currentPath = pageContext?.urlPathname || '';
   const { data: athletes } = useFetch(getAthletes, []);
@@ -123,6 +125,41 @@ export default function Header() {
         </ul>
 
         <div className="nav-actions">
+          {/* Community account menu — hides while the stored session validates */}
+          {!initializing && (
+            isGuest ? (
+              <div className="nav-auth">
+                <a href="/community/login" className="nav-auth-link" onClick={() => setMenuOpen(false)}>Log In</a>
+                <a href="/community/signup" className="btn btn-primary nav-auth-btn" onClick={() => setMenuOpen(false)}>Sign Up</a>
+              </div>
+            ) : (
+              <div className="nav-auth">
+                <a href={`/community/u/${user.username || user.name}`} className="nav-auth-user" onClick={() => setMenuOpen(false)}>
+                  {user.profileImageUrl ? (
+                    <img className="nav-auth-avatar" src={user.profileImageUrl} alt="" />
+                  ) : (
+                    <span className="nav-auth-avatar nav-auth-avatar--fallback">
+                      {(user.username || user.name || '?')[0].toUpperCase()}
+                    </span>
+                  )}
+                  <span className="nav-auth-username">@{user.username || user.name}</span>
+                </a>
+                <a
+                  href="/community/feed"
+                  className="nav-auth-link nav-auth-logout"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    signOut();
+                    setMenuOpen(false);
+                    navigate('/community/feed');
+                  }}
+                >
+                  Log Out
+                </a>
+              </div>
+            )
+          )}
+
           <button
             className="theme-toggle"
             onClick={toggleTheme}

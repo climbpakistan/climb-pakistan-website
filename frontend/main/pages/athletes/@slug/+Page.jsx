@@ -17,6 +17,28 @@ function Page() {
   const { athlete, slug } = useData();
   const [filterDiscipline, setFilterDiscipline] = useState('All');
 
+  // Derive medal data before the early return so every hook runs
+  // unconditionally on each render (rules-of-hooks). All callbacks guard
+  // against a null `athlete` (the "not found" state).
+  const medals = useMemo(() => athlete?.medals || [], [athlete]);
+
+  const medalDisciplines = useMemo(() => {
+    return [...new Set(medals.map((m) => m.discipline))];
+  }, [medals]);
+
+  const filteredMedals = useMemo(() => {
+    if (filterDiscipline === 'All') return medals;
+    return medals.filter((m) => m.discipline === filterDiscipline);
+  }, [medals, filterDiscipline]);
+
+  const medalCounts = useMemo(() => {
+    return {
+      gold: medals.filter((m) => m.medal === 'Gold').length,
+      silver: medals.filter((m) => m.medal === 'Silver').length,
+      bronze: medals.filter((m) => m.medal === 'Bronze').length,
+    };
+  }, [medals]);
+
   if (!athlete) {
     return (
       <section className="page-header">
@@ -28,24 +50,6 @@ function Page() {
       </section>
     );
   }
-
-  const medalDisciplines = useMemo(() => {
-    return [...new Set(athlete.medals?.map((m) => m.discipline))];
-  }, [athlete]);
-
-  const filteredMedals = useMemo(() => {
-    if (filterDiscipline === 'All') return athlete.medals || [];
-    return (athlete.medals || []).filter((m) => m.discipline === filterDiscipline);
-  }, [athlete, filterDiscipline]);
-
-  const medalCounts = useMemo(() => {
-    const medals = athlete.medals || [];
-    return {
-      gold: medals.filter((m) => m.medal === 'Gold').length,
-      silver: medals.filter((m) => m.medal === 'Silver').length,
-      bronze: medals.filter((m) => m.medal === 'Bronze').length,
-    };
-  }, [athlete]);
 
   const showFilter = medalDisciplines.length > 1;
   const mainDiscipline = athlete.mainDiscipline || athlete.disciplines?.[0] || '—';

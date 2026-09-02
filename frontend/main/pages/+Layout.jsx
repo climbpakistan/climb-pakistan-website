@@ -3,9 +3,12 @@ import { usePageContext } from 'vike-react/usePageContext';
 import { useEffect } from 'react';
 import { ThemeProvider } from '../src/hooks/ThemeContext';
 import { AnalyticsProvider } from '../src/hooks/useAnalytics';
+import { CommunityProvider } from '../src/hooks/CommunityContext';
 import Header from '../src/components/Header';
 import Footer from '../src/components/Footer';
 import Seo from '../src/components/Seo';
+import CommunityAuthPrompt from '../src/components/community/CommunityAuthPrompt';
+import RestrictionBanner from '../src/components/community/RestrictionBanner';
 import '../src/styles/main.css';
 import {
   organizationSchema,
@@ -33,6 +36,7 @@ export default function Layout({ children }) {
   return (
     <ThemeProvider>
       <AnalyticsProvider>
+        <CommunityProvider>
         {/* Brand favicon — declared here so it survives Vike's pre-render
             (links in index.html are not preserved in the built head). */}
         <Head>
@@ -59,8 +63,11 @@ export default function Layout({ children }) {
         />
         <a href="#main" className="skip-link">Skip to content</a>
         <Header />
+        <RestrictionBanner />
         <main id="main">{children}</main>
         <Footer />
+        <CommunityAuthPrompt />
+        </CommunityProvider>
       </AnalyticsProvider>
     </ThemeProvider>
   );

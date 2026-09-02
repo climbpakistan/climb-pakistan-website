@@ -18,6 +18,7 @@ export const navLinks = [
   },
   { label: 'Competitions', to: '/competitions' },
   { label: 'Learn Climbing', to: '/learn' },
+  { label: 'Community', to: '/community' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
 ];
@@ -30,6 +31,7 @@ export const footerLinks = {
     { label: 'National Records', to: '/records' },
     { label: 'National Championship Results', to: '/results' },
     { label: 'Competitions', to: '/competitions' },
+    { label: 'Community', to: '/community' },
   ],
   more: [
     { label: 'Learn Climbing', to: '/learn' },

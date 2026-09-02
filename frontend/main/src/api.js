@@ -92,3 +92,323 @@ export async function submitContact(data) {
   }
   return res.json();
 }
+
+// ── Community Auth ──
+/**
+ * Register a new community member. Submits as multipart/form-data so the
+ * optional profile image travels with the account fields.
+ * Returns { user, token }.
+ */
+export async function communityRegister({ username, email, password, avatar }) {
+  const formData = new FormData();
+  formData.append('username', username);
+  formData.append('email', email);
+  formData.append('password', password);
+  if (avatar) formData.append('avatar', avatar);
+
+  const res = await fetch(`${BASE_URL}/auth/register`, { method: 'POST', body: formData });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Registration failed. Please try again.');
+  return data;
+}
+
+/** Log in with an email or username (identifier) + password. Returns { user, token }. */
+export async function communityLogin({ identifier, password }) {
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Login failed. Please try again.');
+  return data;
+}
+
+/** Fetch the current user for a stored token — used to restore sessions. */
+export async function communityMe(token) {
+  const res = await fetch(`${BASE_URL}/auth/me`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Your session is invalid. Please log in again.');
+  return data;
+}
+
+/** Fetch a publicly viewable community profile by username. */
+export async function communityProfile(username) {
+  const clean = String(username || '').trim().replace(/^@/, '');
+  const res = await fetch(`${BASE_URL}/auth/u/${encodeURIComponent(clean)}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Profile not found.');
+  return data;
+}
+
+/** Update the current user's bio and/or profile image (multipart). */
+export async function communityUpdateProfile(token, { bio, avatar }) {
+  const formData = new FormData();
+  if (bio !== undefined) formData.append('bio', bio ?? '');
+  if (avatar) formData.append('avatar', avatar);
+
+  const res = await fetch(`${BASE_URL}/auth/me`, {
+    method: 'PUT',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not update your profile.');
+  return data;
+}
+
+// ── Community Posts ──
+/** Paginated feed. view: new | popular | top; time applies to top. token is optional (enables poll/vote personalization). */
+export async function getPosts(token, { view = 'new', time = 'all', page = 1, limit = 20 } = {}) {
+  const params = new URLSearchParams({ view, time, page: String(page), limit: String(limit) });
+  const res = await fetch(`${BASE_URL}/posts?${params.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load posts.');
+  return data;
+}
+
+/** Single post by id. token is optional (enables vote/poll personalization). */
+export async function getPost(token, id) {
+  const res = await fetch(`${BASE_URL}/posts/${id}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Post not found.');
+  return data;
+}
+
+/** Create a post (multipart; image travels with the fields). For polls, pass pollOptions + pollDuration. */
+export async function createPost(token, { type, title, body, category, externalUrl, image, pollOptions, pollDuration }) {
+  const formData = new FormData();
+  formData.append('type', type);
+  formData.append('title', title);
+  formData.append('body', body ?? '');
+  formData.append('category', category);
+  if (externalUrl) formData.append('externalUrl', externalUrl);
+  if (image) formData.append('image', image);
+  if (type === 'poll') {
+    formData.append('pollOptions', JSON.stringify(pollOptions || []));
+    if (pollDuration !== undefined && pollDuration !== null) {
+      formData.append('pollDuration', String(pollDuration));
+    }
+  }
+
+  const res = await fetch(`${BASE_URL}/posts`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not publish your post.');
+  return data;
+}
+
+/** Edit a post (owner only, multipart). */
+export async function updatePost(token, id, { title, body, category, externalUrl, image }) {
+  const formData = new FormData();
+  if (title !== undefined) formData.append('title', title);
+  if (body !== undefined) formData.append('body', body);
+  if (category !== undefined) formData.append('category', category);
+  if (externalUrl !== undefined) formData.append('externalUrl', externalUrl);
+  if (image) formData.append('image', image);
+
+  const res = await fetch(`${BASE_URL}/posts/${id}`, {
+    method: 'PUT',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not update your post.');
+  return data;
+}
+
+/** Delete a post (owner only). */
+export async function deletePost(token, id) {
+  const res = await fetch(`${BASE_URL}/posts/${id}`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not delete your post.');
+  return data;
+}
+
+// ── Community Comments ──
+/** All comments (and replies) for a post, oldest first. Public. */
+export async function getComments(postId) {
+  return fetchJSON(`${BASE_URL}/comments/${postId}`);
+}
+
+/** Add a comment or reply. Pass parentCommentId to reply. */
+export async function createComment(token, postId, { body, parentCommentId }) {
+  const res = await fetch(`${BASE_URL}/comments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ postId, body, parentCommentId: parentCommentId || undefined }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not add your comment.');
+  return data;
+}
+
+/** Edit a comment (owner only). */
+export async function updateComment(token, id, body) {
+  const res = await fetch(`${BASE_URL}/comments/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ body }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not update your comment.');
+  return data;
+}
+
+/** Delete a comment (owner only). Replies are removed too. */
+export async function deleteComment(token, id) {
+  const res = await fetch(`${BASE_URL}/comments/${id}`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not delete your comment.');
+  return data;
+}
+
+// ── Community Votes ──
+/**
+ * Vote on a post or comment. voteType is 'upvote' | 'downvote' | null.
+ * The backend handles add / remove / switch transitions atomically.
+ */
+export async function vote(token, { target, targetId, voteType }) {
+  const res = await fetch(`${BASE_URL}/votes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ target, targetId, voteType }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not record your vote.');
+  return data;
+}
+
+/**
+ * Batch-fetch the current user's votes for highlighting.
+ * `posts` / `comments` are arrays of ids. Returns { posts: {id: type}, comments: {...} }.
+ */
+export async function getMyVotes(token, { posts = [], comments = [] } = {}) {
+  const params = new URLSearchParams();
+  if (posts.length > 0) params.set('posts', posts.join(','));
+  if (comments.length > 0) params.set('comments', comments.join(','));
+  const qs = params.toString();
+  const res = await fetch(`${BASE_URL}/votes/mine${qs ? `?${qs}` : ''}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load your votes.');
+  return data;
+}
+
+// ── Community Polls ──
+/** Submit or change the current user's vote on a poll. Returns { poll }. */
+export async function votePoll(token, postId, optionKey) {
+  const res = await fetch(`${BASE_URL}/posts/${postId}/poll-vote`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ optionKey }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not record your vote.');
+  return data;
+}
+
+// ── Community Reports ──
+/** Report a post or comment. Pass postId OR commentId. */
+export async function submitReport(token, { postId, commentId, reason, details }) {
+  const res = await fetch(`${BASE_URL}/reports`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      ...(postId ? { postId } : {}),
+      ...(commentId ? { commentId } : {}),
+      reason,
+      details,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not submit your report.');
+  return data;
+}
+
+// ── Community Follows ──
+/** Follow a user by id. */
+export async function followUser(token, userId) {
+  const res = await fetch(`${BASE_URL}/follows/${userId}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not follow this user.');
+  return data;
+}
+
+/** Unfollow a user by id. */
+export async function unfollowUser(token, userId) {
+  const res = await fetch(`${BASE_URL}/follows/${userId}`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not unfollow this user.');
+  return data;
+}
+
+/** Check whether the current user follows a target user. */
+export async function getFollowStatus(token, userId) {
+  const res = await fetch(`${BASE_URL}/follows/status/${userId}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load follow status.');
+  return data;
+}
+
+/** List followers of a profile by username. */
+export async function getFollowers(username) {
+  return fetchJSON(`${BASE_URL}/follows/${encodeURIComponent(username)}/followers`);
+}
+
+/** List users that a profile follows by username. */
+export async function getFollowing(username) {
+  return fetchJSON(`${BASE_URL}/follows/${encodeURIComponent(username)}/following`);
+}
+
+// ── Profile posts & comments ──
+/** A public user's posts (newest first, removed content excluded). */
+export async function getUserPosts(username, { page = 1, limit = 20 } = {}) {
+  const params = new URLSearchParams({ view: 'new', page: String(page), limit: String(limit) });
+  params.set('author', username);
+  return fetchJSON(`${BASE_URL}/posts?${params.toString()}`);
+}
+
+/** A public user's comments (newest first, removed excluded). */
+export async function getUserComments(username) {
+  return fetchJSON(`${BASE_URL}/comments/user/${encodeURIComponent(username)}`);
+}
