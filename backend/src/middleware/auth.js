@@ -1,6 +1,56 @@
 import jwt from 'jsonwebtoken';
 
 /**
+ * Verifies a Bearer JWT and attaches the decoded payload to `req.user`.
+ * Used for the community `/me` endpoint and any account-only endpoint that
+ * must require a valid token regardless of the HTTP method.
+ */
+export function requireUser(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Authentication required. Please log in.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  if (!token || token === 'mock-jwt-token-placeholder') {
+    return res.status(401).json({ error: 'Invalid or expired token. Please log in again.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Session expired. Please log in again.' });
+    }
+    return res.status(401).json({ error: 'Invalid token. Please log in again.' });
+  }
+}
+
+/**
+ * Verifies a Bearer JWT if one is present and attaches the decoded payload
+ * to `req.user`, but never blocks the request. Used on public endpoints that
+ * personalize their response for logged-in users (e.g. vote highlighting).
+ */
+export function optionalUser(req, _res, next) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    if (token && token !== 'mock-jwt-token-placeholder') {
+      try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+      } catch {
+        // Invalid/expired token on a public endpoint — treat as a guest.
+      }
+    }
+  }
+  next();
+}
+
+/**
  * Authentication middleware for admin-only operations.
  *
  * - GET requests pass through without authentication (public data).

@@ -25,6 +25,12 @@ import rebuildRoutes from './routes/rebuild.js';
 import nationalRecordRoutes from './routes/nationalRecords.js';
 import recordsPageRoutes from './routes/recordsPage.js';
 import resultsRoutes from './routes/results.js';
+import postsRoutes from './routes/posts.js';
+import commentsRoutes from './routes/comments.js';
+import votesRoutes from './routes/votes.js';
+import reportsRoutes from './routes/reports.js';
+import moderationRoutes from './routes/moderation.js';
+import followsRoutes from './routes/follows.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -57,14 +63,6 @@ app.use(cors({
 }));
 
 // Rate limiters
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,                     // 5 attempts per window
-  message: { error: 'Too many login attempts. Please try again after 15 minutes.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 const contactLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 3,
@@ -81,7 +79,35 @@ app.get('/api/health', (req, res) => {
 });
 
 // ── Public routes (no auth required) ──
-app.use('/api/auth', loginLimiter, authRoutes);
+// Auth routes carry their own per-endpoint rate limiters (see routes/auth.js).
+app.use('/api/auth', authRoutes);
+
+// ── Community posts ──
+// GET feed / single post are public; create / edit / delete require a JWT and
+// are enforced inside the route (owner checks included).
+app.use('/api/posts', postsRoutes);
+
+// ── Community comments ──
+// GET is public; create / edit / delete require a JWT and owner checks are
+// enforced inside the route.
+app.use('/api/comments', commentsRoutes);
+
+// ── Community votes ──
+// All vote endpoints require a JWT (guests cannot vote); duplicate-vote
+// prevention is enforced by compound unique indexes plus route logic.
+app.use('/api/votes', votesRoutes);
+
+// ── Community reports ──
+// Only logged-in users can submit reports (enforced inside the route).
+app.use('/api/reports', reportsRoutes);
+
+// ── Community follows ──
+// Only logged-in users can follow/unfollow (enforced inside the route).
+app.use('/api/follows', followsRoutes);
+
+// ── Moderation ──
+// All endpoints require a real DB-confirmed admin (enforced inside the route).
+app.use('/api/moderation', moderationRoutes);
 
 // ── Admin-protected routes ──
 // GET requests are always public; POST / PUT / DELETE require a valid JWT.

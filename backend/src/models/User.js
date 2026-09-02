@@ -1,10 +1,55 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+// Usernames that cannot be registered by the public (system/trusted accounts).
+// Expandable — add future reserved names here.
+export const RESERVED_USERNAMES = [
+  'admin',
+  'administrator',
+  'mod',
+  'moderator',
+  'support',
+  'climbpakistan',
+  'team',
+  'official',
+  'staff',
+  'system',
+  'root',
+];
+
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
-  name: { type: String, default: 'Admin' },
+  // Public community identity — lowercased + unique. Sparse so admin users
+  // (which don't have a community username) coexist without conflicts.
+  username: { type: String, unique: true, sparse: true, lowercase: true },
+  // Display name — keeps the user's chosen casing; defaults to the username.
+  name: { type: String, default: '' },
+  profileImageUrl: { type: String, default: '' },
+  bio: { type: String, default: '', maxlength: 300 },
+  role: { type: String, enum: ['member', 'admin'], default: 'member' },
+  // Reputation — placeholder until the points/reputation rules are defined in
+  // a later step. Always starts at 0.
+  communityPoints: { type: Number, default: 0, min: 0 },
+  // Verification. No user can set this themselves — managed by the admin team
+  // via the admin tool. 'none' until then.
+  verification: { type: String, enum: ['none', 'national', 'international'], default: 'none' },
+  // Verification audit — which admin set the current verification and when.
+  verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  verifiedAt: { type: Date, default: null },
+  // Optional link to an existing Climb Pakistan athlete profile. Managed by
+  // admins only; users cannot connect/disconnect themselves.
+  athleteProfileId: { type: mongoose.Schema.Types.ObjectId, ref: 'Athlete', default: null, sparse: true },
+  // ── Account status / moderation ──
+  // active = fully functional; suspended = cannot participate but can log in
+  // and see an explanation; banned = cannot access/participate in the community.
+  accountStatus: { type: String, enum: ['active', 'suspended', 'banned'], default: 'active' },
+  restrictionReason: { type: String, default: '', maxlength: 1000 },
+  restrictedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  restrictedAt: { type: Date, default: null },
+  // Denormalized follow counters — keep in sync with the Follow collection.
+  followerCount: { type: Number, default: 0, min: 0 },
+  followingCount: { type: Number, default: 0, min: 0 },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -16,5 +61,13 @@ userSchema.pre('save', async function () {
 userSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
+
+// Never expose the password hash through JSON serialization.
+userSchema.set('toJSON', {
+  transform(doc, ret) {
+    delete ret.password;
+    return ret;
+  },
+});
 
 export default mongoose.model('User', userSchema);
