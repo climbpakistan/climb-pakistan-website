@@ -36,9 +36,18 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h5>More</h5>
+            <h5>Rankings &amp; Results</h5>
             <ul>
-              {footerLinks.more.map((l) => (
+              {footerLinks.rankings.map((l) => (
+                <li key={l.to}><a href={l.to}>{l.label}</a></li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>About Us</h5>
+            <ul>
+              {footerLinks.about.map((l) => (
                 <li key={l.to}><a href={l.to}>{l.label}</a></li>
               ))}
             </ul>

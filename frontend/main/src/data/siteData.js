@@ -18,22 +18,21 @@ export const navLinks = [
   },
   { label: 'Competitions', to: '/competitions' },
   { label: 'Learn Climbing', to: '/learn' },
-  { label: 'About', to: '/about' },
-  { label: 'Contact', to: '/contact' },
 ];
 
 export const footerLinks = {
   explore: [
     { label: 'Latest News', to: '/news' },
     { label: 'Athletes', to: '/athletes' },
+    { label: 'Community', to: '/community' },
+  ],
+  rankings: [
     { label: 'Rankings', to: '/rankings' },
     { label: 'National Records', to: '/records' },
     { label: 'National Championship Results', to: '/results' },
     { label: 'Competitions', to: '/competitions' },
-    { label: 'Community', to: '/community' },
   ],
-  more: [
-    { label: 'Learn Climbing', to: '/learn' },
+  about: [
     { label: 'About', to: '/about' },
     { label: 'Contact', to: '/contact' },
   ],
