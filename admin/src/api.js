@@ -294,3 +294,104 @@ export function getPageViewStats() {
 export function rebuildSite() {
   return apiFetch(`${BASE_URL}/rebuild`, { method: 'POST' });
 }
+
+// ── Community Moderation ──
+export function getCommunityReports(params = {}) {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set('status', params.status);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  const str = qs.toString();
+  return apiFetch(`${BASE_URL}/moderation/reports${str ? `?${str}` : ''}`);
+}
+
+export function setReportStatus(reportId, status, action = '') {
+  return apiFetch(`${BASE_URL}/moderation/reports/${reportId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status, action }),
+  });
+}
+
+export function removeContent(targetType, targetId) {
+  return apiFetch(`${BASE_URL}/moderation/content/${targetType}/${targetId}/remove`, { method: 'POST' });
+}
+
+export function restoreContent(targetType, targetId) {
+  return apiFetch(`${BASE_URL}/moderation/content/${targetType}/${targetId}/restore`, { method: 'POST' });
+}
+
+export function searchCommunityUsers(query) {
+  const qs = new URLSearchParams();
+  if (query) qs.set('query', query);
+  const str = qs.toString();
+  return apiFetch(`${BASE_URL}/moderation/users/search${str ? `?${str}` : ''}`);
+}
+
+export function warnUser(userId, reason) {
+  return apiFetch(`${BASE_URL}/moderation/users/${userId}/warn`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+export function suspendUser(userId, reason) {
+  return apiFetch(`${BASE_URL}/moderation/users/${userId}/suspend`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+export function banUser(userId, reason) {
+  return apiFetch(`${BASE_URL}/moderation/users/${userId}/ban`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+export function liftUser(userId) {
+  return apiFetch(`${BASE_URL}/moderation/users/${userId}/lift`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export function setVerification(userId, verification) {
+  return apiFetch(`${BASE_URL}/moderation/verification/${userId}`, {
+    method: 'POST',
+    body: JSON.stringify({ verification }),
+  });
+}
+
+export function setAthleteLink(userId, athleteProfileId) {
+  return apiFetch(`${BASE_URL}/moderation/users/${userId}/athlete`, {
+    method: 'POST',
+    body: JSON.stringify({ athleteProfileId: athleteProfileId || null }),
+  });
+}
+
+// ── Community management ──
+export function getCommunitySummary() {
+  return apiFetch(`${BASE_URL}/moderation/community/summary`);
+}
+
+export function getCommunityUsers(params = {}) {
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('search', params.search);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  const str = qs.toString();
+  return apiFetch(`${BASE_URL}/moderation/users${str ? `?${str}` : ''}`);
+}
+
+export function getModerationPosts(params = {}) {
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('search', params.search);
+  if (params.category) qs.set('category', params.category);
+  if (params.type) qs.set('type', params.type);
+  if (params.status) qs.set('status', params.status);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  const str = qs.toString();
+  return apiFetch(`${BASE_URL}/moderation/posts${str ? `?${str}` : ''}`);
+}
+
+export function getModerationComments(params = {}) {
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('search', params.search);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  const str = qs.toString();
+  return apiFetch(`${BASE_URL}/moderation/comments${str ? `?${str}` : ''}`);
+}
+
+export function deleteModerationPost(postId) {
+  return apiFetch(`${BASE_URL}/moderation/posts/${postId}/delete`, { method: 'POST' });
+}

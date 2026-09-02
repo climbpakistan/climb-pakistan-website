@@ -20,6 +20,7 @@ const navItems = [
       { label: 'Competitions', to: '/competitions', icon: 'competitions' },
       { label: 'Learn Climbing', to: '/learn-climbing', icon: 'learn' },
       { label: 'Photos', to: '/photos', icon: 'photos' },
+      { label: 'Community', to: '/community', icon: 'news' },
     ],
   },
   {

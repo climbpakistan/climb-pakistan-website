@@ -16,6 +16,7 @@ import Photos from './pages/Photos';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Results from './pages/Results';
+import Community from './pages/Community';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="/photos" element={<Photos />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/community" element={<Community />} />
       </Route>
 
       {/* Redirect unknown routes */}
