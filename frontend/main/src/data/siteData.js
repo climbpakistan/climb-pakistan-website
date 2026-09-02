@@ -18,7 +18,6 @@ export const navLinks = [
   },
   { label: 'Competitions', to: '/competitions' },
   { label: 'Learn Climbing', to: '/learn' },
-  { label: 'Community', to: '/community' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
 ];

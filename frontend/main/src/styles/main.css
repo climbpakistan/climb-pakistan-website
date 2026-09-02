@@ -2875,6 +2875,14 @@ input, textarea, select { font: inherit; color: inherit; }
   .nav-links a { display: block; padding-block: var(--sp-3); font-size: var(--fs-md); width: 100%; }
   .nav-toggle { display: flex; }
 
+  .nav-item--community { width: 100%; margin-top: var(--sp-4); }
+  .nav-community-btn {
+    width: 100%;
+    justify-content: center;
+    padding-block: var(--sp-3);
+    font-size: var(--fs-md);
+  }
+
   .search-dropdown { position: fixed; top: 72px; left: var(--sp-4); right: var(--sp-4); width: auto; }
 
   /* --- Grids → 1 col --- */
@@ -3448,6 +3456,16 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .nav-auth-user:hover .nav-auth-username { color: var(--cp-accent); }
 .nav-auth-logout { color: var(--cp-text-dim); }
+
+/* Header Community button — matches the Sign Up primary button look */
+.nav-item--community { display: flex; align-items: center; }
+.nav-community-btn {
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
 
 /* Signup avatar picker */
 .community-avatar-input {
