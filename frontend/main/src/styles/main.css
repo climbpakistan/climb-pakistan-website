@@ -4842,13 +4842,10 @@ input, textarea, select { font: inherit; color: inherit; }
   margin: 0 auto;
 }
 
-/* Left side - Branding */
-.community-landing-hero {
+/* Branding */
+.community-landing-brand {
   flex: 1;
   max-width: 380px;
-}
-.community-landing-brand {
-  margin-bottom: var(--sp-6);
 }
 .community-landing-logo {
   font-size: 2.2rem;
@@ -4865,6 +4862,8 @@ input, textarea, select { font: inherit; color: inherit; }
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
+  flex: 1;
+  max-width: 380px;
 }
 .community-landing-feature {
   display: flex;
@@ -5016,16 +5015,21 @@ input, textarea, select { font: inherit; color: inherit; }
     gap: var(--sp-6);
     padding: var(--sp-6);
   }
-  .community-landing-hero {
+  .community-landing-brand {
+    order: 1;
     text-align: center;
     max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
-  .community-landing-brand { order: 1; }
-  .community-landing-form-area { order: 2; }
-  .community-landing-features { order: 3; width: 100%; }
+  .community-landing-form-area {
+    order: 2;
+    max-width: 100%;
+    width: 100%;
+  }
+  .community-landing-features {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+  }
   .community-landing-logo {
     font-size: 2rem;
   }
@@ -5034,10 +5038,6 @@ input, textarea, select { font: inherit; color: inherit; }
   }
   .community-landing-feature {
     padding: var(--sp-3) var(--sp-4);
-  }
-  .community-landing-form-area {
-    max-width: 100%;
-    width: 100%;
   }
 }
 

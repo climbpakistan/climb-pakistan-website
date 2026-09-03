@@ -63,38 +63,17 @@ function Page() {
       />
 
       <div className="community-landing">
-        {/* Left side - Branding */}
-        <div className="community-landing-hero">
-          <div className="community-landing-brand">
-            <h1 className="community-landing-logo">
-              <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
-            </h1>
-            <p className="community-landing-tagline">
-              A community for climbers to connect, share and grow together.
-            </p>
-          </div>
-
-          <div className="community-landing-features">
-            <div className="community-landing-feature">
-              <span className="community-landing-feature-icon">💬</span>
-              <span>Discuss climbing</span>
-            </div>
-            <div className="community-landing-feature">
-              <span className="community-landing-feature-icon">📸</span>
-              <span>Share your climbing experiences</span>
-            </div>
-            <div className="community-landing-feature">
-              <span className="community-landing-feature-icon">🧗</span>
-              <span>Discover climbing in Pakistan</span>
-            </div>
-            <div className="community-landing-feature">
-              <span className="community-landing-feature-icon">🤝</span>
-              <span>Connect with climbers</span>
-            </div>
-          </div>
+        {/* Branding */}
+        <div className="community-landing-brand">
+          <h1 className="community-landing-logo">
+            <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
+          </h1>
+          <p className="community-landing-tagline">
+            A community for climbers to connect, share and grow together.
+          </p>
         </div>
 
-        {/* Right side - Login/Signup */}
+        {/* Login/Signup form */}
         <div className="community-landing-form-area">
           <div className="community-landing-form-card">
             {/* Quick Login */}
@@ -143,6 +122,26 @@ function Page() {
           <p className="community-landing-guest">
             <a href="/community/feed">Browse as Guest</a>
           </p>
+        </div>
+
+        {/* Features */}
+        <div className="community-landing-features">
+          <div className="community-landing-feature">
+            <span className="community-landing-feature-icon">💬</span>
+            <span>Discuss climbing</span>
+          </div>
+          <div className="community-landing-feature">
+            <span className="community-landing-feature-icon">📸</span>
+            <span>Share your climbing experiences</span>
+          </div>
+          <div className="community-landing-feature">
+            <span className="community-landing-feature-icon">🧗</span>
+            <span>Discover climbing in Pakistan</span>
+          </div>
+          <div className="community-landing-feature">
+            <span className="community-landing-feature-icon">🤝</span>
+            <span>Connect with climbers</span>
+          </div>
         </div>
       </div>
     </>
