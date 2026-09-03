@@ -4845,26 +4845,26 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Left side - Branding */
 .community-landing-hero {
   flex: 1;
-  max-width: 420px;
+  max-width: 380px;
 }
 .community-landing-brand {
-  margin-bottom: var(--sp-8);
+  margin-bottom: var(--sp-6);
 }
 .community-landing-logo {
-  font-size: 2.8rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--sp-3);
   line-height: 1.1;
 }
 .community-landing-tagline {
   color: var(--cp-text-dim);
-  font-size: var(--fs-lg);
-  line-height: 1.6;
+  font-size: var(--fs-md);
+  line-height: 1.5;
 }
 .community-landing-features {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-3);
 }
 .community-landing-feature {
   display: flex;
@@ -4872,10 +4872,10 @@ input, textarea, select { font: inherit; color: inherit; }
   gap: var(--sp-3);
   font-size: var(--fs-sm);
   color: var(--cp-text-dim);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
-  border-radius: 12px;
+  border-radius: 10px;
   transition: border-color 0.2s ease;
 }
 .community-landing-feature:hover {
