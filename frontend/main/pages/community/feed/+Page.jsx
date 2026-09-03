@@ -33,15 +33,6 @@ function TopicsSidebar() {
   );
 }
 
-function CommunityAboutCard() {
-  return (
-    <aside className="community-about-card">
-      <h2 className="community-about-title">About this community</h2>
-      <p className="community-about-text">A place for Pakistan&rsquo;s climbing community to ask questions, share experiences, discuss training and competitions, and connect with other climbers.</p>
-    </aside>
-  );
-}
-
 function PostSkeleton() {
   return (
     <div className="community-post-card" aria-hidden="true">
@@ -255,7 +246,7 @@ function Page() {
             )}
           </div>
 
-          <CommunityAboutCard />
+
         </FeedShell>
       </section>
     </>
