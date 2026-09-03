@@ -4394,18 +4394,10 @@ input, textarea, select { font: inherit; color: inherit; }
   margin-bottom: 0;
 }
 
-/* Verification card inside the form */
-.community-verification-card {
-  margin-top: var(--sp-6);
-  padding-top: var(--sp-8);
+/* Verification section inside the form */
+.community-verification-section {
+  padding-top: var(--sp-6);
   border-top: 1px solid var(--cp-border);
-  border-radius: 0;
-  background: transparent;
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
-  padding-left: 0;
-  padding-right: 0;
 }
 
 /* Centered form actions */

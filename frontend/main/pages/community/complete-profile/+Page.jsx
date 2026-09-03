@@ -167,6 +167,48 @@ function Page() {
               <p className="form-hint">Your Instagram profile URL.</p>
             </div>
 
+            {/* ── Verification Badges Info ── */}
+            <div className="community-verification-section">
+              <h3 className="community-badge-title">Verification Badges</h3>
+              <p className="community-badge-subtitle">
+                Verified badges confirm your identity on Climb Pakistan.
+              </p>
+
+              <ol className="community-badge-steps">
+                <li>Send a message from your official Instagram account to{' '}
+                  <a href="https://www.instagram.com/climb_pakistan" target="_blank" rel="noopener noreferrer" className="community-badge-instagram-link">@climb_pakistan</a>.
+                </li>
+                <li>Send us the email address you used to create your Climb Pakistan account so we can identify your profile.</li>
+                <li>Once your identity is confirmed, you&rsquo;ll receive the appropriate verification badge for your category.</li>
+              </ol>
+
+              <div className="community-badge-actions">
+                <div className="community-badge-card">
+                  <div className="community-badge-card-header">
+                    <VerificationBadgeMini color="#22c55e" />
+                    <h4>National Climber</h4>
+                  </div>
+                  <p className="community-badge-card-text">For climbers recognized at the national level in Pakistan.</p>
+                </div>
+
+                <div className="community-badge-card">
+                  <div className="community-badge-card-header">
+                    <VerificationBadgeMini color="#3b82f6" />
+                    <h4>International Climber</h4>
+                  </div>
+                  <p className="community-badge-card-text">For climbers recognized at the international level.</p>
+                </div>
+
+                <div className="community-badge-card">
+                  <div className="community-badge-card-header">
+                    <VerificationBadgeMini color="#eab308" />
+                    <h4>Organization / Club / Team</h4>
+                  </div>
+                  <p className="community-badge-card-text">For official climbing organizations, clubs, and teams.</p>
+                </div>
+              </div>
+            </div>
+
             {error && <p className="form-status form-status--error" role="alert">{error}</p>}
             {saved && <p className="form-status form-status--success">Profile saved successfully!</p>}
 
@@ -179,48 +221,6 @@ function Page() {
               </button>
             </div>
           </form>
-
-          {/* ── Verification Badges Info ── */}
-          <div className="community-form community-verification-card">
-            <h3 className="community-badge-title">Verification Badges</h3>
-            <p className="community-badge-subtitle">
-              Verified badges confirm your identity on Climb Pakistan.
-            </p>
-
-            <ol className="community-badge-steps">
-              <li>Send a message from your official Instagram account to{' '}
-                <a href="https://www.instagram.com/climb_pakistan" target="_blank" rel="noopener noreferrer" className="community-badge-instagram-link">@climb_pakistan</a>.
-              </li>
-              <li>Send us the email address you used to create your Climb Pakistan account so we can identify your profile.</li>
-              <li>Once your identity is confirmed, you&rsquo;ll receive the appropriate verification badge for your category.</li>
-            </ol>
-
-            <div className="community-badge-actions">
-              <div className="community-badge-card">
-                <div className="community-badge-card-header">
-                  <VerificationBadgeMini color="#22c55e" />
-                  <h4>National Climber</h4>
-                </div>
-                <p className="community-badge-card-text">For climbers recognized at the national level in Pakistan.</p>
-              </div>
-
-              <div className="community-badge-card">
-                <div className="community-badge-card-header">
-                  <VerificationBadgeMini color="#3b82f6" />
-                  <h4>International Climber</h4>
-                </div>
-                <p className="community-badge-card-text">For climbers recognized at the international level.</p>
-              </div>
-
-              <div className="community-badge-card">
-                <div className="community-badge-card-header">
-                  <VerificationBadgeMini color="#eab308" />
-                  <h4>Organization / Club / Team</h4>
-                </div>
-                <p className="community-badge-card-text">For official climbing organizations, clubs, and teams.</p>
-              </div>
-            </div>
-          </div>
 
           <div className="community-form-actions community-form-actions--center">
             <a href="/community/feed" className="btn btn-primary">Go to Community Feed</a>
