@@ -8,11 +8,20 @@ import { getPosts, getMyVotes } from '../../../src/api';
 
 export { Page };
 
-function FeedShell({ children }) {
+function TopicsSidebar() {
   return (
-    <div className="container community-feed-layout">
-      {children}
-    </div>
+    <aside className="community-topics-sidebar">
+      <h2 className="community-topics-sidebar-title">Topics</h2>
+      <ul className="community-topics-sidebar-list">
+        {communityTopics.map((topic) => (
+          <li key={topic} className="community-topics-sidebar-item">
+            <a href={`/community/feed?category=${encodeURIComponent(topic)}`} className="community-topics-sidebar-link">
+              {topic}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 }
 
@@ -180,6 +189,7 @@ function Page() {
 
       <section className="section-tight community-feed-body">
         <FeedShell>
+          <TopicsSidebar />
           <div className="community-feed-main">
             {status === 'loading' && (
               <div className="community-post-list">
