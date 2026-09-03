@@ -7,8 +7,8 @@
 
 // Topics visitors can discuss in the community.
 export const communityTopics = [
-  'Questions',
   'News',
+  'Questions',
   'Competition',
   'Training',
   'Outdoor Climbing',
