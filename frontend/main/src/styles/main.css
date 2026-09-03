@@ -4833,36 +4833,62 @@ input, textarea, select { font: inherit; color: inherit; }
 /* ── Community Landing Page - Social Media Style ── */
 .community-landing {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 72px);
   padding: var(--sp-8);
-  gap: var(--sp-6);
-  max-width: 400px;
+  gap: var(--sp-16);
+  max-width: 980px;
   margin: 0 auto;
 }
 
-/* Branding */
+/* Left side - Branding */
+.community-landing-hero {
+  flex: 1;
+  max-width: 420px;
+}
 .community-landing-brand {
-  text-align: center;
-  margin-bottom: var(--sp-2);
+  margin-bottom: var(--sp-10);
 }
 .community-landing-logo {
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  margin-bottom: var(--sp-3);
+  margin-bottom: var(--sp-4);
+  line-height: 1.1;
 }
 .community-landing-tagline {
   color: var(--cp-text-dim);
-  font-size: var(--fs-md);
+  font-size: var(--fs-lg);
   line-height: 1.6;
 }
+.community-landing-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.community-landing-feature {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--cp-text-dim);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  transition: border-color 0.2s ease;
+}
+.community-landing-feature:hover {
+  border-color: var(--cp-accent);
+}
+.community-landing-feature-icon {
+  font-size: 1.25rem;
+}
 
-/* Form area */
+/* Right side - Form */
 .community-landing-form-area {
   width: 100%;
-  max-width: 350px;
+  max-width: 380px;
 }
 .community-landing-form-card {
   background: var(--cp-surface);
@@ -4870,6 +4896,7 @@ input, textarea, select { font: inherit; color: inherit; }
   border-radius: 16px;
   padding: var(--sp-8);
   margin-bottom: var(--sp-4);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
 /* Login form */
@@ -4985,10 +5012,22 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Responsive */
 @media (max-width: 768px) {
   .community-landing {
+    flex-direction: column;
+    gap: var(--sp-8);
     padding: var(--sp-6);
+  }
+  .community-landing-hero {
+    text-align: center;
+    max-width: 100%;
   }
   .community-landing-logo {
     font-size: 2rem;
+  }
+  .community-landing-tagline {
+    font-size: var(--fs-md);
+  }
+  .community-landing-features {
+    align-items: stretch;
   }
   .community-landing-form-area {
     max-width: 100%;
