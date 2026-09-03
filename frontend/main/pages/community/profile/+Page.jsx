@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { navigate } from 'vike/client/router';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { AnimatedPageHeader } from '../../../src/hooks/animations';
@@ -10,8 +11,19 @@ function Page() {
 
   // The canonical profile lives at /community/u/:username — this /community/profile
   // route just hands the visitor off there.
-  if (!initializing && !isGuest && user?.username) {
-    navigate(`/community/u/${user.username}`);
+  useEffect(() => {
+    if (!initializing && !isGuest && user?.username) {
+      navigate(`/community/u/${user.username}`);
+    }
+  }, [isGuest, initializing, user?.username]);
+
+  // Show loading state while checking authentication or redirecting
+  if (initializing || (!isGuest && user?.username)) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+        <p className="profile-loading">Loading your profile…</p>
+      </div>
+    );
   }
 
   return (

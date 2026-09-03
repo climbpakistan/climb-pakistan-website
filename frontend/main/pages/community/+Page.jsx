@@ -1,10 +1,31 @@
+import { useEffect } from 'react';
+import { navigate } from 'vike/client/router';
 import { AnimatedPageHeader, AnimatedSection } from '../../src/hooks/animations';
 import Seo from '../../src/components/Seo';
 import { communityTopics, communityCopy } from '../../src/data/communityData';
+import { useCommunity } from '../../src/hooks/CommunityContext';
 
 export { Page };
 
 function Page() {
+  const { isGuest, initializing } = useCommunity();
+
+  // If the user is already logged in, redirect to the feed
+  useEffect(() => {
+    if (!initializing && !isGuest) {
+      navigate('/community/feed');
+    }
+  }, [isGuest, initializing]);
+
+  // Show loading state while checking authentication
+  if (initializing || !isGuest) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <Seo
