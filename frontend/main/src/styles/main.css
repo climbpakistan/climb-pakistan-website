@@ -3474,6 +3474,10 @@ input, textarea, select { font: inherit; color: inherit; }
   background: var(--cp-accent-strong);
   color: #000 !important;
 }
+.nav-community-btn.active::after,
+.nav-community-btn[aria-current='page']::after {
+  display: none;
+}
 
 /* Signup avatar picker */
 .community-avatar-input {
