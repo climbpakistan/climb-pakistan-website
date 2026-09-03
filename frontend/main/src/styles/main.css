@@ -3689,12 +3689,11 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .profile-bio { color: var(--cp-text); margin-top: var(--sp-3); line-height: 1.65; }
 
-/* Instagram-style follow stats (right side, inline with name) */
+/* Follow stats — aligned with action buttons row */
 .profile-follow-stats {
   display: flex;
   gap: var(--sp-6);
-  flex-shrink: 0;
-  padding-top: 6px;
+  margin-top: var(--sp-4);
 }
 .profile-follow-stat {
   background: none;
@@ -3703,7 +3702,7 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-text-dim);
   font-size: var(--fs-sm);
   font-family: inherit;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
 }
 .profile-follow-stat:disabled { cursor: default; }
@@ -3712,7 +3711,7 @@ input, textarea, select { font: inherit; color: inherit; }
   font-size: var(--fs-md);
   font-weight: 700;
 }
-.profile-follow-stat span { display: block; margin-top: 1px; }
+.profile-follow-stat span { margin-left: 3px; }
 .profile-follow-stat:hover:not(:disabled) strong { color: var(--cp-accent); }
 
 /* Action buttons row */
@@ -3867,7 +3866,7 @@ input, textarea, select { font: inherit; color: inherit; }
   /* Profile */
   .profile-hero { flex-direction: column; align-items: center; text-align: center; }
   .profile-hero .profile-avatar { width: 88px; height: 88px; }
-  .profile-hero-top { flex-direction: column; align-items: center; }
+  .profile-hero-top { justify-content: center; }
   .profile-hero-info { text-align: center; }
   .profile-username { justify-content: center; }
   .profile-follow-stats { justify-content: center; }
