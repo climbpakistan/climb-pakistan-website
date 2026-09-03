@@ -4848,7 +4848,7 @@ input, textarea, select { font: inherit; color: inherit; }
   max-width: 420px;
 }
 .community-landing-brand {
-  margin-bottom: var(--sp-10);
+  margin-bottom: var(--sp-8);
 }
 .community-landing-logo {
   font-size: 2.8rem;
