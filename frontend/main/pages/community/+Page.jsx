@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { navigate } from 'vike/client/router';
 import { AnimatedPageHeader, AnimatedSection } from '../../src/hooks/animations';
 import Seo from '../../src/components/Seo';
-import { communityTopics, communityCopy } from '../../src/data/communityData';
+import { communityCopy } from '../../src/data/communityData';
 import { useCommunity } from '../../src/hooks/CommunityContext';
 
 export { Page };
@@ -42,18 +42,6 @@ function Page() {
           {communityCopy.tagline}
         </p>
       </AnimatedPageHeader>
-
-      {/* ── Topics ── */}
-      <AnimatedSection className="section-tight community-topics-section">
-        <div className="container">
-          <h2 className="detail-heading community-section-title">Discuss the sport</h2>
-          <ul className="community-topic-grid">
-            {communityTopics.map((topic) => (
-              <li key={topic} className="community-topic-pill">{topic}</li>
-            ))}
-          </ul>
-        </div>
-      </AnimatedSection>
 
       {/* ── Join actions ── */}
       <AnimatedSection className="section-tight community-actions-section">
