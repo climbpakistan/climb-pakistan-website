@@ -7,14 +7,12 @@
 
 // Topics visitors can discuss in the community.
 export const communityTopics = [
-  'Speed Climbing',
-  'Lead Climbing',
-  'Bouldering',
+  'Questions',
   'Training',
-  'Competitions',
+  'Competition',
   'Climbing Gear',
   'Outdoor Climbing',
-  'Pakistani climbing',
+  'News',
 ];
 
 // Top-level community navigation. This is the seam we expand later.
@@ -91,16 +89,10 @@ export const reportReasons = [
 export const postCategories = [
   'Questions',
   'Training',
-  'Speed',
-  'Lead',
-  'Bouldering',
   'Competition',
-  'Gear',
-  'Outdoor',
-  'Pakistan Climbing',
-  'Achievement',
+  'Climbing Gear',
+  'Outdoor Climbing',
   'News',
-  'Other',
 ];
 
 export const MAX_POST_TITLE_LENGTH = 300;

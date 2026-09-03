@@ -27,8 +27,7 @@ const TABS = [
 ];
 
 const POST_CATEGORIES = [
-  'Questions', 'Training', 'Speed', 'Lead', 'Bouldering', 'Competition',
-  'Gear', 'Outdoor', 'Pakistan Climbing', 'Achievement', 'News', 'Other',
+  'Questions', 'Training', 'Competition', 'Climbing Gear', 'Outdoor Climbing', 'News',
 ];
 
 const POST_TYPES = ['text', 'image', 'link', 'poll'];

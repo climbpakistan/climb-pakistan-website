@@ -4,16 +4,10 @@ import mongoose from 'mongoose';
 export const POST_CATEGORIES = [
   'Questions',
   'Training',
-  'Speed',
-  'Lead',
-  'Bouldering',
   'Competition',
-  'Gear',
-  'Outdoor',
-  'Pakistan Climbing',
-  'Achievement',
+  'Climbing Gear',
+  'Outdoor Climbing',
   'News',
-  'Other',
 ];
 
 // Exactly four post types. Video uploads are NOT supported.
