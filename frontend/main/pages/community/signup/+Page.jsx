@@ -18,7 +18,7 @@ const COMMUNITY_ROLE_OPTIONS = [
   { value: 'athlete', label: 'Athlete' },
   { value: 'coach', label: 'Coach' },
   { value: 'climbing_enthusiast', label: 'Climbing Enthusiast' },
-  { value: 'gym_or_organization', label: 'Team & Organization' },
+  { value: 'gym_or_organization', label: 'Team or Organization' },
 ];
 
 // Roles that require disciplines and experience level
