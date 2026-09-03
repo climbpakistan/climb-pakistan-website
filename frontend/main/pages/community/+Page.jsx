@@ -70,18 +70,26 @@ function Page() {
               <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
             </h1>
             <p className="community-landing-tagline">
-              A community for climbers to connect, share, and grow together.
+              A community for climbers to connect, share and grow together.
             </p>
           </div>
 
           <div className="community-landing-features">
             <div className="community-landing-feature">
               <span className="community-landing-feature-icon">💬</span>
-              <span>Discuss climbing topics</span>
+              <span>Discuss climbing</span>
             </div>
             <div className="community-landing-feature">
-              <span className="community-landing-feature-icon">🏆</span>
-              <span>Share your achievements</span>
+              <span className="community-landing-feature-icon">📸</span>
+              <span>Share your climbing experiences</span>
+            </div>
+            <div className="community-landing-feature">
+              <span className="community-landing-feature-icon">💡</span>
+              <span>Learn and share climbing knowledge</span>
+            </div>
+            <div className="community-landing-feature">
+              <span className="community-landing-feature-icon">🧗</span>
+              <span>Discover climbing in Pakistan</span>
             </div>
             <div className="community-landing-feature">
               <span className="community-landing-feature-icon">🤝</span>
