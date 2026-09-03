@@ -93,11 +93,20 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
       </div>
 
       <div className="profile-hero-main">
-        {/* Name and username */}
+        {/* Name, username, and followers/following */}
         <div className="profile-hero-top">
           <div className="profile-hero-info">
             <h1 className="profile-name">{profile.name || `@${profile.username}`}</h1>
             <p className="profile-username">@{profile.username}<VerificationBadge verification={profile.verification} /></p>
+          </div>
+
+          <div className="profile-follow-stats">
+            <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowers}>
+              <strong>{followerCount.toLocaleString()}</strong> <span>Followers</span>
+            </button>
+            <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowing}>
+              <strong>{followingCount.toLocaleString()}</strong> <span>Following</span>
+            </button>
           </div>
         </div>
 
@@ -109,16 +118,6 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
 
         {/* Bio */}
         {profile.bio ? <p className="profile-bio">{profile.bio}</p> : null}
-
-        {/* Followers / Following — aligned with action buttons */}
-        <div className="profile-follow-stats">
-          <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowers}>
-            <strong>{followerCount.toLocaleString()}</strong> <span>Followers</span>
-          </button>
-          <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowing}>
-            <strong>{followingCount.toLocaleString()}</strong> <span>Following</span>
-          </button>
-        </div>
 
         {/* Action buttons */}
         <div className="profile-actions-row">

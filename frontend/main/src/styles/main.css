@@ -3655,9 +3655,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .profile-hero-top {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--sp-4);
+  gap: var(--sp-4) var(--sp-8);
 }
 .profile-hero-info { flex: 1; min-width: 0; }
 
@@ -3689,11 +3688,12 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .profile-bio { color: var(--cp-text); margin-top: var(--sp-3); line-height: 1.65; }
 
-/* Follow stats — aligned with action buttons row */
+/* Follow stats — next to name */
 .profile-follow-stats {
   display: flex;
   gap: var(--sp-6);
-  margin-top: var(--sp-4);
+  flex-shrink: 0;
+  padding-top: 4px;
 }
 .profile-follow-stat {
   background: none;
@@ -3866,10 +3866,10 @@ input, textarea, select { font: inherit; color: inherit; }
   /* Profile */
   .profile-hero { flex-direction: column; align-items: center; text-align: center; }
   .profile-hero .profile-avatar { width: 88px; height: 88px; }
-  .profile-hero-top { justify-content: center; }
+  .profile-hero-top { flex-direction: column; align-items: center; }
   .profile-hero-info { text-align: center; }
   .profile-username { justify-content: center; }
-  .profile-follow-stats { justify-content: center; }
+  .profile-follow-stats { justify-content: center; padding-top: 0; }
   .profile-actions-row { justify-content: center; }
   .profile-tabs { width: 100%; }
   .profile-tab { flex: 1; text-align: center; }
