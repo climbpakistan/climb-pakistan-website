@@ -95,7 +95,7 @@ function absoluteUrl(url) {
 async function main() {
   console.log('[sitemap] Generating sitemap…');
 
-  const [athletes, articles, competitions, learnSections, teamRankings, rankings] = await Promise.all([
+  const results = await Promise.allSettled([
     fetchJSON('/athletes'),
     fetchJSON('/news?status=Published'),
     fetchJSON('/competitions'),
@@ -103,18 +103,28 @@ async function main() {
     fetchJSON('/team-rankings'),
     fetchJSON('/rankings'),
   ]);
+  const athletes = results[0].status === 'fulfilled' ? results[0].value : [];
+  const articles = results[1].status === 'fulfilled' ? results[1].value : [];
+  const competitions = results[2].status === 'fulfilled' ? results[2].value : [];
+  const learnSections = results[3].status === 'fulfilled' ? results[3].value : [];
+  const teamRankings = results[4].status === 'fulfilled' ? results[4].value : [];
+  const rankings = results[5].status === 'fulfilled' ? results[5].value : [];
 
   const urls = [];
 
   // Derive lastmod for /rankings from the most recent team-ranking year
   let rankingsLastmod;
-  if (teamRankings && typeof teamRankings === 'object') {
-    const yearsWithData = Object.keys(teamRankings)
-      .filter((y) => Array.isArray(teamRankings[y]) && teamRankings[y].length > 0)
-      .sort((a, b) => Number(b) - Number(a));
-    if (yearsWithData.length > 0) {
-      rankingsLastmod = w3cDate(`${yearsWithData[0]}-12-31`);
+  try {
+    if (teamRankings && typeof teamRankings === 'object') {
+      const yearsWithData = Object.keys(teamRankings)
+        .filter((y) => Array.isArray(teamRankings[y]) && teamRankings[y].length > 0)
+        .sort((a, b) => Number(b) - Number(a));
+      if (yearsWithData.length > 0) {
+        rankingsLastmod = w3cDate(`${yearsWithData[0]}-12-31`);
+      }
     }
+  } catch {
+    // ignore — lastmod will be undefined
   }
 
   // Static pages
@@ -137,36 +147,52 @@ async function main() {
   }
 
   // Dynamic content
-  for (const athlete of athletes) {
-    urls.push(urlElement(`${SITE_URL}/athletes/${encodeURIComponent(athlete.slug)}`, {
-      lastmod: w3cDate(athlete.updatedAt),
-      changefreq: 'weekly',
-      priority: '0.7',
-    }));
+  try {
+    for (const athlete of athletes) {
+      urls.push(urlElement(`${SITE_URL}/athletes/${encodeURIComponent(athlete.slug)}`, {
+        lastmod: w3cDate(athlete.updatedAt),
+        changefreq: 'weekly',
+        priority: '0.7',
+      }));
+    }
+  } catch {
+    // skip athletes
   }
-  for (const article of articles) {
-    urls.push(urlElement(`${SITE_URL}/news/${encodeURIComponent(article.slug)}`, {
-      lastmod: w3cDate(article.updatedAt || article.date),
-      changefreq: 'weekly',
-      priority: '0.8',
-      images: article.imageUrl
-        ? [{ loc: absoluteUrl(article.imageUrl), title: article.title }]
-        : undefined,
-    }));
+  try {
+    for (const article of articles) {
+      urls.push(urlElement(`${SITE_URL}/news/${encodeURIComponent(article.slug)}`, {
+        lastmod: w3cDate(article.updatedAt || article.date),
+        changefreq: 'weekly',
+        priority: '0.8',
+        images: article.imageUrl
+          ? [{ loc: absoluteUrl(article.imageUrl), title: article.title }]
+          : undefined,
+      }));
+    }
+  } catch {
+    // skip articles
   }
-  for (const comp of competitions) {
-    urls.push(urlElement(`${SITE_URL}/competitions/${encodeURIComponent(comp.slug)}`, {
-      lastmod: w3cDate(comp.updatedAt),
-      changefreq: 'weekly',
-      priority: '0.7',
-    }));
+  try {
+    for (const comp of competitions) {
+      urls.push(urlElement(`${SITE_URL}/competitions/${encodeURIComponent(comp.slug)}`, {
+        lastmod: w3cDate(comp.updatedAt),
+        changefreq: 'weekly',
+        priority: '0.7',
+      }));
+    }
+  } catch {
+    // skip competitions
   }
-  for (const section of learnSections) {
-    urls.push(urlElement(`${SITE_URL}/learn/${encodeURIComponent(section.slug)}`, {
-      lastmod: w3cDate(section.updatedAt),
-      changefreq: 'monthly',
-      priority: '0.6',
-    }));
+  try {
+    for (const section of learnSections) {
+      urls.push(urlElement(`${SITE_URL}/learn/${encodeURIComponent(section.slug)}`, {
+        lastmod: w3cDate(section.updatedAt),
+        changefreq: 'monthly',
+        priority: '0.6',
+      }));
+    }
+  } catch {
+    // skip learn sections
   }
 
   // ── Player ranking category/discipline/year combinations ──
