@@ -29,48 +29,9 @@ function readImageMeta(file) {
   });
 }
 
-function VerificationInfoSection() {
-  return (
-    <div className="community-badge-section">
-      <h3 className="community-badge-title">Verification Badges</h3>
-      <p className="community-badge-subtitle">
-        Verified badges confirm your identity on Climb Pakistan. To get verified, send a message from your official Instagram account to{' '}
-        <a href="https://www.instagram.com/climb_pakistan" target="_blank" rel="noopener noreferrer" className="community-badge-instagram-link">@climb_pakistan</a>{' '}
-        on Instagram. After confirming your identity, your profile will be given the verification badge for the respective category.
-      </p>
-
-      <div className="community-badge-actions">
-        <div className="community-badge-card">
-          <div className="community-badge-card-header">
-            <VerificationBadgeMini color="#22c55e" />
-            <h4>National Climber</h4>
-          </div>
-          <p className="community-badge-card-text">For climbers recognized at the national level in Pakistan.</p>
-        </div>
-
-        <div className="community-badge-card">
-          <div className="community-badge-card-header">
-            <VerificationBadgeMini color="#3b82f6" />
-            <h4>International Climber</h4>
-          </div>
-          <p className="community-badge-card-text">For climbers recognized at the international level.</p>
-        </div>
-
-        <div className="community-badge-card">
-          <div className="community-badge-card-header">
-            <VerificationBadgeMini color="#eab308" />
-            <h4>Organization / Club / Team</h4>
-          </div>
-          <p className="community-badge-card-text">For official climbing organizations, clubs, and teams.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function VerificationBadgeMini({ color }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="12" fill={color} />
       <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
@@ -91,8 +52,8 @@ function Page() {
 
   // Redirect if not logged in
   useEffect(() => {
-    if (!isGuest && user) return; // logged in — fine
-    if (!isGuest) return; // initializing
+    if (!isGuest && user) return;
+    if (!isGuest) return;
     navigate('/community/login');
   }, [isGuest, user]);
 
@@ -148,6 +109,7 @@ function Page() {
       <section className="section-tight">
         <div className="container community-form-wrap">
           <form className="community-form" onSubmit={handleSaveProfile} noValidate>
+            {/* ── Profile Photo ── */}
             <div className="form-row community-avatar-field">
               <label>Profile Photo <span className="form-optional">(optional)</span></label>
               <div className="community-avatar-input">
@@ -165,6 +127,7 @@ function Page() {
               </div>
             </div>
 
+            {/* ── Bio ── */}
             <div className="form-row">
               <label htmlFor="bio">Bio <span className="form-optional">(optional)</span></label>
               <textarea
@@ -178,6 +141,7 @@ function Page() {
               <p className="form-hint">{bio.length}/300</p>
             </div>
 
+            {/* ── City ── */}
             <div className="form-row">
               <label htmlFor="city">City / Region <span className="form-optional">(optional)</span></label>
               <input
@@ -190,6 +154,7 @@ function Page() {
               />
             </div>
 
+            {/* ── Instagram ── */}
             <div className="form-row">
               <label htmlFor="instagram">Instagram Link <span className="form-optional">(optional)</span></label>
               <input
@@ -215,12 +180,49 @@ function Page() {
             </div>
           </form>
 
-          {/* Verification Info Section */}
-          <div className="community-form" style={{ marginTop: 'var(--sp-8)' }}>
-            <VerificationInfoSection />
+          {/* ── Verification Badges Info ── */}
+          <div className="community-form community-verification-card">
+            <h3 className="community-badge-title">Verification Badges</h3>
+            <p className="community-badge-subtitle">
+              Verified badges confirm your identity on Climb Pakistan.
+            </p>
+
+            <ol className="community-badge-steps">
+              <li>Send a message from your official Instagram account to{' '}
+                <a href="https://www.instagram.com/climb_pakistan" target="_blank" rel="noopener noreferrer" className="community-badge-instagram-link">@climb_pakistan</a>.
+              </li>
+              <li>Send us the email address you used to create your Climb Pakistan account so we can identify your profile.</li>
+              <li>Once your identity is confirmed, you&rsquo;ll receive the appropriate verification badge for your category.</li>
+            </ol>
+
+            <div className="community-badge-actions">
+              <div className="community-badge-card">
+                <div className="community-badge-card-header">
+                  <VerificationBadgeMini color="#22c55e" />
+                  <h4>National Climber</h4>
+                </div>
+                <p className="community-badge-card-text">For climbers recognized at the national level in Pakistan.</p>
+              </div>
+
+              <div className="community-badge-card">
+                <div className="community-badge-card-header">
+                  <VerificationBadgeMini color="#3b82f6" />
+                  <h4>International Climber</h4>
+                </div>
+                <p className="community-badge-card-text">For climbers recognized at the international level.</p>
+              </div>
+
+              <div className="community-badge-card">
+                <div className="community-badge-card-header">
+                  <VerificationBadgeMini color="#eab308" />
+                  <h4>Organization / Club / Team</h4>
+                </div>
+                <p className="community-badge-card-text">For official climbing organizations, clubs, and teams.</p>
+              </div>
+            </div>
           </div>
 
-          <div className="community-form-actions" style={{ marginTop: 'var(--sp-6)', justifyContent: 'center' }}>
+          <div className="community-form-actions community-form-actions--center">
             <a href="/community/feed" className="btn btn-primary">Go to Community Feed</a>
           </div>
         </div>
