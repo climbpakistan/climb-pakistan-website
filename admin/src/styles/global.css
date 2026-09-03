@@ -375,7 +375,7 @@ textarea {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-sm);
 }
 
@@ -1320,7 +1320,7 @@ tbody tr:hover {
   }
 
   .data-table {
-    min-width: 760px;
+    min-width: 1100px;
   }
 
   .cell-actions {
