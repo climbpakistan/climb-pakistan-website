@@ -93,32 +93,31 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
       </div>
 
       <div className="profile-hero-main">
-        {/* Instagram-style stats row */}
+        {/* Name, username, and followers/following in one row */}
         <div className="profile-hero-top">
           <div className="profile-hero-info">
             <h1 className="profile-name">{profile.name || `@${profile.username}`}</h1>
             <p className="profile-username">@{profile.username}<VerificationBadge verification={profile.verification} /></p>
           </div>
+
+          <div className="profile-follow-stats">
+            <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowers}>
+              <strong>{followerCount.toLocaleString()}</strong> <span>Followers</span>
+            </button>
+            <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowing}>
+              <strong>{followingCount.toLocaleString()}</strong> <span>Following</span>
+            </button>
+          </div>
         </div>
 
         {/* City */}
-        {profile.city ? <p className="profile-city">{profile.city}</p> : null}
+        {profile.city ? <p className="profile-city">📍 {profile.city}</p> : null}
 
         {/* Experience level */}
         {experienceLabel ? <p className="profile-experience-tag">{experienceLabel}</p> : null}
 
         {/* Bio */}
         {profile.bio ? <p className="profile-bio">{profile.bio}</p> : null}
-
-        {/* Instagram-style followers/following */}
-        <div className="profile-follow-stats">
-          <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowers}>
-            <strong>{followerCount.toLocaleString()}</strong> <span>Followers</span>
-          </button>
-          <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowing}>
-            <strong>{followingCount.toLocaleString()}</strong> <span>Following</span>
-          </button>
-        </div>
 
         {/* Action buttons */}
         <div className="profile-actions-row">
@@ -136,13 +135,13 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
           ) : null}
 
           {profile.instagramUrl ? (
-            <a href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline profile-action-btn">
+            <a href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" className="btn profile-action-btn profile-action-btn--instagram">
               Instagram
             </a>
           ) : null}
 
           {athlete ? (
-            <a href={`/athletes/${athlete.slug}`} className="btn btn-outline profile-action-btn">
+            <a href={`/athletes/${athlete.slug}`} className="btn profile-action-btn profile-action-btn--athlete">
               Athlete Profile
             </a>
           ) : null}
