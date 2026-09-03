@@ -16,14 +16,19 @@ function FeedShell({ children }) {
   );
 }
 
-function TopicsSidebar() {
+function TopicsSidebar({ activeCategory }) {
   return (
     <aside className="community-topics-sidebar">
       <h2 className="community-topics-sidebar-title">Topics</h2>
       <ul className="community-topics-sidebar-list">
+        <li className="community-topics-sidebar-item">
+          <a href="/community/feed" className={`community-topics-sidebar-link${!activeCategory ? ' is-active' : ''}`}>
+            All Topics
+          </a>
+        </li>
         {communityTopics.map((topic) => (
           <li key={topic} className="community-topics-sidebar-item">
-            <a href={`/community/feed?category=${encodeURIComponent(topic)}`} className="community-topics-sidebar-link">
+            <a href={`/community/feed?category=${encodeURIComponent(topic)}`} className={`community-topics-sidebar-link${activeCategory === topic ? ' is-active' : ''}`}>
               {topic}
             </a>
           </li>
@@ -72,6 +77,10 @@ function Page() {
     ? searchTime
     : 'all';
 
+  // Active category filter from the URL (?category=...).
+  const searchCategory = pageContext?.urlParsed?.search?.category;
+  const activeCategory = searchCategory || '';
+
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -82,7 +91,7 @@ function Page() {
   useEffect(() => {
     let active = true;
     setStatus('loading');
-    getPosts(token, { view: activeView, time: activeTime, page: 1, limit: FEED_PAGE_SIZE })
+    getPosts(token, { view: activeView, time: activeTime, page: 1, limit: FEED_PAGE_SIZE, category: activeCategory })
       .then(async (data) => {
         if (!active) return;
         setPosts(await withMyVotes(data.posts || []));
@@ -96,13 +105,13 @@ function Page() {
         setStatus('error');
       });
     return () => { active = false; };
-  }, [activeView, activeTime, token, isGuest, withMyVotes]);
+  }, [activeView, activeTime, activeCategory, token, isGuest, withMyVotes]);
 
   async function loadMore() {
     setLoadingMore(true);
     try {
       const next = page + 1;
-      const data = await getPosts(token, { view: activeView, time: activeTime, page: next, limit: FEED_PAGE_SIZE });
+      const data = await getPosts(token, { view: activeView, time: activeTime, page: next, limit: FEED_PAGE_SIZE, category: activeCategory });
       const merged = await withMyVotes(data.posts || []);
       setPosts((prev) => [...prev, ...merged]);
       setHasMore(!!data.hasMore);
@@ -181,7 +190,7 @@ function Page() {
 
       <section className="section-tight community-feed-body">
         <FeedShell>
-          <TopicsSidebar />
+          <TopicsSidebar activeCategory={activeCategory} />
           <div className="community-feed-main">
             {status === 'loading' && (
               <div className="community-post-list">
@@ -206,8 +215,17 @@ function Page() {
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                   </svg>
                 </span>
-                <h2 className="community-empty-title">Welcome to the Climb Pakistan Community</h2>
-                <p className="community-empty-text">Be the first to start a discussion.</p>
+                {activeCategory ? (
+                  <>
+                    <h2 className="community-empty-title">No posts in {activeCategory}</h2>
+                    <p className="community-empty-text">There are no posts in this topic yet. Be the first to start a discussion!</p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="community-empty-title">Welcome to the Climb Pakistan Community</h2>
+                    <p className="community-empty-text">Be the first to start a discussion.</p>
+                  </>
+                )}
                 {isGuest && (
                   <p className="community-empty-guest">
                     Guests can browse freely. Create an account when you&apos;re

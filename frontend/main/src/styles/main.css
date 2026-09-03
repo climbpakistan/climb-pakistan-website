@@ -3733,6 +3733,11 @@ input, textarea, select { font: inherit; color: inherit; }
   background: var(--cp-bg);
   color: var(--cp-primary);
 }
+.community-topics-sidebar-link.is-active {
+  background: var(--cp-bg);
+  color: var(--cp-primary);
+  font-weight: 600;
+}
 
 /* Community responsive */
 @media (max-width: 1100px) {

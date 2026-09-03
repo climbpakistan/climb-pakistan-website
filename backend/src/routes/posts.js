@@ -321,6 +321,12 @@ router.get('/', optionalUser, async (req, res) => {
     // Only ever return content that hasn't been removed by moderators.
     const filter = { removed: { $ne: true } };
 
+    // Optional category filter for topic pages.
+    const category = String(req.query.category || '').trim();
+    if (category && POST_CATEGORIES.includes(category)) {
+      filter.category = category;
+    }
+
     // Optional author filter for profile pages.
     if (req.query.author) {
       const author = await UserModel.findOne({ username: String(req.query.author).trim().toLowerCase().replace(/^@/, '') });

@@ -189,8 +189,9 @@ export async function getMyBadgeApplications(token) {
 
 // ── Community Posts ──
 /** Paginated feed. view: new | popular | top; time applies to top. token is optional (enables poll/vote personalization). */
-export async function getPosts(token, { view = 'new', time = 'all', page = 1, limit = 20 } = {}) {
+export async function getPosts(token, { view = 'new', time = 'all', page = 1, limit = 20, category = '' } = {}) {
   const params = new URLSearchParams({ view, time, page: String(page), limit: String(limit) });
+  if (category) params.set('category', category);
   const res = await fetch(`${BASE_URL}/posts?${params.toString()}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
