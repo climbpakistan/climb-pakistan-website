@@ -54,7 +54,6 @@ function Page() {
       />
 
       <AnimatedPageHeader>
-        <span className="eyebrow">Community</span>
         <h1 className="page-title">Welcome Back</h1>
         <p className="page-sub" style={{ marginInline: 'auto', textAlign: 'center' }}>
           Log in to participate in the Climb Pakistan Community.

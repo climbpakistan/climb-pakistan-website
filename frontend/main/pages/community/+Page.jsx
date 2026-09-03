@@ -36,7 +36,6 @@ function Page() {
       />
 
       <AnimatedPageHeader>
-        <span className="eyebrow">Climb Pakistan Community</span>
         <h1 className="page-title">A place for climbers to connect</h1>
         <p className="page-sub" style={{ marginInline: 'auto', textAlign: 'center' }}>
           {communityCopy.tagline}

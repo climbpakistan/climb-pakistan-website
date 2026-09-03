@@ -168,7 +168,6 @@ function Page() {
       />
 
       <AnimatedPageHeader>
-        <span className="eyebrow">Community</span>
         <h1 className="page-title">Create your account</h1>
         <p className="page-sub" style={{ marginInline: 'auto', textAlign: 'center' }}>
           Join the Climb Pakistan Community to start discussions, comment, and vote on posts.

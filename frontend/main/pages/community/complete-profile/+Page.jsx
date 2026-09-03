@@ -202,7 +202,6 @@ function Page() {
       />
 
       <AnimatedPageHeader>
-        <span className="eyebrow">Community</span>
         <h1 className="page-title">Complete your profile</h1>
         <p className="page-sub" style={{ marginInline: 'auto', textAlign: 'center' }}>
           Add more details to your profile. All fields are optional — you can always fill them in later.

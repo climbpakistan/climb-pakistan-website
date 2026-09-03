@@ -36,7 +36,6 @@ function Page() {
       />
 
       <AnimatedPageHeader>
-        <span className="eyebrow">Community</span>
         <h1 className="page-title">Your Profile</h1>
       </AnimatedPageHeader>
 

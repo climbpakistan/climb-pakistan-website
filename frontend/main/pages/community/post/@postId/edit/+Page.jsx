@@ -67,9 +67,7 @@ function Page() {
         <div className="page-header-bg-grid"></div>
         <div className="page-header-glow"></div>
         <div className="container">
-          <div className="hero-entrance">
-            <span className="eyebrow">Community</span>
-            <h1 className="page-title">Edit Post</h1>
+          <div className="hero-entrance">              <h1 className="page-title">Edit Post</h1>
           </div>
         </div>
       </section>

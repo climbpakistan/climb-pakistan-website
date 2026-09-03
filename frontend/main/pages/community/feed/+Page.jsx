@@ -154,7 +154,6 @@ function Page() {
         <div className="container">
           <div className="community-feed-headrow">
             <div className="hero-entrance">
-              <span className="eyebrow">Community</span>
               <h1 className="page-title">Climb Pakistan Community</h1>
             </div>
             <div className="community-feed-sort" role="tablist" aria-label="Feed view">

@@ -480,7 +480,7 @@ function Page() {
 
       <AnimatedPageHeader>
         <div className="container">
-          <span className="eyebrow">Community Profile</span>
+
         </div>
       </AnimatedPageHeader>
 
