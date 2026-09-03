@@ -3412,6 +3412,7 @@ input, textarea, select { font: inherit; color: inherit; }
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
+  position: relative;
 }
 .nav-auth-link {
   font-size: var(--fs-sm);
@@ -3478,7 +3479,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .nav-profile-dropdown {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  left: 0;
+  right: auto;
   background: var(--cp-surface, #fff);
   border: 1px solid var(--cp-border, #e2e2e2);
   border-radius: 8px;
