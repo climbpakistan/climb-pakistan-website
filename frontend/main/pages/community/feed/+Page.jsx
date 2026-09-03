@@ -8,6 +8,14 @@ import { getPosts, getMyVotes } from '../../../src/api';
 
 export { Page };
 
+function FeedShell({ children }) {
+  return (
+    <div className="container community-feed-layout">
+      {children}
+    </div>
+  );
+}
+
 function TopicsSidebar() {
   return (
     <aside className="community-topics-sidebar">

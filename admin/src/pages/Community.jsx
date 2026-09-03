@@ -16,6 +16,8 @@ import {
   suspendUser,
   banUser,
   liftUser,
+  getBadgeApplications,
+  updateBadgeApplication,
 } from '../api';
 
 const TABS = [
@@ -24,6 +26,7 @@ const TABS = [
   { id: 'posts', label: 'Posts' },
   { id: 'comments', label: 'Comments' },
   { id: 'reports', label: 'Reports' },
+  { id: 'badges', label: 'Badge Apps' },
 ];
 
 const POST_CATEGORIES = [
@@ -37,6 +40,16 @@ const VERIFICATION_OPTIONS = [
   { value: 'national', label: 'Verified National Climber' },
   { value: 'international', label: 'Verified International Sport Climber' },
 ];
+
+const ROLE_LABELS = {
+  athlete: 'Athlete',
+  coach: 'Coach',
+  climbing_enthusiast: 'Climbing Enthusiast',
+  gym_or_organization: 'Gym or Organization',
+};
+const DISCIPLINE_LABELS = { speed: 'Speed', lead: 'Lead', bouldering: 'Bouldering' };
+const EXPERIENCE_LABELS = { beginner: 'Beginner', intermediate: 'Intermediate', professional: 'Professional' };
+const BADGE_STATUS_LABELS = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' };
 
 const STATUS_LABELS = { active: 'Active', suspended: 'Suspended', banned: 'Banned' };
 
@@ -334,11 +347,11 @@ function UsersTab() {
             <tr>
               <th>User</th>
               <th>Email</th>
+              <th>Role</th>
+              <th>Disciplines</th>
+              <th>Experience</th>
               <th>Verification</th>
-              <th>Athlete</th>
               <th>Joined</th>
-              <th>Posts</th>
-              <th>Comments</th>
               <th>Status</th>
               <th className="col-actions"></th>
             </tr>
@@ -360,11 +373,11 @@ function UsersTab() {
                   </div>
                 </td>
                 <td>{u.email || '—'}</td>
+                <td>{ROLE_LABELS[u.communityRole] || '—'}</td>
+                <td>{u.disciplines && u.disciplines.length > 0 ? u.disciplines.map((d) => DISCIPLINE_LABELS[d] || d).join(', ') : '—'}</td>
+                <td>{EXPERIENCE_LABELS[u.experienceLevel] || '—'}</td>
                 <td><VerificationBadge verification={u.verification} /></td>
-                <td>{u.athlete ? <a className="text-link" href={`${FRONTEND_URL}/athletes/${u.athlete.slug}`} target="_blank" rel="noreferrer">{u.athlete.name}</a> : '—'}</td>
                 <td>{formatDate(u.createdAt)}</td>
-                <td>{u.postsCount}</td>
-                <td>{u.commentsCount}</td>
                 <td><StatusBadge status={u.accountStatus} /></td>
                 <td className="col-actions">
                   <div className="cell-actions">
@@ -890,6 +903,177 @@ function ReportsTab() {
   );
 }
 
+// ── Badge Applications ──────────────────────────────────────
+function BadgeApplicationsTab() {
+  const [status, setStatus] = useState('pending');
+  const [badgeType, setBadgeType] = useState('');
+  const [page, setPage] = useState(1);
+  const [applications, setApplications] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [busyId, setBusyId] = useState(null);
+  const [notesModal, setNotesModal] = useState(null); // { id, status }
+  const [notes, setNotes] = useState('');
+
+  async function load(nextPage = 1) {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await getBadgeApplications({
+        status: status || undefined,
+        badgeType: badgeType || undefined,
+        page: nextPage,
+        limit: 20,
+      });
+      setApplications(data.applications || []);
+      setTotal(data.total || 0);
+      setPage(data.page || 1);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load(1);
+  }, [status, badgeType]);
+
+  async function handleAction(appId, actionStatus) {
+    setBusyId(appId);
+    setError('');
+    setNotice('');
+    try {
+      await updateBadgeApplication(appId, { status: actionStatus, adminNotes: notes });
+      setNotice(`Application ${actionStatus}.`);
+      setNotesModal(null);
+      setNotes('');
+      await load(page);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  return (
+    <>
+      <div className="filter-bar">
+        <div className="filter-form" style={{ alignItems: 'center' }}>
+          <select
+            className="form-input"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            style={{ maxWidth: 170 }}
+          >
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select
+            className="form-input"
+            value={badgeType}
+            onChange={(e) => setBadgeType(e.target.value)}
+            style={{ maxWidth: 170 }}
+          >
+            <option value="">All badge types</option>
+            <option value="national">National</option>
+            <option value="international">International</option>
+          </select>
+          <span className="text-muted" style={{ fontSize: 'var(--fs-sm)' }}>{total} application{total === 1 ? '' : 's'}</span>
+        </div>
+      </div>
+
+      {loading ? (
+        <p className="text-muted">Loading applications...</p>
+      ) : applications.length === 0 ? (
+        <div className="card card-pad"><p className="text-muted">No badge applications to show.</p></div>
+      ) : (
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Badge Type</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Applied</th>
+                <th className="col-actions"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {applications.map((a) => (
+                <tr key={a.id}>
+                  <td>
+                    <div className="cell-user">
+                      <Avatar user={a.user} size={26} />
+                      <div>
+                        <div className="cell-strong">@{a.user?.username || 'unknown'}</div>
+                        <div className="cell-sub">{a.user?.name || ''}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span className="badge badge-info">{a.badgeType}</span></td>
+                  <td><div className="cell-truncate" style={{ maxWidth: 200 }}>{a.message || '—'}</div></td>
+                  <td><span className={`badge ${BADGE_STATUS_LABELS[a.status] === 'Approved' ? 'badge-success' : a.status === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>{BADGE_STATUS_LABELS[a.status] || a.status}</span></td>
+                  <td>{formatDate(a.createdAt)}</td>
+                  <td className="col-actions">
+                    <div className="cell-actions">
+                      {a.user && (
+                        <a className="btn btn-ghost btn-xs" href={`${FRONTEND_URL}/community/u/@${a.user.username}`} target="_blank" rel="noreferrer">Profile</a>
+                      )}
+                      {a.status === 'pending' && (
+                        <>
+                          <button className="btn btn-primary btn-xs" type="button" disabled={busyId === a.id} onClick={() => { setNotesModal({ id: a.id, status: 'approved' }); setNotes(''); }}>Approve</button>
+                          <button className="btn btn-danger btn-xs" type="button" disabled={busyId === a.id} onClick={() => { setNotesModal({ id: a.id, status: 'rejected' }); setNotes(''); }}>Reject</button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!loading && total > 20 && <Pagination page={page} total={total} pageSize={20} onPage={(p) => load(p)} loading={loading} />}
+
+      <Notice kind="error">{error}</Notice>
+      <Notice kind="success">{notice}</Notice>
+
+      {notesModal && (
+        <div className="modal-overlay" onClick={() => setNotesModal(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">{notesModal.status === 'approved' ? 'Approve' : 'Reject'} Application</h3>
+              <button className="btn btn-ghost" type="button" onClick={() => setNotesModal(null)}>Close</button>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Admin notes (optional)</label>
+              <textarea className="form-input" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Reason for approval/rejection..." />
+            </div>
+            <div className="btn-row">
+              <button
+                className={notesModal.status === 'approved' ? 'btn btn-primary' : 'btn btn-danger'}
+                type="button"
+                disabled={busyId === notesModal.id}
+                onClick={() => handleAction(notesModal.id, notesModal.status)}
+              >
+                {busyId === notesModal.id ? 'Working...' : notesModal.status === 'approved' ? 'Approve' : 'Reject'}
+              </button>
+              <button className="btn btn-outline" type="button" onClick={() => setNotesModal(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ── Page ────────────────────────────────────────────────────
 export default function Community() {
   const [tab, setTab] = useState('overview');
@@ -930,6 +1114,7 @@ export default function Community() {
         {tab === 'posts' && <PostsTab />}
         {tab === 'comments' && <CommentsTab />}
         {tab === 'reports' && <ReportsTab />}
+        {tab === 'badges' && <BadgeApplicationsTab />}
       </div>
     </>
   );

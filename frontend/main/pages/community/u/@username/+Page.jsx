@@ -82,6 +82,15 @@ function EmptyTab({ title, text }) {
   );
 }
 
+const ROLE_LABELS = {
+  athlete: 'Athlete',
+  coach: 'Coach',
+  climbing_enthusiast: 'Climbing Enthusiast',
+  gym_or_organization: 'Gym or Organization',
+};
+const DISCIPLINE_LABELS = { speed: 'Speed', lead: 'Lead', bouldering: 'Bouldering' };
+const EXPERIENCE_LABELS = { beginner: 'Beginner', intermediate: 'Intermediate', professional: 'Professional' };
+
 function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, onFollow, onEdit, onShowFollowers, onShowFollowing }) {
   const initial = (profile.username || profile.name || '?')[0].toUpperCase();
   const athlete = profile.athlete;
@@ -104,6 +113,27 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
         </h1>
         {profile.name ? <p className="profile-name">{profile.name}</p> : null}
         {profile.bio ? <p className="profile-bio">{profile.bio}</p> : null}
+
+        {profile.city ? <p className="profile-city">📍 {profile.city}</p> : null}
+        {profile.instagramUrl ? (
+          <a href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" className="profile-instagram-link">
+            📸 Instagram
+          </a>
+        ) : null}
+
+        <div className="profile-hero-meta">
+          {profile.communityRole ? (
+            <span className="profile-role">{ROLE_LABELS[profile.communityRole] || profile.communityRole}</span>
+          ) : null}
+          {profile.disciplines && profile.disciplines.length > 0 ? (
+            <span className="profile-disciplines">
+              {profile.disciplines.map((d) => DISCIPLINE_LABELS[d] || d).join(', ')}
+            </span>
+          ) : null}
+          {profile.experienceLevel ? (
+            <span className="profile-experience">{EXPERIENCE_LABELS[profile.experienceLevel] || profile.experienceLevel}</span>
+          ) : null}
+        </div>
 
         <div className="profile-hero-meta">
           <span className="profile-joined">{formatJoined(profile.createdAt)}</span>
@@ -148,6 +178,8 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
 function EditProfile({ profile, onCancel, onSaved }) {
   const { token } = useCommunity();
   const [bio, setBio] = useState(profile.bio || '');
+  const [city, setCity] = useState(profile.city || '');
+  const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl || '');
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(profile.profileImageUrl || null);
   const [saving, setSaving] = useState(false);
@@ -171,7 +203,7 @@ function EditProfile({ profile, onCancel, onSaved }) {
     setError('');
     setSaving(true);
     try {
-      const { user } = await communityUpdateProfile(token, { bio, avatar });
+      const { user } = await communityUpdateProfile(token, { bio, avatar, city, instagramUrl });
       onSaved(user);
     } catch (err) {
       setError(err.message || 'Could not save your profile.');
@@ -209,6 +241,29 @@ function EditProfile({ profile, onCancel, onSaved }) {
           placeholder="Tell the community a little about yourself."
         />
         <p className="form-hint">{bio.length}/300</p>
+      </div>
+
+      <div className="form-row">
+        <label htmlFor="edit-city">City / Region</label>
+        <input
+          type="text"
+          id="edit-city"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          placeholder="e.g. Islamabad, Karachi"
+          maxLength={100}
+        />
+      </div>
+
+      <div className="form-row">
+        <label htmlFor="edit-instagram">Instagram Link</label>
+        <input
+          type="url"
+          id="edit-instagram"
+          value={instagramUrl}
+          onChange={(e) => setInstagramUrl(e.target.value)}
+          placeholder="https://www.instagram.com/yourusername"
+        />
       </div>
 
       {error && <p className="form-status form-status--error" role="alert">{error}</p>}

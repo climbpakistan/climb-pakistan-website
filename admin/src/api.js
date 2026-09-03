@@ -395,3 +395,21 @@ export function getModerationComments(params = {}) {
 export function deleteModerationPost(postId) {
   return apiFetch(`${BASE_URL}/moderation/posts/${postId}/delete`, { method: 'POST' });
 }
+
+// ── Badge Applications ──
+export function getBadgeApplications(params = {}) {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set('status', params.status);
+  if (params.badgeType) qs.set('badgeType', params.badgeType);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  const str = qs.toString();
+  return apiFetch(`${BASE_URL}/moderation/badge-applications${str ? `?${str}` : ''}`);
+}
+
+export function updateBadgeApplication(applicationId, { status, adminNotes }) {
+  return apiFetch(`${BASE_URL}/moderation/badge-applications/${applicationId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ status, adminNotes }),
+  });
+}

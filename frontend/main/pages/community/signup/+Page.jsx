@@ -14,6 +14,25 @@ const RESERVED = ['admin', 'administrator', 'mod', 'moderator', 'support', 'clim
 
 const USERNAME_HINT = '3–20 characters: letters, numbers, underscores — must start with a letter.';
 
+const COMMUNITY_ROLE_OPTIONS = [
+  { value: 'athlete', label: 'Athlete' },
+  { value: 'coach', label: 'Coach' },
+  { value: 'climbing_enthusiast', label: 'Climbing Enthusiast' },
+  { value: 'gym_or_organization', label: 'Gym or Organization' },
+];
+
+const DISCIPLINE_OPTIONS = [
+  { value: 'speed', label: 'Speed' },
+  { value: 'lead', label: 'Lead' },
+  { value: 'bouldering', label: 'Bouldering' },
+];
+
+const EXPERIENCE_OPTIONS = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'professional', label: 'Professional' },
+];
+
 function readImageMeta(file) {
   return new Promise((resolve) => {
     if (!file || !file.type.startsWith('image/')) return resolve({ valid: false, error: 'Please choose an image file.' });
@@ -38,22 +57,42 @@ function Page() {
   const { signIn } = useCommunity();
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [name, setName] = useState('');
   const [username, setUsername] = useState('');
+  const [communityRole, setCommunityRole] = useState('');
+  const [disciplines, setDisciplines] = useState([]);
+  const [experienceLevel, setExperienceLevel] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [agreedToCommunityTerms, setAgreedToCommunityTerms] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const urlRef = useRef(null);
 
+  function toggleDiscipline(value) {
+    setDisciplines((prev) =>
+      prev.includes(value) ? prev.filter((d) => d !== value) : [...prev, value]
+    );
+  }
+
   function validate() {
     const next = {};
+
+    if (!name.trim()) next.name = 'Name is required.';
+
     const u = username.trim().replace(/^@/, '').toLowerCase();
     if (!u) next.username = 'Username is required.';
     else if (u.length < 3 || u.length > 20) next.username = 'Username must be between 3 and 20 characters.';
     else if (!/^[a-z][a-z0-9_]{2,19}$/.test(u)) next.username = 'Usernames can only contain letters, numbers, and underscores, and must start with a letter.';
     else if (RESERVED.includes(u)) next.username = 'That username is reserved and cannot be used.';
+
+    if (!communityRole) next.communityRole = 'Please select your role.';
+
+    if (disciplines.length === 0) next.disciplines = 'Please select at least one discipline.';
+
+    if (!experienceLevel) next.experienceLevel = 'Please select your experience level.';
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = 'Please enter a valid email address.';
 
@@ -62,6 +101,8 @@ function Page() {
     else if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) next.password = 'Password must contain at least one letter and one number.';
 
     if (confirm !== password) next.confirm = 'Passwords do not match.';
+
+    if (!agreedToCommunityTerms) next.terms = 'You must agree to the Community Guidelines and Terms.';
 
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -96,9 +137,19 @@ function Page() {
 
     setSubmitting(true);
     try {
-      const { user, token } = await communityRegister({ username, email, password, avatar });
+      const { user, token } = await communityRegister({
+        name: name.trim(),
+        username,
+        email,
+        password,
+        avatar,
+        communityRole,
+        disciplines,
+        experienceLevel,
+        agreedToCommunityTerms,
+      });
       signIn(token, user);
-      await navigate('/community/feed');
+      await navigate('/community/complete-profile');
     } catch (err) {
       setFormError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -127,6 +178,87 @@ function Page() {
       <section className="section-tight">
         <div className="container community-form-wrap">
           <form className="community-form" onSubmit={handleSubmit} noValidate>
+            <div className="form-row">
+              <label htmlFor="name">Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your full name"
+              />
+              {errors.name && <p className="form-error">{errors.name}</p>}
+            </div>
+
+            <div className="form-row">
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. cliff_runner"
+              />
+              {errors.username ? (
+                <p className="form-error">{errors.username}</p>
+              ) : (
+                <p className="form-hint">{USERNAME_HINT}</p>
+              )}
+            </div>
+
+            <div className="form-row">
+              <label htmlFor="communityRole">I am</label>
+              <select
+                id="communityRole"
+                name="communityRole"
+                value={communityRole}
+                onChange={(e) => setCommunityRole(e.target.value)}
+              >
+                <option value="" disabled>Select your role…</option>
+                {COMMUNITY_ROLE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              {errors.communityRole && <p className="form-error">{errors.communityRole}</p>}
+            </div>
+
+            <div className="form-row">
+              <label>I climb</label>
+              <div className="community-checkbox-group">
+                {DISCIPLINE_OPTIONS.map((d) => (
+                  <label key={d.value} className="community-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={disciplines.includes(d.value)}
+                      onChange={() => toggleDiscipline(d.value)}
+                    />
+                    <span>{d.label}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.disciplines && <p className="form-error">{errors.disciplines}</p>}
+            </div>
+
+            <div className="form-row">
+              <label htmlFor="experienceLevel">Experience Level</label>
+              <select
+                id="experienceLevel"
+                name="experienceLevel"
+                value={experienceLevel}
+                onChange={(e) => setExperienceLevel(e.target.value)}
+              >
+                <option value="" disabled>Select your experience…</option>
+                {EXPERIENCE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              {errors.experienceLevel && <p className="form-error">{errors.experienceLevel}</p>}
+            </div>
+
             {/* Profile image */}
             <div className="form-row community-avatar-field">
               <label>Profile image <span className="form-optional">(optional)</span></label>
@@ -150,24 +282,6 @@ function Page() {
                 </div>
               </div>
               {errors.avatar && <p className="form-error">{errors.avatar}</p>}
-            </div>
-
-            <div className="form-row">
-              <label htmlFor="username">Username</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. cliff_runner"
-              />
-              {errors.username ? (
-                <p className="form-error">{errors.username}</p>
-              ) : (
-                <p className="form-hint">{USERNAME_HINT}</p>
-              )}
             </div>
 
             <div className="form-row">
@@ -210,6 +324,18 @@ function Page() {
                 placeholder="Re-enter your password"
               />
               {errors.confirm && <p className="form-error">{errors.confirm}</p>}
+            </div>
+
+            <div className="form-row">
+              <label className="community-checkbox-label community-terms-label">
+                <input
+                  type="checkbox"
+                  checked={agreedToCommunityTerms}
+                  onChange={(e) => setAgreedToCommunityTerms(e.target.checked)}
+                />
+                <span>I agree to the Climb Pakistan Community Guidelines and Terms.</span>
+              </label>
+              {errors.terms && <p className="form-error">{errors.terms}</p>}
             </div>
 
             {formError && <p className="form-status form-status--error" role="alert">{formError}</p>}

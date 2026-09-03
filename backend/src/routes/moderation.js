@@ -437,74 +437,6 @@ router.get('/community/summary', requireAdminDb, async (req, res) => {
   }
 });
 
-// ── Community users list (admin only, paginated) ──
-// GET /api/moderation/users?search=&page=&limit=
-router.get('/users', requireAdminDb, async (req, res) => {
-  try {
-    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
-    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
-    const search = String(req.query.search || '').trim();
-
-    const filter = {};
-    if (search) {
-      const re = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-      filter.$or = [{ username: re }, { name: re }, { email: re }];
-    }
-
-    const [users, total] = await Promise.all([
-      User.find(filter)
-        .select('username name email profileImageUrl verification verifiedAt accountStatus athleteProfileId followerCount followingCount createdAt')
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit),
-      User.countDocuments(filter),
-    ]);
-
-    const userIds = users.map((u) => u._id);
-    const athleteIds = users.filter((u) => u.athleteProfileId).map((u) => u.athleteProfileId);
-
-    const { default: AthleteModel } = await import('../models/Athlete.js');
-    const [athletes, postCounts, commentCounts] = await Promise.all([
-      athleteIds.length ? AthleteModel.find({ _id: { $in: athleteIds } }).select('slug name') : [],
-      userIds.length
-        ? Post.aggregate([{ $match: { authorId: { $in: userIds } } }, { $group: { _id: '$authorId', count: { $sum: 1 } } }])
-        : [],
-      userIds.length
-        ? Comment.aggregate([{ $match: { authorId: { $in: userIds } } }, { $group: { _id: '$authorId', count: { $sum: 1 } } }])
-        : [],
-    ]);
-
-    const athleteById = new Map(athletes.map((a) => [String(a._id), a]));
-    const postCountById = new Map(postCounts.map((c) => [String(c._id), c.count]));
-    const commentCountById = new Map(commentCounts.map((c) => [String(c._id), c.count]));
-
-    res.json({
-      users: users.map((u) => ({
-        id: u._id,
-        username: u.username,
-        name: u.name,
-        email: u.email,
-        profileImageUrl: u.profileImageUrl,
-        verification: u.verification || 'none',
-        verifiedAt: u.verifiedAt || null,
-        accountStatus: u.accountStatus || 'active',
-        followerCount: u.followerCount ?? 0,
-        followingCount: u.followingCount ?? 0,
-        createdAt: u.createdAt,
-        postsCount: postCountById.get(String(u._id)) || 0,
-        commentsCount: commentCountById.get(String(u._id)) || 0,
-        athlete: u.athleteProfileId && athleteById.get(String(u.athleteProfileId))
-          ? { id: u.athleteProfileId, slug: athleteById.get(String(u.athleteProfileId)).slug, name: athleteById.get(String(u.athleteProfileId)).name }
-          : null,
-      })),
-      page, limit, total, hasMore: page * limit < total,
-    });
-  } catch (err) {
-    console.error('Community users error:', err);
-    res.status(500).json({ error: 'Could not load users.' });
-  }
-});
-
 // ── Community posts list (admin only, paginated + filters) ──
 // GET /api/moderation/posts?search=&category=&type=&status=&page=&limit=
 // status = all | live | removed
@@ -644,6 +576,179 @@ router.post('/posts/:id/delete', requireAdminDb, async (req, res) => {
   } catch (err) {
     console.error('Permanent post delete error:', err);
     res.status(500).json({ error: 'Could not delete the post.' });
+  }
+});
+
+// ── Badge Applications (admin only) ──
+import BadgeApplication, { BADGE_TYPES, APPLICATION_STATUSES } from '../models/BadgeApplication.js';
+
+// GET /api/moderation/badge-applications?status=&badgeType=&page=&limit=
+router.get('/badge-applications', requireAdminDb, async (req, res) => {
+  try {
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
+    const status = String(req.query.status || '').trim();
+    const badgeType = String(req.query.badgeType || '').trim();
+
+    const filter = {};
+    if (APPLICATION_STATUSES.includes(status)) filter.status = status;
+    if (BADGE_TYPES.includes(badgeType)) filter.badgeType = badgeType;
+
+    const [applications, total] = await Promise.all([
+      BadgeApplication.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('userId', 'username name email profileImageUrl verification communityRole disciplines experienceLevel')
+        .populate('handledBy', 'username'),
+      BadgeApplication.countDocuments(filter),
+    ]);
+
+    res.json({
+      applications: applications.map((a) => ({
+        id: a._id,
+        badgeType: a.badgeType,
+        status: a.status,
+        message: a.message,
+        adminNotes: a.adminNotes,
+        createdAt: a.createdAt,
+        handledBy: a.handledBy ? a.handledBy.username : null,
+        handledAt: a.handledAt,
+        user: a.userId
+          ? {
+              id: a.userId._id,
+              username: a.userId.username,
+              name: a.userId.name,
+              email: a.userId.email,
+              profileImageUrl: a.userId.profileImageUrl,
+              verification: a.userId.verification || 'none',
+              communityRole: a.userId.communityRole || '',
+              disciplines: a.userId.disciplines || [],
+              experienceLevel: a.userId.experienceLevel || '',
+            }
+          : null,
+      })),
+      page, limit, total, hasMore: page * limit < total,
+    });
+  } catch (err) {
+    console.error('List badge applications error:', err);
+    res.status(500).json({ error: 'Could not load badge applications.' });
+  }
+});
+
+// PUT /api/moderation/badge-applications/:id — approve or reject.
+router.put('/badge-applications/:id', requireAdminDb, async (req, res) => {
+  try {
+    const appId = req.params.id;
+    if (!isValidObjectId(appId)) {
+      return res.status(400).json({ error: 'Invalid application id.' });
+    }
+
+    const { status, adminNotes } = req.body;
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Status must be approved or rejected.' });
+    }
+
+    const application = await BadgeApplication.findById(appId);
+    if (!application) return res.status(404).json({ error: 'Application not found.' });
+    if (application.status !== 'pending') {
+      return res.status(400).json({ error: 'This application has already been processed.' });
+    }
+
+    application.status = status;
+    application.adminNotes = String(adminNotes || '').trim().slice(0, 1000);
+    application.handledBy = req.user.id;
+    application.handledAt = new Date();
+    await application.save();
+
+    // If approved, update the user's verification
+    if (status === 'approved') {
+      const user = await User.findById(application.userId);
+      if (user) {
+        user.verification = application.badgeType;
+        user.verifiedBy = req.user.id;
+        user.verifiedAt = new Date();
+        await user.save();
+      }
+    }
+
+    await logAction(req.user.id, `badge:${status}`, 'badge-application', application._id, application.badgeType);
+    res.json({ message: `Application ${status}.`, application: { id: application._id, status: application.status } });
+  } catch (err) {
+    console.error('Badge application action error:', err);
+    res.status(500).json({ error: 'Could not process the application.' });
+  }
+});
+
+// ── Community users list with new fields (admin only, paginated) ──
+// Override the existing users list to include new fields
+router.get('/users', requireAdminDb, async (req, res) => {
+  try {
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
+    const search = String(req.query.search || '').trim();
+
+    const filter = {};
+    if (search) {
+      const re = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      filter.$or = [{ username: re }, { name: re }, { email: re }];
+    }
+
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select('username name email profileImageUrl verification verifiedAt accountStatus communityRole disciplines experienceLevel city athleteProfileId followerCount followingCount createdAt')
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      User.countDocuments(filter),
+    ]);
+
+    const userIds = users.map((u) => u._id);
+    const athleteIds = users.filter((u) => u.athleteProfileId).map((u) => u.athleteProfileId);
+
+    const { default: AthleteModel } = await import('../models/Athlete.js');
+    const [athletes, postCounts, commentCounts] = await Promise.all([
+      athleteIds.length ? AthleteModel.find({ _id: { $in: athleteIds } }).select('slug name') : [],
+      userIds.length
+        ? Post.aggregate([{ $match: { authorId: { $in: userIds } } }, { $group: { _id: '$authorId', count: { $sum: 1 } } }])
+        : [],
+      userIds.length
+        ? Comment.aggregate([{ $match: { authorId: { $in: userIds } } }, { $group: { _id: '$authorId', count: { $sum: 1 } } }])
+        : [],
+    ]);
+
+    const athleteById = new Map(athletes.map((a) => [String(a._id), a]));
+    const postCountById = new Map(postCounts.map((c) => [String(c._id), c.count]));
+    const commentCountById = new Map(commentCounts.map((c) => [String(c._id), c.count]));
+
+    res.json({
+      users: users.map((u) => ({
+        id: u._id,
+        username: u.username,
+        name: u.name,
+        email: u.email,
+        profileImageUrl: u.profileImageUrl,
+        verification: u.verification || 'none',
+        verifiedAt: u.verifiedAt || null,
+        accountStatus: u.accountStatus || 'active',
+        communityRole: u.communityRole || '',
+        disciplines: u.disciplines || [],
+        experienceLevel: u.experienceLevel || '',
+        city: u.city || '',
+        followerCount: u.followerCount ?? 0,
+        followingCount: u.followingCount ?? 0,
+        createdAt: u.createdAt,
+        postsCount: postCountById.get(String(u._id)) || 0,
+        commentsCount: commentCountById.get(String(u._id)) || 0,
+        athlete: u.athleteProfileId && athleteById.get(String(u.athleteProfileId))
+          ? { id: u.athleteProfileId, slug: athleteById.get(String(u.athleteProfileId)).slug, name: athleteById.get(String(u.athleteProfileId)).name }
+          : null,
+      })),
+      page, limit, total, hasMore: page * limit < total,
+    });
+  } catch (err) {
+    console.error('Community users error:', err);
+    res.status(500).json({ error: 'Could not load users.' });
   }
 });
 

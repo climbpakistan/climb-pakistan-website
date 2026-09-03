@@ -2,7 +2,8 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
-import User, { RESERVED_USERNAMES } from '../models/User.js';
+import User, { RESERVED_USERNAMES, COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS } from '../models/User.js';
+import BadgeApplication, { BADGE_TYPES } from '../models/BadgeApplication.js';
 import { requireUser } from '../middleware/auth.js';
 import cloudinary from '../cloudinary.js';
 
@@ -50,6 +51,11 @@ function publicUser(user) {
     name: user.name,
     profileImageUrl: user.profileImageUrl,
     bio: user.bio,
+    communityRole: user.communityRole || '',
+    disciplines: user.disciplines || [],
+    experienceLevel: user.experienceLevel || '',
+    city: user.city || '',
+    instagramUrl: user.instagramUrl || '',
     role: user.role,
     communityPoints: user.communityPoints ?? 0,
     verification: user.verification || 'none',
@@ -83,6 +89,11 @@ function publicProfile(user) {
     name: user.name,
     profileImageUrl: user.profileImageUrl ?? '',
     bio: user.bio ?? '',
+    communityRole: user.communityRole || '',
+    disciplines: user.disciplines || [],
+    experienceLevel: user.experienceLevel || '',
+    city: user.city || '',
+    instagramUrl: user.instagramUrl || '',
     role: user.role,
     communityPoints: user.communityPoints ?? 0,
     verification: user.verification || 'none',
@@ -205,12 +216,53 @@ router.post('/register', registerLimiter, uploadAvatarField, async (req, res) =>
       profileImageUrl = await uploadAvatar(req.file.buffer);
     }
 
+    // Validate new registration fields
+    const name = String(req.body.name || '').trim();
+    if (!name) {
+      return res.status(400).json({ error: 'Name is required.' });
+    }
+
+    const communityRole = String(req.body.communityRole || '').trim();
+    if (!COMMUNITY_ROLES.includes(communityRole)) {
+      return res.status(400).json({ error: 'Please select your role in the community.' });
+    }
+
+    let disciplines = [];
+    if (req.body.disciplines) {
+      try {
+        disciplines = JSON.parse(req.body.disciplines);
+      } catch {
+        disciplines = [];
+      }
+    }
+    if (!Array.isArray(disciplines) || disciplines.length === 0) {
+      return res.status(400).json({ error: 'Please select at least one discipline.' });
+    }
+    if (!disciplines.every((d) => DISCIPLINES.includes(d))) {
+      return res.status(400).json({ error: 'Invalid discipline selected.' });
+    }
+
+    const experienceLevel = String(req.body.experienceLevel || '').trim();
+    if (!EXPERIENCE_LEVELS.includes(experienceLevel)) {
+      return res.status(400).json({ error: 'Please select your experience level.' });
+    }
+
+    const agreedToTerms = req.body.agreedToCommunityTerms === 'true' || req.body.agreedToCommunityTerms === true;
+    if (!agreedToTerms) {
+      return res.status(400).json({ error: 'You must agree to the Community Guidelines and Terms.' });
+    }
+
     const user = await User.create({
       email,
       password,
       username,
-      name: String(req.body.username || '').trim(), // preserve the user's chosen casing
+      name,
       profileImageUrl,
+      communityRole,
+      disciplines,
+      experienceLevel,
+      agreedToCommunityTerms: true,
+      communityTermsAgreedAt: new Date(),
       role: 'member',
     });
 
@@ -324,8 +376,7 @@ router.get('/me', requireUser, async (req, res) => {
 });
 
 // PUT /api/auth/me — update the owner's own profile.
-// Multipart/form-data with an optional "bio" text field and an optional
-// "avatar" image file. Username / email / password are NOT editable here.
+// Multipart/form-data with optional fields. Username / email / password are NOT editable here.
 router.put('/me', requireUser, uploadAvatarField, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -337,6 +388,25 @@ router.put('/me', requireUser, uploadAvatarField, async (req, res) => {
         return res.status(400).json({ error: 'Bio must be 300 characters or fewer.' });
       }
       user.bio = bio;
+    }
+
+    if (req.body.city !== undefined) {
+      const city = String(req.body.city || '').trim();
+      if (city.length > 100) {
+        return res.status(400).json({ error: 'City must be 100 characters or fewer.' });
+      }
+      user.city = city;
+    }
+
+    if (req.body.instagramUrl !== undefined) {
+      let instagramUrl = String(req.body.instagramUrl || '').trim();
+      if (instagramUrl && !/^https?:\/\/(www\.)?instagram\.com\//.test(instagramUrl)) {
+        return res.status(400).json({ error: 'Please enter a valid Instagram profile URL.' });
+      }
+      if (instagramUrl && !instagramUrl.startsWith('http')) {
+        instagramUrl = 'https://' + instagramUrl;
+      }
+      user.instagramUrl = instagramUrl;
     }
 
     if (req.file) {
@@ -378,6 +448,59 @@ router.get('/u/:username', async (req, res) => {
     res.json({ profile: data });
   } catch (err) {
     res.status(500).json({ error: 'Could not load this profile.' });
+  }
+});
+
+// ── Badge Applications ──
+
+// POST /api/auth/badge-applications — submit a badge application.
+router.post('/badge-applications', requireUser, async (req, res) => {
+  try {
+    const { badgeType, message } = req.body;
+    if (!BADGE_TYPES.includes(badgeType)) {
+      return res.status(400).json({ error: 'Invalid badge type.' });
+    }
+
+    // Prevent duplicate active applications
+    const existing = await BadgeApplication.findOne({
+      userId: req.user.id,
+      badgeType,
+      status: 'pending',
+    });
+    if (existing) {
+      return res.status(409).json({ error: 'You already have a pending application for this badge.' });
+    }
+
+    const application = await BadgeApplication.create({
+      userId: req.user.id,
+      badgeType,
+      message: String(message || '').trim().slice(0, 1000),
+    });
+
+    res.status(201).json({ application: { id: application._id, badgeType: application.badgeType, status: application.status, createdAt: application.createdAt } });
+  } catch (err) {
+    console.error('Badge application error:', err);
+    res.status(500).json({ error: 'Could not submit your application.' });
+  }
+});
+
+// GET /api/auth/badge-applications/my — get current user's badge applications.
+router.get('/badge-applications/my', requireUser, async (req, res) => {
+  try {
+    const applications = await BadgeApplication.find({ userId: req.user.id })
+      .sort({ createdAt: -1 });
+    res.json({
+      applications: applications.map((a) => ({
+        id: a._id,
+        badgeType: a.badgeType,
+        status: a.status,
+        message: a.message,
+        createdAt: a.createdAt,
+        handledAt: a.handledAt,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not load your applications.' });
   }
 });
 

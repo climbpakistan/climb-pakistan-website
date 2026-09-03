@@ -99,11 +99,16 @@ export async function submitContact(data) {
  * optional profile image travels with the account fields.
  * Returns { user, token }.
  */
-export async function communityRegister({ username, email, password, avatar }) {
+export async function communityRegister({ username, email, password, avatar, name, communityRole, disciplines, experienceLevel, agreedToCommunityTerms }) {
   const formData = new FormData();
   formData.append('username', username);
   formData.append('email', email);
   formData.append('password', password);
+  formData.append('name', name || '');
+  formData.append('communityRole', communityRole || '');
+  formData.append('disciplines', JSON.stringify(disciplines || []));
+  formData.append('experienceLevel', experienceLevel || '');
+  formData.append('agreedToCommunityTerms', agreedToCommunityTerms ? 'true' : 'false');
   if (avatar) formData.append('avatar', avatar);
 
   const res = await fetch(`${BASE_URL}/auth/register`, { method: 'POST', body: formData });
@@ -144,9 +149,11 @@ export async function communityProfile(username) {
 }
 
 /** Update the current user's bio and/or profile image (multipart). */
-export async function communityUpdateProfile(token, { bio, avatar }) {
+export async function communityUpdateProfile(token, { bio, avatar, city, instagramUrl }) {
   const formData = new FormData();
   if (bio !== undefined) formData.append('bio', bio ?? '');
+  if (city !== undefined) formData.append('city', city ?? '');
+  if (instagramUrl !== undefined) formData.append('instagramUrl', instagramUrl ?? '');
   if (avatar) formData.append('avatar', avatar);
 
   const res = await fetch(`${BASE_URL}/auth/me`, {
@@ -156,6 +163,27 @@ export async function communityUpdateProfile(token, { bio, avatar }) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Could not update your profile.');
+  return data;
+}
+
+// ── Badge Applications ──
+export async function submitBadgeApplication(token, { badgeType, message }) {
+  const res = await fetch(`${BASE_URL}/auth/badge-applications`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ badgeType, message }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not submit application.');
+  return data;
+}
+
+export async function getMyBadgeApplications(token) {
+  const res = await fetch(`${BASE_URL}/auth/badge-applications/my`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load applications.');
   return data;
 }
 

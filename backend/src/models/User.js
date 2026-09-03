@@ -17,6 +17,10 @@ export const RESERVED_USERNAMES = [
   'root',
 ];
 
+const COMMUNITY_ROLES = ['athlete', 'coach', 'climbing_enthusiast', 'gym_or_organization'];
+const DISCIPLINES = ['speed', 'lead', 'bouldering'];
+const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'professional'];
+
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
@@ -27,6 +31,14 @@ const userSchema = new mongoose.Schema({
   name: { type: String, default: '' },
   profileImageUrl: { type: String, default: '' },
   bio: { type: String, default: '', maxlength: 300 },
+  // ── New registration fields (all optional/backward-compatible) ──
+  communityRole: { type: String, enum: COMMUNITY_ROLES, default: '' },
+  disciplines: { type: [String], enum: DISCIPLINES, default: [] },
+  experienceLevel: { type: String, enum: EXPERIENCE_LEVELS, default: '' },
+  city: { type: String, default: '', maxlength: 100 },
+  instagramUrl: { type: String, default: '', maxlength: 300 },
+  agreedToCommunityTerms: { type: Boolean, default: false },
+  communityTermsAgreedAt: { type: Date, default: null },
   role: { type: String, enum: ['member', 'admin'], default: 'member' },
   // Reputation — placeholder until the points/reputation rules are defined in
   // a later step. Always starts at 0.
@@ -70,4 +82,5 @@ userSchema.set('toJSON', {
   },
 });
 
+export { COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS };
 export default mongoose.model('User', userSchema);
