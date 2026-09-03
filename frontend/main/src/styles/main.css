@@ -4413,19 +4413,23 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 @media (max-width: 640px) {
   .community-badge-actions { grid-template-columns: 1fr; }
-}
-.community-badge-card {
+}.community-badge-card {
   border: 1px solid var(--cp-border);
   border-radius: var(--radius-md);
   padding: var(--sp-4);
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-2);
 }
 .community-badge-card-header {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
+}
+.community-badge-card-header h4 {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
 }
 .community-badge-icon {
   font-size: var(--fs-lg);
@@ -4436,6 +4440,7 @@ input, textarea, select { font: inherit; color: inherit; }
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 .community-badge-icon--national {
   color: #2e8b57;
@@ -4448,7 +4453,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-badge-card-text {
   color: var(--cp-text-muted);
   font-size: var(--fs-sm);
-  flex: 1;
+  margin: 0;
+  line-height: 1.5;
 }
 
 
