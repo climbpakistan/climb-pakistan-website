@@ -67,7 +67,6 @@ function Page() {
   const [experienceLevel, setExperienceLevel] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
   const [agreedToCommunityTerms, setAgreedToCommunityTerms] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -103,8 +102,6 @@ function Page() {
     if (!password) next.password = 'Password is required.';
     else if (password.length < 8) next.password = 'Password must be at least 8 characters.';
     else if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) next.password = 'Password must contain at least one letter and one number.';
-
-    if (confirm !== password) next.confirm = 'Passwords do not match.';
 
     if (!agreedToCommunityTerms) next.terms = 'You must agree to the Community Guidelines and Terms.';
 
@@ -317,20 +314,6 @@ function Page() {
                 placeholder="At least 8 characters, with a letter and a number"
               />
               {errors.password && <p className="form-error">{errors.password}</p>}
-            </div>
-
-            <div className="form-row">
-              <label htmlFor="confirm">Confirm password</label>
-              <input
-                type="password"
-                id="confirm"
-                name="confirm"
-                autoComplete="new-password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Re-enter your password"
-              />
-              {errors.confirm && <p className="form-error">{errors.confirm}</p>}
             </div>
 
             <div className="form-row">
