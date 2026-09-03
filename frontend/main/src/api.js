@@ -189,9 +189,10 @@ export async function getMyBadgeApplications(token) {
 
 // ── Community Posts ──
 /** Paginated feed. view: new | popular | top; time applies to top. token is optional (enables poll/vote personalization). */
-export async function getPosts(token, { view = 'new', time = 'all', page = 1, limit = 20, category = '' } = {}) {
+export async function getPosts(token, { view = 'new', time = 'all', page = 1, limit = 20, category = '', search = '' } = {}) {
   const params = new URLSearchParams({ view, time, page: String(page), limit: String(limit) });
   if (category) params.set('category', category);
+  if (search) params.set('search', search);
   const res = await fetch(`${BASE_URL}/posts?${params.toString()}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
@@ -427,6 +428,13 @@ export async function getFollowers(username) {
 /** List users that a profile follows by username. */
 export async function getFollowing(username) {
   return fetchJSON(`${BASE_URL}/follows/${encodeURIComponent(username)}/following`);
+}
+
+// ── Community Search ──
+export async function searchCommunityUsers(query) {
+  if (!query || query.length < 2) return { users: [] };
+  const params = new URLSearchParams({ query });
+  return fetchJSON(`${BASE_URL}/auth/search?${params.toString()}`);
 }
 
 // ── Profile posts & comments ──

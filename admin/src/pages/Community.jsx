@@ -16,6 +16,7 @@ import {
   suspendUser,
   banUser,
   liftUser,
+  deleteUser,
   getBadgeApplications,
   updateBadgeApplication,
 } from '../api';
@@ -259,6 +260,38 @@ function UserManageModal({ user, athletes, onRefresh, onClose }) {
               <button className="btn btn-primary" type="button" disabled={saving} onClick={() => run((uid) => liftUser(uid), 'Restriction lifted.')}>Lift restriction</button>
             )}
           </div>
+        </div>
+
+        {/* Delete user section */}
+        <div className="form-group" style={{ borderTop: '1px solid var(--cp-border)', paddingTop: 'var(--sp-4)', marginTop: 'var(--sp-4)' }}>
+          <label className="form-label" style={{ color: 'var(--cp-danger, #e5484d)' }}>Danger Zone</label>
+          <p className="text-muted" style={{ fontSize: 'var(--fs-sm)', marginBottom: 'var(--sp-2)' }}>
+            Permanently delete this user and all their content. This action cannot be undone.
+          </p>
+          <button
+            className="btn btn-danger"
+            type="button"
+            disabled={saving}
+            onClick={async () => {
+              const ok = window.confirm(`Are you sure you want to permanently delete @${user.username}? This will remove all their posts, comments, and account data. This action cannot be undone.`);
+              if (!ok) return;
+              setSaving(true);
+              setError('');
+              setNotice('');
+              try {
+                await deleteUser(user.id);
+                setNotice('User deleted.');
+                await refresh();
+                onClose();
+              } catch (err) {
+                setError(err.message);
+              } finally {
+                setSaving(false);
+              }
+            }}
+          >
+            Delete Account
+          </button>
         </div>
 
         {saving && <p className="text-muted">Working...</p>}

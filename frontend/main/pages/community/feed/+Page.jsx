@@ -4,7 +4,7 @@ import Seo from '../../../src/components/Seo';
 import PostCard from '../../../src/components/community/PostCard';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes } from '../../../src/api';
+import { getPosts, getMyVotes, searchCommunityUsers } from '../../../src/api';
 
 export { Page };
 
@@ -81,6 +81,13 @@ function Page() {
   const searchCategory = pageContext?.urlParsed?.search?.category;
   const activeCategory = searchCategory || '';
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchFilter, setSearchFilter] = useState('posts'); // 'posts' or 'users'
+  const [searchResults, setSearchResults] = useState({ posts: [], users: [] });
+  const [searching, setSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -130,6 +137,37 @@ function Page() {
       return;
     }
     window.location.href = '/community/create';
+  }
+
+  async function handleSearch(e) {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) {
+      setHasSearched(false);
+      setSearchResults({ posts: [], users: [] });
+      return;
+    }
+    setSearching(true);
+    setHasSearched(true);
+    try {
+      if (searchFilter === 'posts') {
+        const data = await getPosts(token, { view: 'new', page: 1, limit: 20, search: q, category: activeCategory });
+        setSearchResults({ posts: data.posts || [], users: [] });
+      } else {
+        const data = await searchCommunityUsers(q);
+        setSearchResults({ posts: [], users: data.users || [] });
+      }
+    } catch {
+      setSearchResults({ posts: [], users: [] });
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function clearSearch() {
+    setSearchQuery('');
+    setHasSearched(false);
+    setSearchResults({ posts: [], users: [] });
   }
 
   return (
@@ -188,17 +226,121 @@ function Page() {
         </div>
       </section>
 
+      {/* Search bar */}
+      <section className="section-tight community-search-section">
+        <div className="container">
+          <form className="community-search-bar" onSubmit={handleSearch}>
+            <div className="community-search-filters" role="tablist" aria-label="Search filter">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={searchFilter === 'posts'}
+                className={`community-search-filter${searchFilter === 'posts' ? ' is-active' : ''}`}
+                onClick={() => setSearchFilter('posts')}
+              >
+                Questions
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={searchFilter === 'users'}
+                className={`community-search-filter${searchFilter === 'users' ? ' is-active' : ''}`}
+                onClick={() => setSearchFilter('users')}
+              >
+                Users
+              </button>
+            </div>
+            <div className="community-search-input-wrap">
+              <input
+                type="text"
+                className="community-search-input"
+                placeholder={searchFilter === 'posts' ? 'Search questions...' : 'Search users...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button type="button" className="community-search-clear" onClick={clearSearch} aria-label="Clear search">
+                  ✕
+                </button>
+              )}
+            </div>
+            <button type="submit" className="btn btn-primary community-search-btn" disabled={searching}>
+              {searching ? 'Searching...' : 'Search'}
+            </button>
+          </form>
+        </div>
+      </section>
+
       <section className="section-tight community-feed-body">
         <FeedShell>
           <TopicsSidebar activeCategory={activeCategory} />
           <div className="community-feed-main">
-            {status === 'loading' && (
+            {/* Search results */}
+            {hasSearched && (
+              <div className="community-search-results">
+                <div className="community-search-results-header">
+                  <h2 className="community-search-results-title">
+                    {searchFilter === 'posts' ? 'Search Results' : 'Users'}
+                  </h2>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={clearSearch}>
+                    Clear search
+                  </button>
+                </div>
+
+                {searchFilter === 'users' && (
+                  <>
+                    {searchResults.users.length === 0 ? (
+                      <div className="community-empty-state">
+                        <p className="community-empty-text">No users found for &ldquo;{searchQuery}&rdquo;</p>
+                      </div>
+                    ) : (
+                      <div className="community-search-user-list">
+                        {searchResults.users.map((u) => (
+                          <a key={u.id} href={`/community/u/${u.username}`} className="community-search-user-card">
+                            {u.profileImageUrl ? (
+                              <img src={u.profileImageUrl} alt="" className="community-avatar community-avatar--md" />
+                            ) : (
+                              <span className="community-avatar community-avatar--md community-avatar--fallback">
+                                {(u.username || '?')[0].toUpperCase()}
+                              </span>
+                            )}
+                            <div className="community-search-user-info">
+                              <span className="community-search-user-name">@{u.username}</span>
+                              {u.name && <span className="community-search-user-display">{u.name}</span>}
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {searchFilter === 'posts' && (
+                  <>
+                    {searchResults.posts.length === 0 ? (
+                      <div className="community-empty-state">
+                        <p className="community-empty-text">No questions found for &ldquo;{searchQuery}&rdquo;</p>
+                      </div>
+                    ) : (
+                      <div className="community-post-list">
+                        {searchResults.posts.map((post) => (
+                          <PostCard key={post.id} post={post} />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Regular feed (hidden when searching) */}
+            {!hasSearched && status === 'loading' && (
               <div className="community-post-list">
                 <PostSkeleton /><PostSkeleton /><PostSkeleton />
               </div>
             )}
 
-            {status === 'error' && (
+            {!hasSearched && status === 'error' && (
               <div className="community-empty-state">
                 <h2 className="community-empty-title">Couldn&rsquo;t load the feed</h2>
                 <p className="community-empty-text">{errorMsg}</p>
@@ -208,7 +350,7 @@ function Page() {
               </div>
             )}
 
-            {status === 'ready' && posts.length === 0 && (
+            {!hasSearched && status === 'ready' && posts.length === 0 && (
               <div className="community-empty-state">
                 <span className="community-empty-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -321,6 +321,13 @@ router.get('/', optionalUser, async (req, res) => {
     // Only ever return content that hasn't been removed by moderators.
     const filter = { removed: { $ne: true } };
 
+    // Optional search filter (searches title and body).
+    const search = String(req.query.search || '').trim();
+    if (search) {
+      const re = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      filter.$or = [{ title: re }, { body: re }];
+    }
+
     // Optional category filter for topic pages.
     const category = String(req.query.category || '').trim();
     if (category && POST_CATEGORIES.includes(category)) {

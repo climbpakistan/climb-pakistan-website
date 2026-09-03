@@ -504,4 +504,36 @@ router.get('/badge-applications/my', requireUser, async (req, res) => {
   }
 });
 
+// GET /api/auth/search?query= — public user search.
+router.get('/search', async (req, res) => {
+  try {
+    const query = String(req.query.query || '').trim();
+    if (!query || query.length < 2) return res.json({ users: [] });
+
+    const re = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    const users = await User.find({
+      username: { $exists: true, $ne: null },
+      accountStatus: 'active',
+      $or: [{ username: re }, { name: re }],
+    })
+      .select('username name profileImageUrl verification communityRole')
+      .limit(20)
+      .sort({ communityPoints: -1 });
+
+    res.json({
+      users: users.map((u) => ({
+        id: u._id,
+        username: u.username,
+        name: u.name,
+        profileImageUrl: u.profileImageUrl || '',
+        verification: u.verification || 'none',
+        communityRole: u.communityRole || '',
+      })),
+    });
+  } catch (err) {
+    console.error('User search error:', err);
+    res.status(500).json({ error: 'Could not search users.' });
+  }
+});
+
 export default router;

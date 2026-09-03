@@ -362,6 +362,46 @@ router.post('/users/:userId/lift', requireAdminDb, async (req, res) => {
   }
 });
 
+// POST /api/moderation/users/:userId/delete — permanently delete a user and all their content.
+router.post('/users/:userId/delete', requireAdminDb, async (req, res) => {
+  try {
+    const user = await loadUserTarget(req, res);
+    if (!user) return;
+
+    // Prevent deleting admin accounts
+    if (user.role === 'admin') {
+      return res.status(400).json({ error: 'Cannot delete admin accounts.' });
+    }
+
+    const userId = user._id;
+
+    // Delete all user's posts, comments, votes, poll votes, follows, reports
+    const postIds = await Post.find({ authorId: userId }).distinct('_id');
+    const commentIds = await Comment.find({ authorId: userId }).distinct('_id');
+
+    await Promise.all([
+      Post.deleteMany({ authorId: userId }),
+      Comment.deleteMany({ authorId: userId }),
+      Vote.deleteMany({ userId }),
+      Vote.deleteMany({ postId: { $in: postIds } }),
+      Vote.deleteMany({ commentId: { $in: commentIds } }),
+      PollVote.deleteMany({ userId }),
+      Report.updateMany(
+        { $or: [{ postId: { $in: postIds } }, { commentId: { $in: commentIds } }] },
+        { $set: { postId: null, commentId: null } },
+      ),
+      BadgeApplication.deleteMany({ userId }),
+      User.deleteOne({ _id: userId }),
+    ]);
+
+    await logAction(req.user.id, 'user:delete', 'user', userId, user.username);
+    res.json({ message: 'User and all their content permanently deleted.' });
+  } catch (err) {
+    console.error('Delete user error:', err);
+    res.status(500).json({ error: 'Could not delete the user.' });
+  }
+});
+
 // ── Verification (admin-controlled, with audit) ──
 // POST /api/moderation/verification/:userId  body: { verification, reason? }
 router.post('/verification/:userId', requireAdminDb, async (req, res) => {

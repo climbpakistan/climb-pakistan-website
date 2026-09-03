@@ -343,6 +343,10 @@ export function liftUser(userId) {
   return apiFetch(`${BASE_URL}/moderation/users/${userId}/lift`, { method: 'POST', body: JSON.stringify({}) });
 }
 
+export function deleteUser(userId) {
+  return apiFetch(`${BASE_URL}/moderation/users/${userId}/delete`, { method: 'POST' });
+}
+
 export function setVerification(userId, verification) {
   return apiFetch(`${BASE_URL}/moderation/verification/${userId}`, {
     method: 'POST',
