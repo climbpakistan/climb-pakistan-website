@@ -84,10 +84,6 @@ function Page() {
               <span>Share your climbing experiences</span>
             </div>
             <div className="community-landing-feature">
-              <span className="community-landing-feature-icon">💡</span>
-              <span>Learn and share climbing knowledge</span>
-            </div>
-            <div className="community-landing-feature">
               <span className="community-landing-feature-icon">🧗</span>
               <span>Discover climbing in Pakistan</span>
             </div>
