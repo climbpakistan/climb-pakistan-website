@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePageContext } from 'vike-react/usePageContext';
 import Seo from '../../../src/components/Seo';
 import PostCard from '../../../src/components/community/PostCard';
+import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
 import { getPosts, getMyVotes, searchCommunityUsers } from '../../../src/api';
@@ -305,7 +306,7 @@ function Page() {
                               </span>
                             )}
                             <div className="community-search-user-info">
-                              <span className="community-search-user-name">@{u.username}</span>
+                              <span className="community-search-user-name">@{u.username} <VerificationBadge verification={u.verification} /></span>
                               {u.name && <span className="community-search-user-display">{u.name}</span>}
                             </div>
                           </a>

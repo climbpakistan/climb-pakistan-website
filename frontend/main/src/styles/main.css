@@ -3689,15 +3689,6 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .profile-bio { color: var(--cp-text); margin-top: var(--sp-3); line-height: 1.65; }
 
-/* Verification checkmark */
-.profile-verified {
-  font-size: var(--fs-md);
-  font-weight: 700;
-  line-height: 1;
-  cursor: help;
-}
-.profile-verified--national { color: #22c55e; }
-.profile-verified--international { color: #3b82f6; }
 
 /* Instagram-style follow stats */
 .profile-follow-stats {

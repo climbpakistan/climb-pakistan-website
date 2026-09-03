@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useData } from 'vike-react/useData';
 import Seo from '../../../../src/components/Seo';
 import PostCard from '../../../../src/components/community/PostCard';
+import VerificationBadge from '../../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../../src/hooks/CommunityContext';
 import {
   communityUpdateProfile,
@@ -18,12 +19,6 @@ import { AnimatedPageHeader } from '../../../../src/hooks/animations';
 import { formatPostDate } from '../../../../src/utils/communityPosts';
 
 export { Page };
-
-const VERIFICATION = {
-  none: null,
-  national: { label: 'Verified National Climber', language: 'national' },
-  international: { label: 'Verified International Sport Climber', language: 'international' },
-};
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_DIMENSION = 4000;
@@ -56,21 +51,6 @@ function readImageMeta(file) {
     img.onerror = () => { URL.revokeObjectURL(url); resolve({ valid: false, error: 'That file could not be read as an image.' }); };
     img.src = url;
   });
-}
-
-function VerificationBadge({ verification }) {
-  const config = VERIFICATION[verification];
-  if (!config) return null;
-  return (
-    <span
-      className={`profile-verified profile-verified--${config.language}`}
-      role="img"
-      aria-label={config.label}
-      title={config.label}
-    >
-      ✓
-    </span>
-  );
 }
 
 function EmptyTab({ title, text }) {
@@ -292,7 +272,7 @@ function FollowList({ list, busy, denormalized }) {
               {(m.username || m.name || '?')[0].toUpperCase()}
             </span>
             <span className="profile-follow-row-meta">
-              <span className="profile-follow-row-name">@{m.username}</span>
+              <span className="profile-follow-row-name">@{m.username} <VerificationBadge verification={m.verification} size={12} /></span>
               {m.name ? <span className="profile-follow-row-bio">{m.name}</span> : null}
             </span>
           </a>

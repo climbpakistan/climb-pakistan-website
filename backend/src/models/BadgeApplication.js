@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const BADGE_TYPES = ['national', 'international'];
+const BADGE_TYPES = ['national', 'international', 'organization'];
 const APPLICATION_STATUSES = ['pending', 'approved', 'rejected'];
 
 const badgeApplicationSchema = new mongoose.Schema({

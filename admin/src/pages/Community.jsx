@@ -58,15 +58,20 @@ const REPORT_BADGE = { pending: 'badge-warning', reviewed: 'badge-info', dismiss
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || 'https://climbpakistan.com';
 
-// Green ✓ for National, blue ✓ for International. No circles around the check.
+const VERIFICATION_LABELS = {
+  national: 'Verified National Climber',
+  international: 'Verified International Sport Climber',
+  organization: 'Verified Organization / Club',
+};
+
 function VerificationBadge({ verification }) {
   if (!verification || verification === 'none') {
     return <span className="text-muted">None</span>;
   }
-  const national = verification === 'national';
+  const label = VERIFICATION_LABELS[verification] || verification;
   return (
-    <span className={`verification-badge ${national ? 'verification-national' : 'verification-international'}`}>
-      {national ? 'Verified National Climber' : 'Verified International Sport Climber'}
+    <span className={`verification-badge verification-${verification}`}>
+      {label}
       <span className="verification-check">{'\u2713'}</span>
     </span>
   );

@@ -1203,6 +1203,10 @@ tbody tr:hover {
   color: #2563eb;
 }
 
+.verification-organization {
+  color: #ca8a04;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

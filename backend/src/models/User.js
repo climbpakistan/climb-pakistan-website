@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
   communityPoints: { type: Number, default: 0, min: 0 },
   // Verification. No user can set this themselves — managed by the admin team
   // via the admin tool. 'none' until then.
-  verification: { type: String, enum: ['none', 'national', 'international'], default: 'none' },
+  verification: { type: String, enum: ['none', 'national', 'international', 'organization'], default: 'none' },
   // Verification audit — which admin set the current verification and when.
   verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   verifiedAt: { type: Date, default: null },
