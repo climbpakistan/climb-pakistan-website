@@ -19,8 +19,25 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [profileMenuClosing, setProfileMenuClosing] = useState(false);
+  const profileMenuTimerRef = useRef(null);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
+  const profileMenuRef = useRef(null);
+
+  // Animate profile dropdown close
+  const closeProfileMenu = useCallback(() => {
+    if (!profileMenuOpen) return;
+    setProfileMenuClosing(true);
+    profileMenuTimerRef.current = setTimeout(() => {
+      setProfileMenuOpen(false);
+      setProfileMenuClosing(false);
+    }, 160); // matches CSS duration
+  }, [profileMenuOpen]);
+
+  // Cleanup timer on unmount
+  useEffect(() => () => clearTimeout(profileMenuTimerRef.current), []);
 
   // Close the search dropdown on outside click.
   useEffect(() => {
@@ -45,6 +62,20 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', onClick);
   }, [openDropdown]);
 
+  // Close profile menu on outside click.
+  useEffect(() => {
+    function onClick(e) {
+      if (!profileMenuOpen || profileMenuClosing) return;
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        closeProfileMenu();
+      }
+    }
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [profileMenuOpen, profileMenuClosing, closeProfileMenu]);
+
+
+
   // Close mobile menu on route change would need location; simplest is to
   // close it whenever a link inside it is clicked (handled inline below).
 
@@ -63,6 +94,7 @@ export default function Header() {
     setSearchOpen(false);
     setQuery('');
     setMenuOpen(false);
+    closeProfileMenu();
     navigate(path);
   }
 
@@ -137,8 +169,14 @@ export default function Header() {
         <div className="nav-actions">
           {/* Community account menu — hides while the stored session validates */}
           {!initializing && user && (
-            <div className="nav-auth">
-              <a href={`/community/u/${user.username || user.name}`} className="nav-auth-user" onClick={() => setMenuOpen(false)}>
+            <div className="nav-auth" ref={profileMenuRef}>
+              <button
+                className="nav-auth-profile-btn"
+                type="button"
+                onClick={() => (profileMenuOpen ? closeProfileMenu() : setProfileMenuOpen(true))}
+                aria-label="User menu"
+                aria-expanded={profileMenuOpen}
+              >
                 {user.profileImageUrl ? (
                   <img className="nav-auth-avatar" src={user.profileImageUrl} alt="" />
                 ) : (
@@ -146,20 +184,31 @@ export default function Header() {
                     {(user.username || user.name || '?')[0].toUpperCase()}
                   </span>
                 )}
-                <span className="nav-auth-username">@{user.username || user.name}</span>
-              </a>
-              <a
-                href="/community/feed"
-                className="nav-auth-link nav-auth-logout"
-                onClick={(e) => {
-                  e.preventDefault();
-                  signOut();
-                  setMenuOpen(false);
-                  navigate('/community/feed');
-                }}
-              >
-                Log Out
-              </a>
+              </button>
+              {profileMenuOpen && (
+                <div className={`nav-profile-dropdown${profileMenuClosing ? ' nav-profile-dropdown--closing' : ''}`}>
+                  <a
+                    href={`/community/u/${user.username || user.name}`}
+                    className="nav-profile-dropdown-item"
+                    onClick={() => { setProfileMenuOpen(false); setProfileMenuClosing(false); setMenuOpen(false); }}
+                  >
+                    Your Profile
+                  </a>
+                  <button
+                    type="button"
+                    className="nav-profile-dropdown-item nav-profile-dropdown-item--danger"
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      setProfileMenuClosing(false);
+                      signOut();
+                      setMenuOpen(false);
+                      navigate('/community/feed');
+                    }}
+                  >
+                    Log Out
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
