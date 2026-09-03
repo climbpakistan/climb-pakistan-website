@@ -12,6 +12,7 @@ Express.js + MongoDB (Mongoose) REST API with JWT authentication, rate limiting,
 - **Image Upload:** Cloudinary SDK + Multer (file & URL upload)
 - **Excel Parsing:** xlsx (SheetJS) for importing rankings, results, and team data
 - **Contact Email:** Web3Forms API (external service — no SMTP credentials needed)
+- **Password Reset Email:** Resend API (transactional email for the community forgot-password flow)
 - **File Format:** ES Modules (`"type": "module"`)
 
 ## Project Structure
@@ -223,6 +224,8 @@ All variables go in `backend/.env` (gitignored). **Credentials must come from `.
 | `CLOUDINARY_API_KEY`      | ✅ For uploads| Cloudinary API key                               |
 | `CLOUDINARY_API_SECRET`   | ✅ For uploads| Cloudinary API secret                            |
 | `WEB3FORMS_ACCESS_KEY`    | ✅ For contact| Web3Forms API access key                         |
+| `RESEND_API_KEY`          | ✅ For password reset | Resend API key (https://resend.com/api-keys)     |
+| `RESEND_FROM`             | ❌ Optional   | Verified sender on the reset email (default: `Climb Pakistan <onboarding@resend.dev>`) |
 | `CORS_ORIGIN`             | ❌ Optional   | Comma-separated allowed origins                  |
 | `PORT`                    | ❌ No         | Server port (default: `3001`)                    |
 
@@ -251,6 +254,7 @@ All variables go in `backend/.env` (gitignored). **Credentials must come from `.
 - **Championship Results**: Imported from Excel (.xlsx) files. Stored as Mixed schema for flexible data structures per competition
 - **Page Views**: Anonymous tracking (path + timestamp) for basic analytics. GET stats endpoint is admin-protected
 - **Contact form**: Messages are sent via Web3Forms API (no SMTP configuration needed). Messages are not stored in the database
+- **Password reset email**: `/api/auth/forgot-password` sends the 6-digit reset code via the Resend API (needs `RESEND_API_KEY`). Until a domain is verified in Resend, use the default `onboarding@resend.dev` sender, which only delivers to the account owner's email; verify a domain and set `RESEND_FROM` for real deliveries
 - **Auth**: Credentials are read from environment variables only — no hardcoded fallbacks exist in the source code
 - **File uploads**: Capped at 10 MB for both direct file upload and URL download
 - **Excel parsing**: SheetJS (xlsx) library handles Excel import for rankings, team rankings, and championship results

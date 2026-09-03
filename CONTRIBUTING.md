@@ -9,6 +9,7 @@
 - **MongoDB Atlas** account (or local MongoDB instance with a connection string)
 - **Cloudinary** account (for image upload features in the admin dashboard)
 - **Web3Forms** access key (for contact form — no SMTP credentials needed)
+- **Resend API key** (only if you use the community password reset — see `backend/.env.example`)
 
 ### Initial Setup
 

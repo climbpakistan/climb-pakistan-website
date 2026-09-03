@@ -2,22 +2,19 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import User, { RESERVED_USERNAMES, COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS } from '../models/User.js';
 import BadgeApplication, { BADGE_TYPES } from '../models/BadgeApplication.js';
 import { requireUser } from '../middleware/auth.js';
 import cloudinary from '../cloudinary.js';
 
-// ── Nodemailer transporter ──
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// ── Resend (transactional email for the password reset flow) ──
+// Requires RESEND_API_KEY. RESEND_FROM must be a verified sender — either a
+// verified domain (e.g. "Climb Pakistan <noreply@climbpakistan.com>") or the
+// default "onboarding@resend.dev" (which only delivers to the account owner's
+// email until a domain is verified).
+const resend = new Resend(process.env.RESEND_API_KEY);
+const RESEND_FROM = process.env.RESEND_FROM || 'Climb Pakistan <onboarding@resend.dev>';
 
 const router = Router();
 
@@ -581,13 +578,18 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
     user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
     await user.save();
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    // Resend's SDK returns { data, error } instead of throwing on API errors.
+    const { data, error } = await resend.emails.send({
+      from: RESEND_FROM,
       to: email,
       subject: 'Climb Pakistan — Password Reset Code',
       text: `Your password reset code is: ${code}\n\nThis code expires in 15 minutes.\n\nIf you did not request this, please ignore this email.`,
       html: `<p>Your password reset code is:</p><h2 style="letter-spacing:4px;font-size:28px;">${code}</h2><p>This code expires in 15 minutes.</p><p>If you did not request this, please ignore this email.</p>`,
     });
+    if (error) {
+      console.error('Resend error:', error);
+      throw new Error(error.message || 'Email sending failed.');
+    }
 
     res.json({ message: 'If an account with that email exists, a reset code has been sent.' });
   } catch (err) {
