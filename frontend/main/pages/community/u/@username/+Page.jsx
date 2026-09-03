@@ -66,7 +66,7 @@ const ROLE_LABELS = {
   athlete: 'Athlete',
   coach: 'Coach',
   climbing_enthusiast: 'Climbing Enthusiast',
-  gym_or_organization: 'Gym or Organization',
+  gym_or_organization: 'Team & Organization',
 };
 const DISCIPLINE_LABELS = { speed: 'Speed', lead: 'Lead', bouldering: 'Bouldering' };
 const EXPERIENCE_LABELS = { beginner: 'Beginner', intermediate: 'Intermediate', professional: 'Professional' };

@@ -18,8 +18,11 @@ const COMMUNITY_ROLE_OPTIONS = [
   { value: 'athlete', label: 'Athlete' },
   { value: 'coach', label: 'Coach' },
   { value: 'climbing_enthusiast', label: 'Climbing Enthusiast' },
-  { value: 'gym_or_organization', label: 'Gym or Organization' },
+  { value: 'gym_or_organization', label: 'Team & Organization' },
 ];
+
+// Roles that require disciplines and experience level
+const ROLES_WITH_DISCIPLINES = ['athlete', 'climbing_enthusiast'];
 
 const DISCIPLINE_OPTIONS = [
   { value: 'speed', label: 'Speed' },
@@ -90,9 +93,10 @@ function Page() {
 
     if (!communityRole) next.communityRole = 'Please select your role.';
 
-    if (disciplines.length === 0) next.disciplines = 'Please select at least one discipline.';
-
-    if (!experienceLevel) next.experienceLevel = 'Please select your experience level.';
+    if (ROLES_WITH_DISCIPLINES.includes(communityRole)) {
+      if (disciplines.length === 0) next.disciplines = 'Please select at least one discipline.';
+      if (!experienceLevel) next.experienceLevel = 'Please select your experience level.';
+    }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = 'Please enter a valid email address.';
 
@@ -225,38 +229,42 @@ function Page() {
               {errors.communityRole && <p className="form-error">{errors.communityRole}</p>}
             </div>
 
-            <div className="form-row">
-              <label>I climb</label>
-              <div className="community-checkbox-group">
-                {DISCIPLINE_OPTIONS.map((d) => (
-                  <label key={d.value} className="community-checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={disciplines.includes(d.value)}
-                      onChange={() => toggleDiscipline(d.value)}
-                    />
-                    <span>{d.label}</span>
-                  </label>
-                ))}
-              </div>
-              {errors.disciplines && <p className="form-error">{errors.disciplines}</p>}
-            </div>
+            {ROLES_WITH_DISCIPLINES.includes(communityRole) && (
+              <>
+                <div className="form-row">
+                  <label>I climb</label>
+                  <div className="community-checkbox-group">
+                    {DISCIPLINE_OPTIONS.map((d) => (
+                      <label key={d.value} className="community-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={disciplines.includes(d.value)}
+                          onChange={() => toggleDiscipline(d.value)}
+                        />
+                        <span>{d.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {errors.disciplines && <p className="form-error">{errors.disciplines}</p>}
+                </div>
 
-            <div className="form-row">
-              <label htmlFor="experienceLevel">Experience Level</label>
-              <select
-                id="experienceLevel"
-                name="experienceLevel"
-                value={experienceLevel}
-                onChange={(e) => setExperienceLevel(e.target.value)}
-              >
-                <option value="" disabled>Select your experience…</option>
-                {EXPERIENCE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-              {errors.experienceLevel && <p className="form-error">{errors.experienceLevel}</p>}
-            </div>
+                <div className="form-row">
+                  <label htmlFor="experienceLevel">Experience Level</label>
+                  <select
+                    id="experienceLevel"
+                    name="experienceLevel"
+                    value={experienceLevel}
+                    onChange={(e) => setExperienceLevel(e.target.value)}
+                  >
+                    <option value="" disabled>Select your experience…</option>
+                    {EXPERIENCE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  {errors.experienceLevel && <p className="form-error">{errors.experienceLevel}</p>}
+                </div>
+              </>
+            )}
 
             {/* Profile image */}
             <div className="form-row community-avatar-field">
