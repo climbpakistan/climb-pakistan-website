@@ -78,7 +78,10 @@ function Page() {
             </div>
 
             <div className="form-row">
-              <label htmlFor="password">Password</label>
+              <div className="form-row-header">
+                <label htmlFor="password">Password</label>
+                <a href="/community/forgot-password" className="form-link">Forgot password?</a>
+              </div>
               <input
                 type="password"
                 id="password"

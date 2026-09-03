@@ -2756,6 +2756,17 @@ input, textarea, select { font: inherit; color: inherit; }
 .contact-form { display: flex; flex-direction: column; gap: var(--sp-5); }
 .form-row { display: flex; flex-direction: column; gap: var(--sp-2); }
 .form-row label { font-size: var(--fs-sm); font-weight: 600; color: var(--cp-white); }
+.form-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.form-link {
+  font-size: var(--fs-xs);
+  color: var(--cp-accent);
+  text-decoration: none;
+}
+.form-link:hover { text-decoration: underline; }
 .form-row input,
 .form-row select,
 .form-row textarea {
@@ -4455,6 +4466,30 @@ input, textarea, select { font: inherit; color: inherit; }
   font-size: var(--fs-sm);
   margin: 0;
   line-height: 1.5;
+}
+
+/* ── Forgot password steps ── */
+.reset-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-6);
+  font-size: var(--fs-sm);
+  color: var(--cp-text-muted);
+}
+.reset-step {
+  opacity: 0.4;
+  font-weight: 500;
+}
+.reset-step.is-active {
+  opacity: 1;
+  color: var(--cp-accent);
+  font-weight: 600;
+}
+.reset-step-arrow {
+  opacity: 0.3;
+  font-size: var(--fs-xs);
 }
 
 

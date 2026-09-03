@@ -52,6 +52,9 @@ const userSchema = new mongoose.Schema({
   // Optional link to an existing Climb Pakistan athlete profile. Managed by
   // admins only; users cannot connect/disconnect themselves.
   athleteProfileId: { type: mongoose.Schema.Types.ObjectId, ref: 'Athlete', default: null, sparse: true },
+  // ── Password reset ──
+  resetCode: { type: String, default: null },
+  resetCodeExpires: { type: Date, default: null },
   // ── Account status / moderation ──
   // active = fully functional; suspended = cannot participate but can log in
   // and see an explanation; banned = cannot access/participate in the community.

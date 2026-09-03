@@ -139,6 +139,42 @@ export async function communityMe(token) {
   return data;
 }
 
+/** Send a password reset code to the user's email. */
+export async function forgotPassword(email) {
+  const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not send reset code.');
+  return data;
+}
+
+/** Verify a 6-digit reset code. */
+export async function verifyResetCode(email, code) {
+  const res = await fetch(`${BASE_URL}/auth/verify-reset-code`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Invalid reset code.');
+  return data;
+}
+
+/** Reset password with verified code. */
+export async function resetPassword(email, code, newPassword) {
+  const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code, newPassword }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not reset password.');
+  return data;
+}
+
 /** Fetch a publicly viewable community profile by username. */
 export async function communityProfile(username) {
   const clean = String(username || '').trim().replace(/^@/, '');

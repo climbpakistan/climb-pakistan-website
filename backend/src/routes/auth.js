@@ -2,10 +2,22 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
+import nodemailer from 'nodemailer';
 import User, { RESERVED_USERNAMES, COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS } from '../models/User.js';
 import BadgeApplication, { BADGE_TYPES } from '../models/BadgeApplication.js';
 import { requireUser } from '../middleware/auth.js';
 import cloudinary from '../cloudinary.js';
+
+// ── Nodemailer transporter ──
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 const router = Router();
 
@@ -181,6 +193,18 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,                    // 5 requests per window
+  message: { error: 'Too many requests. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+function generateResetCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
 
 // POST /api/auth/register — create a community member account.
 // Multipart/form-data with fields username, email, password and an optional
@@ -533,6 +557,119 @@ router.get('/search', async (req, res) => {
   } catch (err) {
     console.error('User search error:', err);
     res.status(500).json({ error: 'Could not search users.' });
+  }
+});
+
+// ── Forgot Password Flow ──
+
+// POST /api/auth/forgot-password — send a 6-digit reset code to the user's email.
+router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
+  try {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+
+    const user = await User.findOne({ email });
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.json({ message: 'If an account with that email exists, a reset code has been sent.' });
+    }
+
+    const code = generateResetCode();
+    user.resetCode = code;
+    user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: 'Climb Pakistan — Password Reset Code',
+      text: `Your password reset code is: ${code}\n\nThis code expires in 15 minutes.\n\nIf you did not request this, please ignore this email.`,
+      html: `<p>Your password reset code is:</p><h2 style="letter-spacing:4px;font-size:28px;">${code}</h2><p>This code expires in 15 minutes.</p><p>If you did not request this, please ignore this email.</p>`,
+    });
+
+    res.json({ message: 'If an account with that email exists, a reset code has been sent.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Could not process your request. Please try again.' });
+  }
+});
+
+// POST /api/auth/verify-reset-code — verify the 6-digit code.
+router.post('/verify-reset-code', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanCode = String(code || '').trim();
+
+    if (!EMAIL_REGEX.test(cleanEmail) || !cleanCode) {
+      return res.status(400).json({ error: 'Please provide a valid email and code.' });
+    }
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user || !user.resetCode || !user.resetCodeExpires) {
+      return res.status(400).json({ error: 'Invalid or expired reset code.' });
+    }
+
+    if (user.resetCodeExpires < new Date()) {
+      user.resetCode = null;
+      user.resetCodeExpires = null;
+      await user.save();
+      return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
+    }
+
+    if (user.resetCode !== cleanCode) {
+      return res.status(400).json({ error: 'Incorrect reset code. Please try again.' });
+    }
+
+    res.json({ message: 'Code verified successfully. You can now set a new password.' });
+  } catch (err) {
+    console.error('Verify reset code error:', err);
+    res.status(500).json({ error: 'Could not verify code. Please try again.' });
+  }
+});
+
+// POST /api/auth/reset-password — set a new password after code verification.
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanCode = String(code || '').trim();
+    const cleanPassword = String(newPassword || '');
+
+    if (!EMAIL_REGEX.test(cleanEmail) || !cleanCode || !cleanPassword) {
+      return res.status(400).json({ error: 'Please provide all required fields.' });
+    }
+
+    const passwordError = validatePassword(cleanPassword);
+    if (passwordError) return res.status(400).json({ error: passwordError });
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user || !user.resetCode || !user.resetCodeExpires) {
+      return res.status(400).json({ error: 'Invalid or expired reset code.' });
+    }
+
+    if (user.resetCodeExpires < new Date()) {
+      user.resetCode = null;
+      user.resetCodeExpires = null;
+      await user.save();
+      return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
+    }
+
+    if (user.resetCode !== cleanCode) {
+      return res.status(400).json({ error: 'Incorrect reset code.' });
+    }
+
+    user.password = cleanPassword;
+    user.resetCode = null;
+    user.resetCodeExpires = null;
+    await user.save();
+
+    res.json({ message: 'Password has been reset successfully. You can now log in.' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Could not reset password. Please try again.' });
   }
 });
 
