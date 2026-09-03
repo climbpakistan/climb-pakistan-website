@@ -3,7 +3,7 @@ import { usePageContext } from 'vike-react/usePageContext';
 import Seo from '../../../src/components/Seo';
 import PostCard from '../../../src/components/community/PostCard';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
-import { feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
+import { communityTopics, feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
 import { getPosts, getMyVotes } from '../../../src/api';
 
 export { Page };
