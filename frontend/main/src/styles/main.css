@@ -3466,10 +3466,13 @@ input, textarea, select { font: inherit; color: inherit; }
   text-transform: uppercase;
   letter-spacing: 0.02em;
   border-radius: var(--radius-sm);
-  color: #000;
+  background: var(--cp-accent);
+  color: #000 !important;
+  border: 1px solid transparent;
 }
 .nav-community-btn:hover {
-  color: #000;
+  background: var(--cp-accent-strong);
+  color: #000 !important;
 }
 
 /* Signup avatar picker */
