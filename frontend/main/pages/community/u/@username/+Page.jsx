@@ -96,6 +96,12 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
   const athlete = profile.athlete;
   const followerCount = profile.followerCount ?? 0;
   const followingCount = profile.followingCount ?? 0;
+
+  // Build experience label like "Professional Athlete"
+  const experienceLabel = profile.experienceLevel
+    ? `${EXPERIENCE_LABELS[profile.experienceLevel] || profile.experienceLevel}${profile.communityRole === 'athlete' ? ' Athlete' : ''}`
+    : null;
+
   return (
     <div className="profile-hero">
       <div className="profile-avatar">
@@ -107,39 +113,24 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
       </div>
 
       <div className="profile-hero-main">
-        <h1 className="profile-username">
-          @{profile.username}
-          <VerificationBadge verification={profile.verification} />
-        </h1>
-        {profile.name ? <p className="profile-name">{profile.name}</p> : null}
+        {/* Instagram-style stats row */}
+        <div className="profile-hero-top">
+          <div className="profile-hero-info">
+            <h1 className="profile-name">{profile.name || `@${profile.username}`}</h1>
+            <p className="profile-username">@{profile.username}<VerificationBadge verification={profile.verification} /></p>
+          </div>
+        </div>
+
+        {/* City */}
+        {profile.city ? <p className="profile-city">{profile.city}</p> : null}
+
+        {/* Experience level */}
+        {experienceLabel ? <p className="profile-experience-tag">{experienceLabel}</p> : null}
+
+        {/* Bio */}
         {profile.bio ? <p className="profile-bio">{profile.bio}</p> : null}
 
-        {profile.city ? <p className="profile-city">📍 {profile.city}</p> : null}
-        {profile.instagramUrl ? (
-          <a href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" className="profile-instagram-link">
-            📸 Instagram
-          </a>
-        ) : null}
-
-        <div className="profile-hero-meta">
-          {profile.communityRole ? (
-            <span className="profile-role">{ROLE_LABELS[profile.communityRole] || profile.communityRole}</span>
-          ) : null}
-          {profile.disciplines && profile.disciplines.length > 0 ? (
-            <span className="profile-disciplines">
-              {profile.disciplines.map((d) => DISCIPLINE_LABELS[d] || d).join(', ')}
-            </span>
-          ) : null}
-          {profile.experienceLevel ? (
-            <span className="profile-experience">{EXPERIENCE_LABELS[profile.experienceLevel] || profile.experienceLevel}</span>
-          ) : null}
-        </div>
-
-        <div className="profile-hero-meta">
-          <span className="profile-joined">{formatJoined(profile.createdAt)}</span>
-          <span className="profile-points">{formatPoints(profile.communityPoints)} Community Points</span>
-        </div>
-
+        {/* Instagram-style followers/following */}
         <div className="profile-follow-stats">
           <button type="button" className="profile-follow-stat" disabled={isOwner} onClick={onShowFollowers}>
             <strong>{followerCount.toLocaleString()}</strong> <span>Followers</span>
@@ -149,27 +140,33 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
           </button>
         </div>
 
-        {athlete ? (
-          <a href={`/athletes/${athlete.slug}`} className="profile-athlete-link">
-            <span className="profile-athlete-label">Climb Pakistan Athlete</span>
-            <span className="profile-athlete-cta">View Athlete Profile →</span>
-          </a>
-        ) : null}
-      </div>
+        {/* Action buttons */}
+        <div className="profile-actions-row">
+          {isOwner ? (
+            <button type="button" className="btn btn-outline profile-action-btn" onClick={onEdit}>Edit Profile</button>
+          ) : canFollow ? (
+            <button
+              type="button"
+              className={`btn ${isFollowing ? 'btn-outline' : 'btn-primary'} profile-action-btn`}
+              onClick={onFollow}
+              disabled={followBusy}
+            >
+              {followBusy ? '…' : isFollowing ? 'Following' : 'Follow'}
+            </button>
+          ) : null}
 
-      <div className="profile-hero-actions">
-        {isOwner ? (
-          <button type="button" className="btn btn-outline profile-edit-btn" onClick={onEdit}>Edit Profile</button>
-        ) : canFollow ? (
-          <button
-            type="button"
-            className={`btn ${isFollowing ? 'btn-outline' : 'btn-primary'} profile-follow-btn`}
-            onClick={onFollow}
-            disabled={followBusy}
-          >
-            {followBusy ? '…' : isFollowing ? 'Following' : 'Follow'}
-          </button>
-        ) : null}
+          {profile.instagramUrl ? (
+            <a href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline profile-action-btn">
+              Instagram
+            </a>
+          ) : null}
+
+          {athlete ? (
+            <a href={`/athletes/${athlete.slug}`} className="btn btn-outline profile-action-btn">
+              Athlete Profile
+            </a>
+          ) : null}
+        </div>
       </div>
     </div>
   );
