@@ -3457,7 +3457,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .nav-auth-user:hover .nav-auth-username { color: var(--cp-accent); }
 .nav-auth-logout { color: var(--cp-text-dim); }
 
-/* Header Community button — matches the Sign Up primary button look */
+/* Header Community button */
 .nav-item--community { display: flex; align-items: center; }
 .nav-community-btn {
   padding: var(--sp-2) var(--sp-4);
@@ -3465,6 +3465,11 @@ input, textarea, select { font: inherit; color: inherit; }
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  border-radius: var(--radius-sm);
+  color: #000;
+}
+.nav-community-btn:hover {
+  color: #000;
 }
 
 /* Signup avatar picker */
