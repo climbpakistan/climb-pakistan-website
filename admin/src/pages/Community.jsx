@@ -418,6 +418,25 @@ function UsersTab() {
                       View
                     </a>
                     <button className="btn btn-outline btn-xs" type="button" onClick={() => { setActive(u); setError(''); setNotice(''); }}>Manage</button>
+                    {u.username !== 'admin' && (
+                      <button
+                        className="btn btn-danger btn-xs"
+                        type="button"
+                        onClick={async () => {
+                          const ok = window.confirm(`Delete @${u.username} and all their content? This cannot be undone.`);
+                          if (!ok) return;
+                          try {
+                            await deleteUser(u.id);
+                            setNotice(`@${u.username} deleted.`);
+                            await load(page, searched);
+                          } catch (err) {
+                            setError(err.message);
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
