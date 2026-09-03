@@ -4368,6 +4368,15 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-text-muted);
   font-size: var(--fs-sm);
   margin-bottom: var(--sp-4);
+  line-height: 1.6;
+}
+.community-badge-instagram-link {
+  color: #e1306c;
+  font-weight: 600;
+  text-decoration: none;
+}
+.community-badge-instagram-link:hover {
+  text-decoration: underline;
 }
 .community-badge-actions {
   display: grid;

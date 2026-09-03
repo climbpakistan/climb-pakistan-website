@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { navigate } from 'vike/client/router';
 import { AnimatedPageHeader } from '../../../src/hooks/animations';
 import Seo from '../../../src/components/Seo';
-import { communityUpdateProfile, submitBadgeApplication, getMyBadgeApplications } from '../../../src/api';
+import { communityUpdateProfile } from '../../../src/api';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 
 export { Page };
@@ -29,114 +29,51 @@ function readImageMeta(file) {
   });
 }
 
-function BadgeApplicationSection({ token, onUpdate }) {
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(null);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  useEffect(() => {
-    getMyBadgeApplications(token)
-      .then((data) => setApplications(data.applications || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [token]);
-
-  async function handleApply(badgeType) {
-    setSubmitting(badgeType);
-    setError('');
-    setSuccess('');
-    try {
-      await submitBadgeApplication(token, { badgeType, message });
-      const data = await getMyBadgeApplications(token);
-      setApplications(data.applications || []);
-      setSuccess(`Application for ${badgeType === 'national' ? 'National' : 'International'} Climber badge submitted!`);
-      setMessage('');
-      if (onUpdate) onUpdate();
-    } catch (err) {
-      setError(err.message || 'Could not submit application.');
-    } finally {
-      setSubmitting(null);
-    }
-  }
-
-  const pendingNational = applications.find((a) => a.badgeType === 'national' && a.status === 'pending');
-  const pendingInternational = applications.find((a) => a.badgeType === 'international' && a.status === 'pending');
-  const approvedNational = applications.find((a) => a.badgeType === 'national' && a.status === 'approved');
-  const approvedInternational = applications.find((a) => a.badgeType === 'international' && a.status === 'approved');
-
-  if (loading) return <p className="text-muted">Loading badge status…</p>;
-
+function VerificationInfoSection() {
   return (
     <div className="community-badge-section">
-      <h3 className="community-badge-title">Apply for Verification Badges</h3>
+      <h3 className="community-badge-title">Verification Badges</h3>
       <p className="community-badge-subtitle">
-        Verified badges are reviewed by the Climb Pakistan team. Applying does not guarantee approval.
+        Verified badges confirm your identity on Climb Pakistan. To get verified, send a message from your official Instagram account to{' '}
+        <a href="https://www.instagram.com/climb_pakistan" target="_blank" rel="noopener noreferrer" className="community-badge-instagram-link">@climb_pakistan</a>{' '}
+        on Instagram. After confirming your identity, your profile will be given the verification badge for the respective category.
       </p>
-
-      {error && <p className="form-status form-status--error" role="alert">{error}</p>}
-      {success && <p className="form-status form-status--success">{success}</p>}
-
-      <div className="form-row">
-        <label htmlFor="badge-message">Message to reviewers <span className="form-optional">(optional)</span></label>
-        <textarea
-          id="badge-message"
-          rows={3}
-          maxLength={1000}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Tell us about your climbing achievements and why you're applying…"
-        />
-      </div>
 
       <div className="community-badge-actions">
         <div className="community-badge-card">
           <div className="community-badge-card-header">
-            <span className="community-badge-icon community-badge-icon--national">✓</span>
-            <h4>National Climber Badge</h4>
+            <VerificationBadgeMini color="#22c55e" />
+            <h4>National Climber</h4>
           </div>
           <p className="community-badge-card-text">For climbers recognized at the national level in Pakistan.</p>
-          {approvedNational ? (
-            <span className="badge badge-success">Approved</span>
-          ) : pendingNational ? (
-            <span className="badge badge-warning">Application Pending</span>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={submitting === 'national'}
-              onClick={() => handleApply('national')}
-            >
-              {submitting === 'national' ? 'Submitting…' : 'Apply for National Badge'}
-            </button>
-          )}
         </div>
 
         <div className="community-badge-card">
           <div className="community-badge-card-header">
-            <span className="community-badge-icon community-badge-icon--international">✓</span>
-            <h4>International Climber Badge</h4>
+            <VerificationBadgeMini color="#3b82f6" />
+            <h4>International Climber</h4>
           </div>
           <p className="community-badge-card-text">For climbers recognized at the international level.</p>
-          {approvedInternational ? (
-            <span className="badge badge-success">Approved</span>
-          ) : pendingInternational ? (
-            <span className="badge badge-warning">Application Pending</span>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={submitting === 'international'}
-              onClick={() => handleApply('international')}
-            >
-              {submitting === 'international' ? 'Submitting…' : 'Apply for International Badge'}
-            </button>
-          )}
+        </div>
+
+        <div className="community-badge-card">
+          <div className="community-badge-card-header">
+            <VerificationBadgeMini color="#eab308" />
+            <h4>Organization / Club / Team</h4>
+          </div>
+          <p className="community-badge-card-text">For official climbing organizations, clubs, and teams.</p>
         </div>
       </div>
     </div>
+  );
+}
+
+function VerificationBadgeMini({ color }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="12" fill={color} />
+      <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
   );
 }
 
@@ -278,9 +215,9 @@ function Page() {
             </div>
           </form>
 
-          {/* Badge Application Section */}
+          {/* Verification Info Section */}
           <div className="community-form" style={{ marginTop: 'var(--sp-8)' }}>
-            <BadgeApplicationSection token={token} onUpdate={() => {}} />
+            <VerificationInfoSection />
           </div>
 
           <div className="community-form-actions" style={{ marginTop: 'var(--sp-6)', justifyContent: 'center' }}>
