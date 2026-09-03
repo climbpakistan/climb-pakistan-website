@@ -3,7 +3,7 @@ import { usePageContext } from 'vike-react/usePageContext';
 import Seo from '../../../src/components/Seo';
 import PostCard from '../../../src/components/community/PostCard';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
-import { communityTopics, feedSortTabs, topTimeFilters, communityCopy, FEED_PAGE_SIZE } from '../../../src/data/communityData';
+import { feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
 import { getPosts, getMyVotes } from '../../../src/api';
 
 export { Page };
@@ -37,13 +37,7 @@ function CommunityAboutCard() {
   return (
     <aside className="community-about-card">
       <h2 className="community-about-title">About this community</h2>
-      <p className="community-about-text">{communityCopy.tagline}</p>
-      <div className="community-about-topics">
-        {communityTopics.slice(0, 5).map((topic) => (
-          <span key={topic} className="tag">{topic}</span>
-        ))}
-      </div>
-      <a href="/community" className="btn btn-outline community-about-btn">About the Community</a>
+      <p className="community-about-text">A place for Pakistan&rsquo;s climbing community to ask questions, share experiences, discuss training and competitions, and connect with other climbers.</p>
     </aside>
   );
 }
