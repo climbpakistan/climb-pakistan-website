@@ -3658,7 +3658,7 @@ input, textarea, select { font: inherit; color: inherit; }
   flex-wrap: wrap;
   gap: var(--sp-4) var(--sp-5);
 }
-.profile-hero-info { flex: 1; min-width: 0; }
+.profile-hero-info { min-width: 0; }
 
 .profile-name {
   font-size: var(--fs-xl);
