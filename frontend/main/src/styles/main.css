@@ -3950,6 +3950,89 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .profile-tab-empty-text { color: var(--cp-text-dim); margin-top: var(--sp-2); }
 
+/* Similar accounts — Instagram-style suggestions below the profile */
+.profile-similar {
+  margin-top: var(--sp-8);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--cp-border);
+}
+.profile-similar-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cp-text-muted);
+  margin-bottom: var(--sp-4);
+}
+.profile-similar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--sp-3);
+}
+.profile-similar-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  transition: border-color 0.15s ease;
+}
+.profile-similar-card:hover { border-color: var(--cp-accent); }
+.profile-similar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+.profile-similar-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+.profile-similar-avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  font-weight: 700;
+  font-size: var(--fs-md);
+}
+.profile-similar-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.profile-similar-username {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-similar-name {
+  font-size: var(--fs-xs);
+  color: var(--cp-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-similar-follow {
+  flex: none;
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-xs);
+}
+
 .profile-edit-form { margin-top: var(--sp-6); }
 .profile-edit-title {
   font-size: var(--fs-md);

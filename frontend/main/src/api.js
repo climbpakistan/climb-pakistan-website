@@ -477,6 +477,12 @@ export async function getFollowing(username) {
   return fetchJSON(`${BASE_URL}/follows/${encodeURIComponent(username)}/following`);
 }
 
+/** Instagram-style "similar accounts" for a community profile by username. */
+export function getSimilarUsers(username) {
+  const clean = String(username || '').trim().replace(/^@/, '');
+  return fetchJSON(`${BASE_URL}/auth/u/${encodeURIComponent(clean)}/similar`);
+}
+
 // ── Community Search ──
 export async function searchCommunityUsers(query) {
   if (!query || query.length < 2) return { users: [] };

@@ -472,6 +472,66 @@ router.get('/u/:username', async (req, res) => {
   }
 });
 
+// GET /api/auth/u/:username/similar — Instagram-style "similar accounts" for
+// a profile. Scores other active members by shared city, community role,
+// experience level, overlapping disciplines and verification status, then
+// returns the closest matches (falling back to popular members). Public.
+router.get('/u/:username/similar', async (req, res) => {
+  try {
+    const username = String(req.params.username || '').trim().toLowerCase().replace(/^@/, '');
+    const profile = await User.findOne({ username })
+      .select('city communityRole disciplines experienceLevel verification')
+      .lean();
+
+    if (!profile) return res.status(404).json({ error: 'User not found.' });
+
+    const sameCity = { $cond: [{ $and: [{ $ne: [profile.city, ''] }, { $eq: ['$city', profile.city] }] }, 2, 0] };
+    const sameRole = { $cond: [{ $and: [{ $ne: [profile.communityRole, ''] }, { $eq: ['$communityRole', profile.communityRole] }] }, 2, 0] };
+    const sameLevel = { $cond: [{ $and: [{ $ne: [profile.experienceLevel, ''] }, { $eq: ['$experienceLevel', profile.experienceLevel] }] }, 1, 0] };
+    const verified = { $cond: [{ $ne: ['$verification', 'none'] }, 1, 0] };
+    const sharedDisciplines = { $size: { $setIntersection: ['$disciplines', profile.disciplines] } };
+
+    const similar = await User.aggregate([
+      {
+        $match: {
+          username: { $exists: true, $ne: null },
+          accountStatus: 'active',
+          _id: { $ne: profile._id },
+        },
+      },
+      { $addFields: { score: { $add: [sameCity, sameRole, sameLevel, verified, sharedDisciplines] } } },
+      { $sort: { score: -1, followerCount: -1, communityPoints: -1 } },
+      { $limit: 6 },
+      {
+        $project: {
+          username: 1,
+          name: 1,
+          profileImageUrl: 1,
+          verification: 1,
+          communityRole: 1,
+          city: 1,
+          followerCount: 1,
+        },
+      },
+    ]);
+
+    res.json({
+      users: similar.map((u) => ({
+        id: u._id,
+        username: u.username,
+        name: u.name || '',
+        profileImageUrl: u.profileImageUrl || '',
+        verification: u.verification || 'none',
+        communityRole: u.communityRole || '',
+        city: u.city || '',
+        followerCount: u.followerCount ?? 0,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not load similar accounts.' });
+  }
+});
+
 // ── Badge Applications ──
 
 // POST /api/auth/badge-applications — submit a badge application.

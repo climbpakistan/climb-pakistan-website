@@ -14,6 +14,7 @@ import {
   unfollowUser,
   getFollowStatus,
   getMyVotes,
+  getSimilarUsers,
 } from '../../../../src/api';
 import { AnimatedPageHeader } from '../../../../src/hooks/animations';
 import { formatPostDate } from '../../../../src/utils/communityPosts';
@@ -254,6 +255,45 @@ function EditProfile({ profile, onCancel, onSaved }) {
   );
 }
 
+function SimilarAccounts({ users, viewerIsGuest, isOwnerOfProfile, follows, busy, onToggleFollow }) {
+  return (
+    <div className="profile-similar">
+      <h2 className="profile-similar-title">Similar accounts</h2>
+      <div className="profile-similar-grid">
+        {users.map((u) => (
+          <div key={u.id} className="profile-similar-card">
+            <a href={`/community/u/${u.username}`} className="profile-similar-link">
+              {u.profileImageUrl ? (
+                <img src={u.profileImageUrl} alt="" className="profile-similar-avatar" />
+              ) : (
+                <span className="profile-similar-avatar profile-similar-avatar--fallback">
+                  {(u.username || '?')[0].toUpperCase()}
+                </span>
+              )}
+              <span className="profile-similar-meta">
+                <span className="profile-similar-username">
+                  @{u.username} <VerificationBadge verification={u.verification} size={12} />
+                </span>
+                <span className="profile-similar-name">{u.name || u.city || 'Community member'}</span>
+              </span>
+            </a>
+            {!viewerIsGuest && !isOwnerOfProfile && (
+              <button
+                type="button"
+                className={`btn btn-sm ${follows[u.id] ? 'btn-outline' : 'btn-primary'} profile-similar-follow`}
+                onClick={() => onToggleFollow(u)}
+                disabled={busy[u.id]}
+              >
+                {busy[u.id] ? '…' : follows[u.id] ? 'Following' : 'Follow'}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FollowList({ list, busy, denormalized }) {
   // `list` is the denormalized avatar/name list saved on CachedUser (backend
   // provides { username, name, profileImageUrl } entries) OR a full profile list.
@@ -305,6 +345,41 @@ function Page() {
   // Owner detection happens client-side (the cached user has the username).
   const isOwner = !isGuest && user?.username === profile?.username;
   const canFollow = !isGuest && !isOwner;
+
+  // ── Similar accounts (Instagram-style) ──
+  const [similar, setSimilar] = useState([]);
+  const [similarFollows, setSimilarFollows] = useState({});
+  const [similarBusy, setSimilarBusy] = useState({});
+
+  useEffect(() => {
+    let active = true;
+    if (!profile) return () => { active = false; };
+    getSimilarUsers(profile.username)
+      .then((data) => {
+        if (!active) return;
+        setSimilar((data.users || []).filter((u) => u.username !== profile.username));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [profile]);
+
+  async function handleSimilarFollow(u) {
+    if (isGuest || similarBusy[u.id]) return;
+    setSimilarBusy((m) => ({ ...m, [u.id]: true }));
+    try {
+      if (similarFollows[u.id]) {
+        await unfollowUser(token, u.id);
+        setSimilarFollows((m) => ({ ...m, [u.id]: false }));
+      } else {
+        await followUser(token, u.id);
+        setSimilarFollows((m) => ({ ...m, [u.id]: true }));
+      }
+    } catch {
+      // leave state unchanged; user can retry
+    } finally {
+      setSimilarBusy((m) => ({ ...m, [u.id]: false }));
+    }
+  }
 
   // Load the viewer's follow status for this profile once authenticated.
   useEffect(() => {
@@ -501,6 +576,17 @@ function Page() {
                 {renderTab()}
               </div>
             </>
+          )}
+
+          {!editing && similar.length > 0 && (
+            <SimilarAccounts
+              users={similar}
+              viewerIsGuest={isGuest}
+              isOwnerOfProfile={isOwner}
+              follows={similarFollows}
+              busy={similarBusy}
+              onToggleFollow={handleSimilarFollow}
+            />
           )}
         </div>
       </section>
