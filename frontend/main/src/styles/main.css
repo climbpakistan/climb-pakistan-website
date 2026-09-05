@@ -4979,7 +4979,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-search-suggestion-chip[data-category="News"] {
   color: #2563eb; background: rgba(37, 99, 235, 0.1); border-color: rgba(37, 99, 235, 0.28);
 }
-.community-search-suggestion-chip[data-category="Questions"] {
+.community-search-suggestion-chip[data-category="Community Posts"] {
   color: #d97706; background: rgba(217, 119, 6, 0.1); border-color: rgba(217, 119, 6, 0.28);
 }
 .community-search-suggestion-chip[data-category="Competition"] {

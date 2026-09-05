@@ -32,7 +32,7 @@ const TABS = [
 ];
 
 const POST_CATEGORIES = [
-  'Questions', 'Training', 'Competition', 'Climbing Gear', 'Outdoor Climbing', 'News',
+  'Community Posts', 'Training', 'Competition', 'Climbing Gear', 'Outdoor Climbing', 'News',
 ];
 
 const POST_TYPES = ['text', 'image', 'link', 'poll'];

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 // Post categories — keep in sync with the frontend (communityData.js).
 export const POST_CATEGORIES = [
-  'Questions',
+  'Community Posts',
   'Training',
   'Competition',
   'Climbing Gear',
