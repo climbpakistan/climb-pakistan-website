@@ -2886,6 +2886,13 @@ input, textarea, select { font: inherit; color: inherit; }
   .nav-links a { display: block; padding-block: var(--sp-3); font-size: var(--fs-md); width: 100%; }
   .nav-toggle { display: flex; }
 
+  /* Keep the bar itself from crowding on narrow screens */
+  .nav { gap: var(--sp-3); }
+  .nav-actions { gap: var(--sp-2); margin-left: auto; }
+
+  /* Search bar can get tight between 641-860px — let it wrap */
+  .community-search-bar { flex-wrap: wrap; }
+
   .nav-item--community { width: 100%; margin-top: var(--sp-4); }
   .nav-community-btn {
     width: 100%;
@@ -2967,7 +2974,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 
 @media (max-width: 560px) {
-  .container { padding-inline: var(--sp-4); }
+  .container { padding-inline: var(--sp-5); }
   .footer-grid { grid-template-columns: 1fr; }
   .about-stats { grid-template-columns: 1fr; }
   .hero-actions, .thanks-actions { flex-direction: column; align-items: stretch; }
