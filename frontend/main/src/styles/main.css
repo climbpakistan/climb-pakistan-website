@@ -3886,7 +3886,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .profile-avatar .community-avatar-fallback { font-size: 2.4rem; }
 .profile-username {
   font-size: var(--fs-2xl);
-  text-transform: uppercase;
+  /* No text-transform here — usernames must always display as stored
+     (lowercase). The Instagram-style rule below reuses this class. */
   letter-spacing: 0.02em;
 }
 .profile-name { color: var(--cp-text-dim); margin-top: var(--sp-1); }
