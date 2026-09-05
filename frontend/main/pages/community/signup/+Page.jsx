@@ -12,7 +12,7 @@ const MAX_IMAGE_DIMENSION = 4000;
 
 const RESERVED = ['admin', 'administrator', 'mod', 'moderator', 'support', 'climbpakistan', 'team', 'official', 'staff', 'system', 'root'];
 
-const USERNAME_HINT = '3–20 characters: letters, numbers, underscores — must start with a letter.';
+const USERNAME_HINT = '3–20 characters: lowercase letters, numbers, underscores — must start with a letter.';
 
 const COMMUNITY_ROLE_OPTIONS = [
   { value: 'athlete', label: 'Athlete' },
@@ -200,8 +200,9 @@ function Page() {
                 name="username"
                 autoComplete="username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 placeholder="e.g. cliff_runner"
+                style={{ textTransform: 'lowercase' }}
               />
               {errors.username ? (
                 <p className="form-error">{errors.username}</p>

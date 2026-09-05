@@ -70,6 +70,12 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function () {
+  // Usernames are always stored lowercase — enforce it on every save path
+  // (registration, future admin tooling, imports) so the community never
+  // displays mixed-case handles.
+  if (this.username && typeof this.username === 'string') {
+    this.username = this.username.toLowerCase();
+  }
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
