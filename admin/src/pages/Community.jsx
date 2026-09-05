@@ -12,6 +12,7 @@ import {
   getAthletes,
   setVerification,
   setAthleteLink,
+  updateCommunityUserProfile,
   warnUser,
   suspendUser,
   banUser,
@@ -182,6 +183,47 @@ function UserManageModal({ user, athletes, onRefresh, onClose }) {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
+  // Editable community profile fields.
+  const initialProfile = {
+    name: user.name || '',
+    bio: user.bio || '',
+    city: user.city || '',
+    communityRole: user.communityRole || '',
+    disciplines: user.disciplines || [],
+    experienceLevel: user.experienceLevel || '',
+    instagramUrl: user.instagramUrl || '',
+  };
+  const [profile, setProfile] = useState(initialProfile);
+  const profileDirty = JSON.stringify(profile) !== JSON.stringify(initialProfile);
+
+  function setProfileField(key, value) {
+    setProfile((p) => ({ ...p, [key]: value }));
+  }
+  function toggleDiscipline(d) {
+    setProfile((p) => ({
+      ...p,
+      disciplines: p.disciplines.includes(d)
+        ? p.disciplines.filter((x) => x !== d)
+        : [...p.disciplines, d],
+    }));
+  }
+
+  async function saveProfile() {
+    setSaving(true);
+    setError('');
+    setNotice('');
+    try {
+      await updateCommunityUserProfile(user.id, profile);
+      setNotice('Profile updated.');
+      setProfile((p) => ({ ...p })); // keep entered values
+      if (onRefresh) await onRefresh();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function refresh() {
     if (onRefresh) await onRefresh();
   }
@@ -254,6 +296,115 @@ function UserManageModal({ user, athletes, onRefresh, onClose }) {
             <button className="btn btn-primary" type="button" disabled={saving || athleteId === (user.athlete ? user.athlete.id : '')} onClick={() => run((uid) => setAthleteLink(uid, athleteId || null), athleteId ? 'Athlete profile connected.' : 'Athlete profile disconnected.')}>
               {athleteId ? 'Connect / change athlete' : 'Disconnect athlete'}
             </button>
+          </div>
+        </div>
+
+        {/* Editable community profile fields */}
+        <div className="form-group" style={{ borderTop: '1px solid var(--cp-border)', paddingTop: 'var(--sp-4)' }}>
+          <label className="form-label">Community Profile</label>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-3)', maxWidth: 480 }}>
+            <div>
+              <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Display name</label>
+              <input
+                className="form-input"
+                type="text"
+                value={profile.name}
+                onChange={(e) => setProfileField('name', e.target.value)}
+                placeholder="Display name"
+              />
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>City</label>
+              <input
+                className="form-input"
+                type="text"
+                value={profile.city}
+                onChange={(e) => setProfileField('city', e.target.value)}
+                placeholder="City"
+              />
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Community role</label>
+              <select
+                className="form-input"
+                value={profile.communityRole}
+                onChange={(e) => setProfileField('communityRole', e.target.value)}
+              >
+                <option value="">— Not set —</option>
+                {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="form-label" style={{ fontSize: 'var(--fs-xs)' }}>Experience level</label>
+              <select
+                className="form-input"
+                value={profile.experienceLevel}
+                onChange={(e) => setProfileField('experienceLevel', e.target.value)}
+              >
+                <option value="">— Not set —</option>
+                {Object.entries(EXPERIENCE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <label className="form-label" style={{ fontSize: 'var(--fs-xs)', marginTop: 'var(--sp-3)' }}>Disciplines</label>
+          <div style={{ display: 'flex', gap: 'var(--sp-4)', flexWrap: 'wrap' }}>
+            {Object.entries(DISCIPLINE_LABELS).map(([value, label]) => (
+              <label key={value} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={profile.disciplines.includes(value)}
+                  onChange={() => toggleDiscipline(value)}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          <label className="form-label" style={{ fontSize: 'var(--fs-xs)', marginTop: 'var(--sp-3)' }}>Bio</label>
+          <textarea
+            className="form-input"
+            rows="2"
+            maxLength={300}
+            value={profile.bio}
+            onChange={(e) => setProfileField('bio', e.target.value)}
+            placeholder="Short public bio (max 300 characters)..."
+          />
+
+          <label className="form-label" style={{ fontSize: 'var(--fs-xs)', marginTop: 'var(--sp-3)' }}>Instagram URL</label>
+          <input
+            className="form-input"
+            type="text"
+            value={profile.instagramUrl}
+            onChange={(e) => setProfileField('instagramUrl', e.target.value)}
+            placeholder="https://www.instagram.com/..."
+            style={{ maxWidth: 480 }}
+          />
+
+          <div className="btn-row" style={{ marginTop: 'var(--sp-3)' }}>
+            <button
+              className="btn btn-primary"
+              type="button"
+              disabled={saving || !profileDirty}
+              onClick={saveProfile}
+            >
+              {saving ? 'Saving...' : 'Save profile'}
+            </button>
+            {profileDirty && (
+              <button
+                className="btn btn-outline"
+                type="button"
+                disabled={saving}
+                onClick={() => setProfile(initialProfile)}
+              >
+                Discard changes
+              </button>
+            )}
           </div>
         </div>
 

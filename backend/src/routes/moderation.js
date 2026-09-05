@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import Report, { REPORT_STATUSES } from '../models/Report.js';
 import Post, { POST_CATEGORIES, POST_TYPES } from '../models/Post.js';
 import Comment from '../models/Comment.js';
-import User from '../models/User.js';
+import User, { COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS } from '../models/User.js';
 import ModerationLog from '../models/ModerationLog.js';
 import Vote from '../models/Vote.js';
 import PollVote from '../models/PollVote.js';
@@ -458,6 +458,56 @@ router.post('/users/:userId/athlete', requireAdminDb, async (req, res) => {
   }
 });
 
+// ── Community profile editing (admin-controlled, with audit) ──
+// PUT /api/moderation/users/:userId/profile
+// body: { name?, bio?, city?, communityRole?, disciplines?, experienceLevel?, instagramUrl? }
+router.put('/users/:userId/profile', requireAdminDb, async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({ error: 'Invalid user id.' });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    const updates = {};
+    if (req.body.name !== undefined) updates.name = String(req.body.name).trim().slice(0, 100);
+    if (req.body.bio !== undefined) updates.bio = String(req.body.bio).slice(0, 300);
+    if (req.body.city !== undefined) updates.city = String(req.body.city).trim().slice(0, 100);
+    if (req.body.instagramUrl !== undefined) updates.instagramUrl = String(req.body.instagramUrl).trim().slice(0, 300);
+
+    if (req.body.communityRole !== undefined) {
+      const role = String(req.body.communityRole);
+      if (!['', ...COMMUNITY_ROLES].includes(role)) {
+        return res.status(400).json({ error: 'Invalid community role.' });
+      }
+      updates.communityRole = role;
+    }
+    if (req.body.disciplines !== undefined) {
+      const list = Array.isArray(req.body.disciplines) ? req.body.disciplines.map(String) : [];
+      if (list.some((d) => !DISCIPLINES.includes(d))) {
+        return res.status(400).json({ error: 'Invalid discipline.' });
+      }
+      updates.disciplines = list;
+    }
+    if (req.body.experienceLevel !== undefined) {
+      const level = String(req.body.experienceLevel);
+      if (!['', ...EXPERIENCE_LEVELS].includes(level)) {
+        return res.status(400).json({ error: 'Invalid experience level.' });
+      }
+      updates.experienceLevel = level;
+    }
+
+    Object.assign(user, updates);
+    await user.save();
+    await logAction(req.user.id, 'user:profile-update', 'user', user._id, Object.keys(updates).join(','));
+    res.json({ message: 'Profile updated.', user: { id: user._id, username: user.username, ...updates } });
+  } catch (err) {
+    console.error('Update community user profile error:', err);
+    res.status(500).json({ error: 'Could not update the profile.' });
+  }
+});
+
 // ── Community overview (admin only) ──
 // GET /api/moderation/community/summary — total users, posts, comments, pending reports.
 router.get('/community/summary', requireAdminDb, async (req, res) => {
@@ -734,7 +784,7 @@ router.get('/users', requireAdminDb, async (req, res) => {
 
     const [users, total] = await Promise.all([
       User.find(filter)
-        .select('username name email profileImageUrl verification verifiedAt accountStatus communityRole disciplines experienceLevel city athleteProfileId followerCount followingCount createdAt')
+        .select('username name email profileImageUrl verification verifiedAt accountStatus communityRole disciplines experienceLevel city bio instagramUrl athleteProfileId followerCount followingCount createdAt')
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit),
@@ -773,6 +823,8 @@ router.get('/users', requireAdminDb, async (req, res) => {
         disciplines: u.disciplines || [],
         experienceLevel: u.experienceLevel || '',
         city: u.city || '',
+        bio: u.bio || '',
+        instagramUrl: u.instagramUrl || '',
         followerCount: u.followerCount ?? 0,
         followingCount: u.followingCount ?? 0,
         createdAt: u.createdAt,

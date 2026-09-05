@@ -382,6 +382,13 @@ export function setAthleteLink(userId, athleteProfileId) {
   });
 }
 
+export function updateCommunityUserProfile(userId, data) {
+  return apiFetch(`${BASE_URL}/moderation/users/${userId}/profile`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
 // ── Community management ──
 export function getCommunitySummary() {
   return apiFetch(`${BASE_URL}/moderation/community/summary`);
