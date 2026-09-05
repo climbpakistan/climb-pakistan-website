@@ -18,6 +18,7 @@ import UserModel from '../models/User.js';
 import Vote from '../models/Vote.js';
 import { requireUser, optionalUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
+import { loadHiddenUserIds } from '../utils/userBlocks.js';
 import { notifyMentions } from '../utils/notifications.js';
 import cloudinary from '../cloudinary.js';
 
@@ -328,6 +329,13 @@ router.get('/', optionalUser, async (req, res) => {
     // Only ever return content that hasn't been removed by moderators.
     const filter = { removed: { $ne: true } };
 
+    // Hide posts by users the viewer blocked, muted, or who blocked them.
+    if (req.user) {
+      const hidden = await loadHiddenUserIds(req.user.id);
+      const hiddenIds = [...hidden.blockedIds, ...hidden.mutedIds, ...hidden.blockedByIds];
+      if (hiddenIds.length > 0) filter.authorId = { $nin: hiddenIds };
+    }
+
     // Optional search filter (searches title and body).
     const search = String(req.query.search || '').trim();
     if (search) {
@@ -363,7 +371,7 @@ router.get('/', optionalUser, async (req, res) => {
       if (followingIds.length === 0) {
         return res.json({ posts: [], page, limit, total: 0, hasMore: false });
       }
-      filter.authorId = { $in: followingIds };
+      filter.authorId = { ...filter.authorId, $in: followingIds };
       sort = { createdAt: -1 };
     } else if (view === 'top') {
       // Time filter only applies to the Top view.

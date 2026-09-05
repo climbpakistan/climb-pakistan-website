@@ -29,6 +29,7 @@ import postsRoutes from './routes/posts.js';
 import commentsRoutes from './routes/comments.js';
 import votesRoutes from './routes/votes.js';
 import notificationsRoutes from './routes/notifications.js';
+import blocksRoutes from './routes/blocks.js';
 import reportsRoutes from './routes/reports.js';
 import moderationRoutes from './routes/moderation.js';
 import followsRoutes from './routes/follows.js';
@@ -109,6 +110,10 @@ app.use('/api/follows', followsRoutes);
 // ── Community notifications ──
 // In-app notifications (likes, comments, replies, follows, mentions).
 app.use('/api/notifications', notificationsRoutes);
+
+// ── Community blocks / mutes ──
+// User-level safety: block or mute other members.
+app.use('/api/blocks', blocksRoutes);
 
 // ── Moderation ──
 // All endpoints require a real DB-confirmed admin (enforced inside the route).

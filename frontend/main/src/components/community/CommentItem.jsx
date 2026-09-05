@@ -5,6 +5,7 @@ import ReportMenu from './ReportMenu';
 import { useCommunity } from '../../hooks/CommunityContext';
 import { createComment, updateComment, deleteComment } from '../../api';
 import { formatPostDate, MAX_COMMENT_LENGTH } from '../../utils/communityPosts';
+import RichText from './RichText';
 
 /**
  * CommentItem — a single comment (or reply) with nested replies. Renders
@@ -139,7 +140,7 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
           </div>
         </form>
       ) : (
-        <p className="community-comment-body">{comment.body}</p>
+        <p className="community-comment-body"><RichText text={comment.body} /></p>
       )}
 
       <div className="community-comment-actions">

@@ -16,6 +16,9 @@ import {
   getMyVotes,
   getSavedPosts,
   getSimilarUsers,
+  getBlockStatus,
+  setBlock,
+  removeBlock,
 } from '../../../../src/api';
 import { AnimatedPageHeader } from '../../../../src/hooks/animations';
 import { formatPostDate } from '../../../../src/utils/communityPosts';
@@ -73,7 +76,9 @@ const ROLE_LABELS = {
 const DISCIPLINE_LABELS = { speed: 'Speed', lead: 'Lead', bouldering: 'Bouldering' };
 const EXPERIENCE_LABELS = { beginner: 'Beginner', intermediate: 'Intermediate', professional: 'Professional' };
 
-function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, onFollow, onEdit, onShowFollowers, onShowFollowing }) {
+function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, onFollow, onEdit, onShowFollowers, onShowFollowing, blockStatus, blockBusy, onMuteToggle, onBlock, onUnblock }) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [confirmBlock, setConfirmBlock] = useState(false);
   const initial = (profile.username || profile.name || '?')[0].toUpperCase();
   const athlete = profile.athlete;
   const followerCount = profile.followerCount ?? 0;
@@ -126,14 +131,84 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
           {isOwner ? (
             <button type="button" className="btn btn-outline profile-action-btn" onClick={onEdit}>Edit Profile</button>
           ) : canFollow ? (
-            <button
-              type="button"
-              className={`btn ${isFollowing ? 'btn-outline' : 'btn-primary'} profile-action-btn`}
-              onClick={onFollow}
-              disabled={followBusy}
-            >
-              {followBusy ? '…' : isFollowing ? 'Following' : 'Follow'}
-            </button>
+            <>
+              <button
+                type="button"
+                className={`btn ${isFollowing ? 'btn-outline' : 'btn-primary'} profile-action-btn`}
+                onClick={onFollow}
+                disabled={followBusy}
+              >
+                {followBusy ? '…' : isFollowing ? 'Following' : 'Follow'}
+              </button>
+              <div className="profile-more">
+                <button
+                  type="button"
+                  className="profile-more-btn"
+                  aria-label="More options"
+                  aria-expanded={moreOpen || confirmBlock}
+                  onClick={() => { setConfirmBlock(false); setMoreOpen((v) => !v); }}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" /></svg>
+                </button>
+                {confirmBlock ? (
+                  <div className="profile-more-dropdown" role="dialog" aria-label="Confirm block">
+                    <p className="profile-more-confirm-text">
+                      Block @{profile.username}? They won&rsquo;t see your posts or be able to interact with you.
+                    </p>
+                    <button
+                      type="button"
+                      className="community-post-menu-item community-post-menu-item--danger"
+                      onClick={onBlock}
+                      disabled={blockBusy}
+                    >
+                      {blockBusy ? 'Blocking…' : 'Block'}
+                    </button>
+                    <button
+                      type="button"
+                      className="community-post-menu-item"
+                      onClick={() => setConfirmBlock(false)}
+                      disabled={blockBusy}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : moreOpen && (
+                  <div className="profile-more-dropdown" role="menu">
+                    {blockStatus.blocked || blockStatus.muted ? (
+                      <button
+                        role="menuitem"
+                        type="button"
+                        className="community-post-menu-item"
+                        onClick={blockStatus.blocked ? onUnblock : onMuteToggle}
+                        disabled={blockBusy}
+                      >
+                        {blockStatus.blocked ? `Unblock @${profile.username}` : `Unmute @${profile.username}`}
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          role="menuitem"
+                          type="button"
+                          className="community-post-menu-item"
+                          onClick={onMuteToggle}
+                          disabled={blockBusy}
+                        >
+                          Mute @{profile.username}
+                        </button>
+                        <button
+                          role="menuitem"
+                          type="button"
+                          className="community-post-menu-item community-post-menu-item--danger"
+                          onClick={() => { setMoreOpen(false); setConfirmBlock(true); }}
+                        >
+                          Block @{profile.username}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
           ) : null}
 
           {profile.instagramUrl ? (
@@ -337,6 +412,10 @@ function Page() {
   // ── Follow state ──
   const [isFollowing, setIsFollowing] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
+
+  // ── Block / mute state ──
+  const [blockStatus, setBlockStatus] = useState({ blocked: false, muted: false });
+  const [blockBusy, setBlockBusy] = useState(false);
   const [followerCount, setFollowerCount] = useState(profile?.followerCount ?? 0);
   const followingCount = profile?.followingCount ?? 0;
 
@@ -409,6 +488,65 @@ function Page() {
       .catch(() => {});
     return () => { active = false; };
   }, [token, isGuest, isOwner, profile?.id]);
+
+  // Load whether the viewer has blocked/muted this profile.
+  useEffect(() => {
+    let active = true;
+    if (isGuest || isOwner || !profile) { setBlockStatus({ blocked: false, muted: false }); return () => { active = false; }; }
+    getBlockStatus(token, profile.id)
+      .then((data) => { if (active) setBlockStatus({ blocked: !!data.blocked, muted: !!data.muted }); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [token, isGuest, isOwner, profile]);
+
+  async function handleMuteToggle() {
+    if (isGuest || isOwner || blockBusy) return;
+    setBlockBusy(true);
+    try {
+      if (blockStatus.blocked || blockStatus.muted) {
+        await removeBlock(token, profile.id);
+        setBlockStatus({ blocked: false, muted: false });
+      } else {
+        await setBlock(token, profile.id, true);
+        setBlockStatus({ blocked: false, muted: true });
+      }
+    } catch {
+      // leave state unchanged; user can retry
+    } finally {
+      setBlockBusy(false);
+    }
+  }
+
+  async function handleBlock() {
+    if (isGuest || isOwner || blockBusy) return;
+    setBlockBusy(true);
+    try {
+      await setBlock(token, profile.id, false);
+      // Blocking severs the follow server-side; reflect it locally.
+      if (isFollowing) {
+        setIsFollowing(false);
+        setFollowerCount((c) => Math.max(0, c - 1));
+      }
+      setBlockStatus({ blocked: true, muted: false });
+    } catch {
+      // leave state unchanged; user can retry
+    } finally {
+      setBlockBusy(false);
+    }
+  }
+
+  async function handleUnblock() {
+    if (isGuest || isOwner || blockBusy) return;
+    setBlockBusy(true);
+    try {
+      await removeBlock(token, profile.id);
+      setBlockStatus({ blocked: false, muted: false });
+    } catch {
+      // leave state unchanged; user can retry
+    } finally {
+      setBlockBusy(false);
+    }
+  }
 
   // Load tab content lazily on first activation.
   const loaded = useRef({});
@@ -580,6 +718,11 @@ function Page() {
             onEdit={() => setEditing((v) => !v)}
             onShowFollowers={() => openList('followers')}
             onShowFollowing={() => openList('following')}
+            blockStatus={blockStatus}
+            blockBusy={blockBusy}
+            onMuteToggle={handleMuteToggle}
+            onBlock={handleBlock}
+            onUnblock={handleUnblock}
           />
 
           {/* Instagram-style "Similar accounts" row — shown above the posts */}

@@ -513,6 +513,40 @@ export async function submitReport(token, { postId, commentId, reason, details }
   return data;
 }
 
+// ── Community Blocks / Mutes ──
+/** Block (mute=false) or mute (mute=true) another user. */
+export async function setBlock(token, userId, mute = false) {
+  const res = await fetch(`${BASE_URL}/blocks/${userId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ mute }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not update this user.');
+  return data;
+}
+
+/** Unblock or unmute another user. */
+export async function removeBlock(token, userId) {
+  const res = await fetch(`${BASE_URL}/blocks/${userId}`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not update this user.');
+  return data;
+}
+
+/** Whether the viewer has blocked/muted a user. Returns { blocked, muted }. */
+export async function getBlockStatus(token, userId) {
+  const res = await fetch(`${BASE_URL}/blocks/status/${userId}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load block status.');
+  return data;
+}
+
 // ── Community Follows ──
 /** Follow a user by id. */
 export async function followUser(token, userId) {

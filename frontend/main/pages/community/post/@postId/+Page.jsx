@@ -6,6 +6,7 @@ import VoteControls from '../../../../src/components/community/VoteControls';
 import CommentSection from '../../../../src/components/community/CommentSection';
 import ReportMenu from '../../../../src/components/community/ReportMenu';
 import Poll from '../../../../src/components/community/Poll';
+import RichText from '../../../../src/components/community/RichText';
 import { useCommunity } from '../../../../src/hooks/CommunityContext';
 import { getPost, deletePost, getMyVotes } from '../../../../src/api';
 import {
@@ -169,7 +170,7 @@ function Page() {
                 </time>
               </div>
 
-              {post.body && <p className="community-post-body">{post.body}</p>}
+              {post.body && <p className="community-post-body"><RichText text={post.body} /></p>}
 
               {post.type === 'image' && post.imageUrl && (
                 <img

@@ -5,8 +5,10 @@ import Comment, { MAX_COMMENT_LENGTH } from '../models/Comment.js';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
 import Vote from '../models/Vote.js';
-import { requireUser } from '../middleware/auth.js';
+import UserBlock from '../models/UserBlock.js';
+import { requireUser, optionalUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
+import { loadHiddenUserIds } from '../utils/userBlocks.js';
 import { createNotification, notifyMentions } from '../utils/notifications.js';
 import { refreshPostScore } from './posts.js';
 
@@ -112,17 +114,30 @@ router.get('/user/:username', async (req, res) => {
 // GET /api/comments/:postId — all comments for a post (public). Replies are
 // returned flat with parentCommentId; the client builds the tree. Moderator-
 // removed comments are hidden from normal users.
-router.get('/:postId', async (req, res) => {
+router.get('/:postId', optionalUser, async (req, res) => {
   try {
     if (!isValidObjectId(req.params.postId)) {
       return res.status(400).json({ error: 'Invalid post id.' });
     }
-    const comments = await Comment.find({
+    let comments = await Comment.find({
       postId: req.params.postId,
       removed: { $ne: true },
     })
       .sort({ createdAt: 1 })
       .populate('authorId', AUTHOR_POPULATE);
+
+    // Hide comments from users the viewer blocked or who blocked the viewer.
+    if (req.user) {
+      const hidden = await loadHiddenUserIds(req.user.id);
+      const hiddenIds = new Set([...hidden.blockedIds, ...hidden.blockedByIds].map(String));
+      if (hiddenIds.size > 0) {
+        comments = comments.filter((c) => {
+          const authorId = c.authorId && typeof c.authorId === 'object' ? c.authorId._id : c.authorId;
+          return !hiddenIds.has(String(authorId));
+        });
+      }
+    }
+
     res.json({ comments: comments.map(commentJSON) });
   } catch (err) {
     console.error('List comments error:', err);
@@ -146,6 +161,12 @@ router.post('/', commentLimiter, requireUser, async (req, res) => {
     const post = await Post.findById(postId);
     if (!post) return res.status(404).json({ error: 'Post not found.' });
     if (post.removed) return res.status(404).json({ error: 'Post not found.' });
+
+    // Users blocked by the post author cannot comment on it.
+    if (post.authorId) {
+      const blocked = await UserBlock.findOne({ blockerId: post.authorId, blockedId: req.user.id, mute: false });
+      if (blocked) return res.status(403).json({ error: 'You cannot comment on this post.' });
+    }
 
     const bodyResult = validateBody(req.body.body);
     if (!bodyResult.ok) return res.status(400).json({ error: bodyResult.error });

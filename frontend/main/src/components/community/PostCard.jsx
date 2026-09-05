@@ -3,6 +3,7 @@ import VerificationBadge from './VerificationBadge';
 import VoteControls from './VoteControls';
 import ReportMenu from './ReportMenu';
 import Poll from './Poll';
+import RichText from './RichText';
 import { useCommunity } from '../../hooks/CommunityContext';
 import { savePost, unsavePost } from '../../api';
 import {
@@ -17,6 +18,7 @@ export default function PostCard({ post }) {
   const { token, isGuest, openAuthPrompt } = useCommunity();
   const [saved, setSaved] = useState(!!post?.saved);
   const [saveBusy, setSaveBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!post) return null;
   const author = post.author || {};
@@ -48,7 +50,12 @@ export default function PostCard({ post }) {
     if (navigator.share) {
       navigator.share({ title: post.title, url }).catch(() => {});
     } else {
-      navigator.clipboard?.writeText(url).catch(() => {});
+      navigator.clipboard?.writeText(url)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch(() => {});
     }
   }
 
@@ -79,7 +86,7 @@ export default function PostCard({ post }) {
       )}
 
       {post.body && (
-        <p className="community-post-excerpt">{postExcerpt(post.body)}</p>
+        <p className="community-post-excerpt"><RichText text={postExcerpt(post.body)} /></p>
       )}
 
       {post.type === 'link' && post.externalUrl && (
@@ -135,7 +142,7 @@ export default function PostCard({ post }) {
               <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
             </svg>
-            Share
+            {copied ? 'Copied!' : 'Share'}
           </button>
           <VoteControls
             target="post"

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Types } from 'mongoose';
 import Follow from '../models/Follow.js';
 import User from '../models/User.js';
+import UserBlock from '../models/UserBlock.js';
 import { requireUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
 import { createNotification } from '../utils/notifications.js';
@@ -30,6 +31,16 @@ router.post('/:userId', requireUser, async (req, res) => {
     }
     const target = await User.findById(targetId);
     if (!target) return res.status(404).json({ error: 'User not found.' });
+
+    // A full block in either direction prevents following.
+    const blocked = await UserBlock.findOne({
+      $or: [
+        { blockerId: targetId, blockedId: req.user.id },
+        { blockerId: req.user.id, blockedId: targetId },
+      ],
+      mute: false,
+    });
+    if (blocked) return res.status(403).json({ error: 'You cannot follow this user.' });
 
     const existing = await Follow.findOne({ followerId: req.user.id, followingId: targetId });
     if (existing) return res.status(409).json({ error: 'You already follow this user.' });

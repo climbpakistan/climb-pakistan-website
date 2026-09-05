@@ -241,10 +241,9 @@ function Page() {
     window.location.href = '/community/create';
   }
 
-  async function handleSearch(e) {
-    e.preventDefault();
+  async function runSearch(rawQuery, filter = searchFilter) {
     setSuggestionsOpen(false);
-    const q = searchQuery.trim();
+    const q = String(rawQuery || '').trim();
     if (!q) {
       setHasSearched(false);
       setSearchResults({ posts: [], users: [] });
@@ -253,7 +252,7 @@ function Page() {
     setSearching(true);
     setHasSearched(true);
     try {
-      if (searchFilter === 'posts') {
+      if (filter === 'posts') {
         const data = await getPosts(token, { view: 'new', page: 1, limit: 20, search: q, category: activeCategory });
         setSearchResults({ posts: data.posts || [], users: [] });
       } else {
@@ -267,6 +266,11 @@ function Page() {
     }
   }
 
+  async function handleSearch(e) {
+    e.preventDefault();
+    await runSearch(searchQuery);
+  }
+
   function clearSearch() {
     setSearchQuery('');
     setSuggestions({ posts: [], users: [] });
@@ -274,6 +278,19 @@ function Page() {
     setHasSearched(false);
     setSearchResults({ posts: [], users: [] });
   }
+
+  // Deep links like /community/feed?search=training (from #hashtags) prefill
+  // the search box and run the search once on load.
+  const urlSearch = pageContext?.urlParsed?.search?.search;
+  const initializedSearch = useRef(false);
+  useEffect(() => {
+    if (urlSearch && !initializedSearch.current) {
+      initializedSearch.current = true;
+      setSearchQuery(String(urlSearch));
+      runSearch(urlSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSearch]);
 
   return (
     <>
