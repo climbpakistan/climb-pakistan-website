@@ -429,6 +429,29 @@ router.get('/', optionalUser, async (req, res) => {
   }
 });
 
+// GET /api/posts/counts — post counts per category (public).
+// Used by the feed sidebar to show how many posts each topic has. Counts
+// exclude removed content; the client caps the displayed number at 100.
+// Registered before /:id so 'counts' is not treated as a post id.
+router.get('/counts', async (req, res) => {
+  try {
+    const filter = { removed: { $ne: true } };
+    const [total, grouped] = await Promise.all([
+      Post.countDocuments(filter),
+      Post.aggregate([
+        { $match: filter },
+        { $group: { _id: '$category', count: { $sum: 1 } } },
+      ]),
+    ]);
+    const categories = grouped
+      .filter((g) => g._id)
+      .map((g) => ({ category: g._id, count: g.count }));
+    res.json({ total, categories });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not load topic counts.' });
+  }
+});
+
 // GET /api/posts/:id — single post (public; removed posts are hidden unless
 // the request carries an admin token).
 router.get('/:id', optionalUser, async (req, res) => {

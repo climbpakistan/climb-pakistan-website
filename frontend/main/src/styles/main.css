@@ -3984,13 +3984,33 @@ input, textarea, select { font: inherit; color: inherit; }
   margin-bottom: var(--sp-1);
 }
 .community-topics-sidebar-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
   padding: var(--sp-2) var(--sp-3);
   color: var(--cp-text);
   text-decoration: none;
   font-size: var(--fs-sm);
   border-radius: var(--radius-sm);
   transition: background 0.15s ease, color 0.15s ease;
+}
+.community-topics-sidebar-count {
+  flex: none;
+  min-width: 26px;
+  padding: 1px var(--sp-2);
+  text-align: center;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--cp-text-muted);
+  background: var(--cp-bg-alt);
+  border: 1px solid var(--cp-border);
+  border-radius: 999px;
+  line-height: 1.5;
+}
+.community-topics-sidebar-link.is-active .community-topics-sidebar-count {
+  color: var(--cp-primary);
+  border-color: var(--cp-primary);
 }
 .community-topics-sidebar-link:hover {
   background: var(--cp-bg);

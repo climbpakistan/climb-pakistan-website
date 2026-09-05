@@ -237,6 +237,11 @@ export async function getPosts(token, { view = 'new', time = 'all', page = 1, li
   return data;
 }
 
+/** Post counts per topic, for the feed sidebar. */
+export function getTopicCounts() {
+  return fetchJSON(`${BASE_URL}/posts/counts`);
+}
+
 /** Single post by id. token is optional (enables vote/poll personalization). */
 export async function getPost(token, id) {
   const res = await fetch(`${BASE_URL}/posts/${id}`, {

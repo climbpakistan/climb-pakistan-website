@@ -5,7 +5,7 @@ import PostCard from '../../../src/components/community/PostCard';
 import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes, searchCommunityUsers } from '../../../src/api';
+import { getPosts, getMyVotes, getTopicCounts, searchCommunityUsers } from '../../../src/api';
 
 export { Page };
 
@@ -17,20 +17,28 @@ function FeedShell({ children }) {
   );
 }
 
-function TopicsSidebar({ activeCategory }) {
+// Display cap for topic counts: show the real number up to 100, then 100+.
+function formatCount(n) {
+  if (n == null) return '';
+  return n > 100 ? '100+' : String(n);
+}
+
+function TopicsSidebar({ activeCategory, counts }) {
   return (
     <aside className="community-topics-sidebar">
       <h2 className="community-topics-sidebar-title">Topics</h2>
       <ul className="community-topics-sidebar-list">
         <li className="community-topics-sidebar-item">
           <a href="/community/feed" className={`community-topics-sidebar-link${!activeCategory ? ' is-active' : ''}`}>
-            All Topics
+            <span>All Topics</span>
+            {counts && <span className="community-topics-sidebar-count">{formatCount(counts.total)}</span>}
           </a>
         </li>
         {communityTopics.map((topic) => (
           <li key={topic} className="community-topics-sidebar-item">
             <a href={`/community/feed?category=${encodeURIComponent(topic)}`} className={`community-topics-sidebar-link${activeCategory === topic ? ' is-active' : ''}`}>
-              {topic}
+              <span>{topic}</span>
+              {counts && <span className="community-topics-sidebar-count">{formatCount(counts.byCategory[topic])}</span>}
             </a>
           </li>
         ))}
@@ -95,6 +103,22 @@ function Page() {
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [errorMsg, setErrorMsg] = useState('');
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Post counts per topic for the sidebar ({ total, byCategory }).
+  const [topicCounts, setTopicCounts] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    getTopicCounts()
+      .then((data) => {
+        if (!active) return;
+        const byCategory = {};
+        for (const c of data.categories || []) byCategory[c.category] = c.count;
+        setTopicCounts({ total: data.total || 0, byCategory });
+      })
+      .catch(() => { if (active) setTopicCounts(null); });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -274,7 +298,7 @@ function Page() {
 
       <section className="section-tight community-feed-body">
         <FeedShell>
-          <TopicsSidebar activeCategory={activeCategory} />
+          <TopicsSidebar activeCategory={activeCategory} counts={topicCounts} />
           <div className="community-feed-main">
             {/* Search results */}
             {hasSearched && (
