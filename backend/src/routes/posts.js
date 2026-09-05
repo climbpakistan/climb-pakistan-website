@@ -257,15 +257,14 @@ async function postJSONWithPoll(post, viewerId) {
   return json;
 }
 
-// Attach viewer-specific poll payloads to a list of posts (used by the feed so
-// poll cards render interactively instead of as bare text). Batches the poll
-// vote lookups into a single query per viewer.
+// Serialize a list of posts for the feed (never exposes internals) and attach
+// viewer-specific poll payloads so poll cards render interactively instead of
+// as bare text. Batches the poll vote lookups into a single query per viewer.
 async function attachPollPayloads(posts, viewerId) {
   const pollPosts = posts.filter((p) => p.type === 'poll');
-  if (pollPosts.length === 0) return posts;
 
   const myVotes = new Map();
-  if (viewerId) {
+  if (viewerId && pollPosts.length > 0) {
     const votes = await PollVote.find({
       postId: { $in: pollPosts.map((p) => p._id) },
       userId: viewerId,
@@ -525,7 +524,8 @@ router.get('/saved', requireUser, async (req, res) => {
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('postId'),
+        .populate('postId')
+        .populate('postId.authorId', 'username name profileImageUrl verification'),
       SavedPost.countDocuments({ userId: req.user.id }),
     ]);
 
