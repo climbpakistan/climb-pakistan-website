@@ -4453,7 +4453,7 @@ input, textarea, select { font: inherit; color: inherit; }
   flex-shrink: 0;
 }
 .community-search-filter {
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
   background: none;
   border: none;
   font-size: var(--fs-sm);
@@ -4483,7 +4483,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .community-search-input {
   width: 100%;
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
   border: none;
   background: transparent;
   font-size: var(--fs-sm);
@@ -4673,7 +4673,7 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Search button */
 .community-search-btn {
   border-radius: 0 11px 11px 0;
-  padding: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
   font-size: var(--fs-sm);
   font-weight: 600;
   flex-shrink: 0;
