@@ -34,7 +34,6 @@ export const footerLinks = {
   ],
   about: [
     { label: 'About', to: '/about' },
-    { label: 'Contact Form', to: '/contact' },
     { label: 'contact@climbpakistan.com', to: 'mailto:contact@climbpakistan.com', external: true },
   ],
 };

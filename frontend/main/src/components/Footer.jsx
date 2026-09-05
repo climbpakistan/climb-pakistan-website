@@ -24,6 +24,7 @@ export default function Footer() {
               </svg>
               @climb_pakistan
             </a>
+            <p className="footer-copyright">© {new Date().getFullYear()} Climb Pakistan.</p>
           </div>
 
           <div className="footer-col">
@@ -54,12 +55,6 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Climb Pakistan.</p>
-          <div className="footer-legal">
-            <a href="/contact">Contact</a>
-          </div>
-        </div>
       </div>
     </footer>
   );
