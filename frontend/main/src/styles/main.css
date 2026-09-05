@@ -3809,7 +3809,6 @@ input, textarea, select { font: inherit; color: inherit; }
   padding: var(--sp-2) var(--sp-4);
   font-size: var(--fs-xs);
   white-space: nowrap;
-  text-transform: uppercase;
   letter-spacing: 0.02em;
   border-radius: var(--radius-sm);
   background: var(--cp-accent);
