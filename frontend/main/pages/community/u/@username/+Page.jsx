@@ -255,13 +255,23 @@ function EditProfile({ profile, onCancel, onSaved }) {
   );
 }
 
-function SimilarAccounts({ users, viewerIsGuest, isOwnerOfProfile, follows, busy, onToggleFollow }) {
+function SimilarAccounts({ users, viewerIsGuest, isOwnerOfProfile, follows, busy, onToggleFollow, onDismiss }) {
   return (
     <div className="profile-similar">
       <h2 className="profile-similar-title">Similar accounts</h2>
       <div className="profile-similar-grid">
         {users.map((u) => (
           <div key={u.id} className="profile-similar-card">
+            <button
+              type="button"
+              className="profile-similar-dismiss"
+              aria-label={`Dismiss ${u.username}`}
+              onClick={() => onDismiss(u.id)}
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                <path d="m13.414 12 7.293-7.293a1 1 0 1 0-1.414-1.414L12 10.586 4.707 3.293a1 1 0 1 0-1.414 1.414L10.586 12l-7.293 7.293a1 1 0 1 0 1.414 1.414L12 13.414l7.293 7.293a.997.997 0 0 0 1.414 0 1 1 0 0 0 0-1.414L13.414 12z" />
+              </svg>
+            </button>
             <a href={`/community/u/${u.username}`} className="profile-similar-link">
               {u.profileImageUrl ? (
                 <img src={u.profileImageUrl} alt="" className="profile-similar-avatar" />
@@ -270,17 +280,15 @@ function SimilarAccounts({ users, viewerIsGuest, isOwnerOfProfile, follows, busy
                   {(u.username || '?')[0].toUpperCase()}
                 </span>
               )}
-              <span className="profile-similar-meta">
-                <span className="profile-similar-username">
-                  @{u.username} <VerificationBadge verification={u.verification} size={12} />
-                </span>
-                <span className="profile-similar-name">{u.name || u.city || 'Community member'}</span>
+              <span className="profile-similar-username">
+                @{u.username} <VerificationBadge verification={u.verification} size={12} />
               </span>
+              <span className="profile-similar-name">{u.name || u.city || 'Community member'}</span>
             </a>
             {!viewerIsGuest && !isOwnerOfProfile && (
               <button
                 type="button"
-                className={`btn btn-sm ${follows[u.id] ? 'btn-outline' : 'btn-primary'} profile-similar-follow`}
+                className={`btn profile-similar-follow ${follows[u.id] ? 'btn-outline' : 'btn-primary'}`}
                 onClick={() => onToggleFollow(u)}
                 disabled={busy[u.id]}
               >
@@ -379,6 +387,10 @@ function Page() {
     } finally {
       setSimilarBusy((m) => ({ ...m, [u.id]: false }));
     }
+  }
+
+  function dismissSimilar(id) {
+    setSimilar((prev) => prev.filter((u) => u.id !== id));
   }
 
   // Load the viewer's follow status for this profile once authenticated.
@@ -549,6 +561,19 @@ function Page() {
             onShowFollowing={() => openList('following')}
           />
 
+          {/* Instagram-style "Similar accounts" row — shown above the posts */}
+          {!editing && tab === 'posts' && similar.length > 0 && (
+            <SimilarAccounts
+              users={similar}
+              viewerIsGuest={isGuest}
+              isOwnerOfProfile={isOwner}
+              follows={similarFollows}
+              busy={similarBusy}
+              onToggleFollow={handleSimilarFollow}
+              onDismiss={dismissSimilar}
+            />
+          )}
+
           {editing ? (
             <EditProfile
               profile={profile}
@@ -578,16 +603,6 @@ function Page() {
             </>
           )}
 
-          {!editing && similar.length > 0 && (
-            <SimilarAccounts
-              users={similar}
-              viewerIsGuest={isGuest}
-              isOwnerOfProfile={isOwner}
-              follows={similarFollows}
-              busy={similarBusy}
-              onToggleFollow={handleSimilarFollow}
-            />
-          )}
         </div>
       </section>
     </>

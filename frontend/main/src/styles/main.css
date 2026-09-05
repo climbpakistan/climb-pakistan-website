@@ -3950,11 +3950,9 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .profile-tab-empty-text { color: var(--cp-text-dim); margin-top: var(--sp-2); }
 
-/* Similar accounts — Instagram-style suggestions below the profile */
+/* Similar accounts — Instagram-style "Suggested for you" row above the posts */
 .profile-similar {
-  margin-top: var(--sp-8);
-  padding-top: var(--sp-6);
-  border-top: 1px solid var(--cp-border);
+  margin-top: var(--sp-7);
 }
 .profile-similar-title {
   font-size: var(--fs-sm);
@@ -3965,36 +3963,66 @@ input, textarea, select { font: inherit; color: inherit; }
   margin-bottom: var(--sp-4);
 }
 .profile-similar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display: flex;
   gap: var(--sp-3);
+  overflow-x: auto;
+  padding-bottom: var(--sp-2);
+  scrollbar-width: thin;
 }
 .profile-similar-card {
+  position: relative;
+  flex: none;
+  width: 170px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3);
+  gap: var(--sp-2);
+  padding: var(--sp-6) var(--sp-3) var(--sp-4);
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
-  border-radius: 12px;
-  transition: border-color 0.15s ease;
+  border-radius: 14px;
+  text-align: center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.profile-similar-card:hover { border-color: var(--cp-accent); }
-.profile-similar-link {
+.profile-similar-card:hover {
+  border-color: var(--cp-accent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+.profile-similar-dismiss {
+  position: absolute;
+  top: 6px;
+  right: 6px;
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--cp-text-dim);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.profile-similar-dismiss:hover {
+  background: var(--cp-bg-alt);
+  color: var(--cp-text);
+}
+.profile-similar-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
   min-width: 0;
-  flex: 1;
   text-decoration: none;
   color: inherit;
 }
 .profile-similar-avatar {
-  width: 44px;
-  height: 44px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   object-fit: cover;
-  flex: none;
 }
 .profile-similar-avatar--fallback {
   display: flex;
@@ -4003,24 +4031,21 @@ input, textarea, select { font: inherit; color: inherit; }
   background: var(--cp-accent-soft);
   color: var(--cp-accent);
   font-weight: 700;
-  font-size: var(--fs-md);
-}
-.profile-similar-meta {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  font-size: var(--fs-xl);
 }
 .profile-similar-username {
-  font-size: var(--fs-sm);
-  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
+  max-width: 100%;
+  font-size: var(--fs-sm);
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .profile-similar-name {
+  max-width: 100%;
   font-size: var(--fs-xs);
   color: var(--cp-text-muted);
   white-space: nowrap;
@@ -4028,9 +4053,12 @@ input, textarea, select { font: inherit; color: inherit; }
   text-overflow: ellipsis;
 }
 .profile-similar-follow {
-  flex: none;
-  padding: var(--sp-1) var(--sp-3);
-  font-size: var(--fs-xs);
+  width: 100%;
+  margin-top: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: 8px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
 }
 
 .profile-edit-form { margin-top: var(--sp-6); }
