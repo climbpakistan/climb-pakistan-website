@@ -361,6 +361,85 @@ export async function deleteComment(token, id) {
   return data;
 }
 
+// ── Saved Posts ──
+/** Bookmark a post for later. */
+export async function savePost(token, id) {
+  const res = await fetch(`${BASE_URL}/posts/${id}/save`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not save this post.');
+  return data;
+}
+
+/** Remove a saved post. */
+export async function unsavePost(token, id) {
+  const res = await fetch(`${BASE_URL}/posts/${id}/save`, {
+    method: 'DELETE',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not remove this saved post.');
+  return data;
+}
+
+/** The viewer's saved posts, newest save first. */
+export async function getSavedPosts(token, { page = 1, limit = 20 } = {}) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await fetch(`${BASE_URL}/posts/saved?${params.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load saved posts.');
+  return data;
+}
+
+/** Batch-check which posts the viewer has saved. Returns { saved: {id: true} }. */
+export async function getMySaved(token, posts = []) {
+  if (!posts.length) return { saved: {} };
+  const params = new URLSearchParams({ posts: posts.join(',') });
+  const res = await fetch(`${BASE_URL}/posts/saved/ids?${params.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load saved flags.');
+  return data;
+}
+
+// ── Community Notifications ──
+/** The viewer's in-app notifications, newest first. */
+export async function getNotifications(token, { page = 1, limit = 30 } = {}) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await fetch(`${BASE_URL}/notifications?${params.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load notifications.');
+  return data;
+}
+
+/** Unread notification count for the navbar badge. */
+export async function getUnreadNotificationCount(token) {
+  const res = await fetch(`${BASE_URL}/notifications/unread-count`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load unread count.');
+  return data;
+}
+
+/** Mark all notifications as read. */
+export async function markNotificationsRead(token) {
+  const res = await fetch(`${BASE_URL}/notifications/read`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not update notifications.');
+  return data;
+}
+
 // ── Community Votes ──
 /**
  * Vote on a post or comment. voteType is 'upvote' | 'downvote' | null.

@@ -11,14 +11,21 @@ import Post, {
   MAX_POLL_OPTIONS,
   POLL_DURATIONS,
 } from '../models/Post.js';
+import Follow from '../models/Follow.js';
 import PollVote from '../models/PollVote.js';
+import SavedPost from '../models/SavedPost.js';
 import UserModel from '../models/User.js';
 import Vote from '../models/Vote.js';
 import { requireUser, optionalUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
+import { notifyMentions } from '../utils/notifications.js';
 import cloudinary from '../cloudinary.js';
 
 const router = Router();
+
+function isValidObjectId(value) {
+  return typeof value === 'string' && /^[a-f\d]{24}$/i.test(value);
+}
 
 // ── Image upload (Multer → Cloudinary) ──
 // JPG / JPEG / PNG / WebP only. No video support.
@@ -345,6 +352,19 @@ router.get('/', optionalUser, async (req, res) => {
 
     if (view === 'popular') {
       sort = { score: -1, createdAt: -1 };
+    } else if (view === 'following') {
+      // Personal feed: newest posts from people the viewer follows. Guests and
+      // users who follow nobody get an empty feed.
+      if (!req.user) {
+        return res.json({ posts: [], page, limit, total: 0, hasMore: false });
+      }
+      const follows = await Follow.find({ followerId: req.user.id }).select('followingId').lean();
+      const followingIds = follows.map((f) => f.followingId).filter(Boolean);
+      if (followingIds.length === 0) {
+        return res.json({ posts: [], page, limit, total: 0, hasMore: false });
+      }
+      filter.authorId = { $in: followingIds };
+      sort = { createdAt: -1 };
     } else if (view === 'top') {
       // Time filter only applies to the Top view.
       const time = String(req.query.time || 'all');
@@ -480,6 +500,83 @@ router.get('/suggest', async (req, res) => {
   }
 });
 
+// GET /api/posts/saved — the viewer's saved posts, newest save first.
+// Registered before /:id so 'saved' isn't treated as a post id.
+router.get('/saved', requireUser, async (req, res) => {
+  try {
+    const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
+
+    const [saved, total] = await Promise.all([
+      SavedPost.find({ userId: req.user.id })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('postId'),
+      SavedPost.countDocuments({ userId: req.user.id }),
+    ]);
+
+    const posts = saved.map((s) => s.postId).filter(Boolean);
+    const json = await attachPollPayloads(posts, req.user.id);
+    res.json({ posts: json, page, limit, total, hasMore: page * limit < total });
+  } catch (err) {
+    console.error('Saved posts error:', err);
+    res.status(500).json({ error: 'Could not load saved posts.' });
+  }
+});
+
+// GET /api/posts/saved/ids?posts=a,b,c — which of the given posts the viewer
+// has saved (batch check for feed highlighting, like /votes/mine).
+router.get('/saved/ids', requireUser, async (req, res) => {
+  try {
+    const ids = String(req.query.posts || '').split(',').map((s) => s.trim()).filter(isValidObjectId);
+    if (ids.length === 0) return res.json({ saved: {} });
+    const docs = await SavedPost.find({ userId: req.user.id, postId: { $in: ids } }).select('postId').lean();
+    const saved = {};
+    for (const d of docs) saved[String(d.postId)] = true;
+    res.json({ saved });
+  } catch (err) {
+    console.error('Saved ids error:', err);
+    res.status(500).json({ error: 'Could not load saved flags.' });
+  }
+});
+
+// POST /api/posts/:id/save — bookmark a post for later.
+router.post('/:id/save', requireUser, async (req, res) => {
+  try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid post id.' });
+    }
+    const post = await Post.findById(req.params.id).select('_id removed');
+    if (!post || post.removed) return res.status(404).json({ error: 'Post not found.' });
+    try {
+      await SavedPost.create({ userId: req.user.id, postId: req.params.id });
+    } catch (err) {
+      // Already saved — treat as success.
+      if (err.code === 11000) return res.json({ saved: true });
+      throw err;
+    }
+    res.status(201).json({ saved: true });
+  } catch (err) {
+    console.error('Save post error:', err);
+    res.status(500).json({ error: 'Could not save this post.' });
+  }
+});
+
+// DELETE /api/posts/:id/save — remove a saved post.
+router.delete('/:id/save', requireUser, async (req, res) => {
+  try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid post id.' });
+    }
+    await SavedPost.deleteOne({ userId: req.user.id, postId: req.params.id });
+    res.json({ saved: false });
+  } catch (err) {
+    console.error('Unsave post error:', err);
+    res.status(500).json({ error: 'Could not remove this post from your saved list.' });
+  }
+});
+
 // GET /api/posts/:id — single post (public; removed posts are hidden unless
 // the request carries an admin token).
 router.get('/:id', optionalUser, async (req, res) => {
@@ -590,6 +687,9 @@ router.post('/', createLimiter, requireUser, uploadImageField, async (req, res) 
       score: computePopularityScore(0, 0, 0, now),
       // upvoteCount / downvoteCount / commentCount default to 0
     });
+
+    // Notify users mentioned in the title or body.
+    await notifyMentions({ text: `${titleResult.title} ${body}`, actorId: req.user.id, postId: post._id });
 
     const fresh = await Post.findById(post._id).populate('authorId', 'username name profileImageUrl verification');
     const json = await postJSONWithPoll(fresh, req.user.id);

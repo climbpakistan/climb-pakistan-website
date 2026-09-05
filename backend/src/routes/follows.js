@@ -4,6 +4,7 @@ import Follow from '../models/Follow.js';
 import User from '../models/User.js';
 import { requireUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
+import { createNotification } from '../utils/notifications.js';
 
 const router = Router();
 
@@ -42,6 +43,9 @@ router.post('/:userId', requireUser, async (req, res) => {
     // Keep denormalized counters in sync.
     await User.updateOne({ _id: req.user.id }, { $inc: { followingCount: 1 } });
     await User.updateOne({ _id: targetId }, { $inc: { followerCount: 1 } });
+
+    // Notify the followed user (createNotification skips self-follows).
+    await createNotification({ userId: targetId, type: 'follow', actorId: req.user.id });
 
     const fresh = await User.findById(targetId).select('followerCount followingCount username');
     res.status(201).json({ following: true, followerCount: fresh.followerCount ?? 0, followingCount: fresh.followingCount ?? 0 });

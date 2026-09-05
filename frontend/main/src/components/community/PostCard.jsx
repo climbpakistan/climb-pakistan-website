@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import VerificationBadge from './VerificationBadge';
 import VoteControls from './VoteControls';
 import ReportMenu from './ReportMenu';
 import Poll from './Poll';
 import { useCommunity } from '../../hooks/CommunityContext';
+import { savePost, unsavePost } from '../../api';
 import {
   formatPostDate,
   postExcerpt,
@@ -12,13 +14,33 @@ import {
  * PostCard — feed card for a community post. Voting/commenting are functional.
  */
 export default function PostCard({ post }) {
-  const { isGuest, openAuthPrompt } = useCommunity();
+  const { token, isGuest, openAuthPrompt } = useCommunity();
+  const [saved, setSaved] = useState(!!post?.saved);
+  const [saveBusy, setSaveBusy] = useState(false);
 
   if (!post) return null;
   const author = post.author || {};
 
-  function handleSave() {
-    if (isGuest) openAuthPrompt('Log in to save posts to your list.');
+  async function handleSave() {
+    if (isGuest) {
+      openAuthPrompt('Log in to save posts to your list.');
+      return;
+    }
+    if (saveBusy) return;
+    setSaveBusy(true);
+    try {
+      if (saved) {
+        await unsavePost(token, post.id);
+        setSaved(false);
+      } else {
+        await savePost(token, post.id);
+        setSaved(true);
+      }
+    } catch {
+      // leave state unchanged; user can retry
+    } finally {
+      setSaveBusy(false);
+    }
   }
 
   function handleShare() {
@@ -96,11 +118,17 @@ export default function PostCard({ post }) {
         </a>
 
         <div className="community-post-actions">
-          <button type="button" className="community-post-action" onClick={handleSave} aria-label="Save post">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <button
+            type="button"
+            className={`community-post-action${saved ? ' is-saved' : ''}`}
+            onClick={handleSave}
+            aria-label={saved ? 'Remove from saved' : 'Save post'}
+            aria-pressed={saved}
+          >
+            <svg viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
             </svg>
-            Save
+            {saved ? 'Saved' : 'Save'}
           </button>
           <button type="button" className="community-post-action" onClick={handleShare} aria-label="Share post">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

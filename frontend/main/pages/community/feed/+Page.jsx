@@ -5,8 +5,8 @@ import Seo from '../../../src/components/Seo';
 import PostCard from '../../../src/components/community/PostCard';
 import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
-import { communityTopics, feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes, getPostSuggestions, getTopicCounts, searchCommunityUsers } from '../../../src/api';
+import { communityTopics, feedSortTabs, FEED_PAGE_SIZE } from '../../../src/data/communityData';
+import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers } from '../../../src/api';
 
 export { Page };
 
@@ -67,9 +67,18 @@ function Page() {
   const withMyVotes = useCallback(async (list) => {
     if (isGuest || list.length === 0) return list;
     try {
-      const data = await getMyVotes(token, { posts: list.map((p) => p.id) });
-      const mine = data.posts || {};
-      return list.map((p) => (mine[p.id] ? { ...p, myVote: mine[p.id] } : p));
+      const ids = list.map((p) => p.id);
+      const [voteData, savedData] = await Promise.all([
+        getMyVotes(token, { posts: ids }),
+        getMySaved(token, ids),
+      ]);
+      const mine = voteData.posts || {};
+      const saved = savedData.saved || {};
+      return list.map((p) => ({
+        ...p,
+        myVote: mine[p.id] || null,
+        saved: !!saved[p.id],
+      }));
     } catch {
       return list; // highlighting is best-effort
     }
@@ -81,11 +90,8 @@ function Page() {
     ? searchView
     : 'popular';
 
-  // Active Top time filter from the URL (?time=...). Only applies to Top.
-  const searchTime = pageContext?.urlParsed?.search?.time;
-  const activeTime = topTimeFilters.some((t) => t.value === searchTime)
-    ? searchTime
-    : 'all';
+  // Top view time filters were replaced by the Following feed — the URL may
+  // still carry ?time= from old links, but the backend ignores it now.
 
   // Active category filter from the URL (?category=...).
   const searchCategory = pageContext?.urlParsed?.search?.category;
@@ -194,7 +200,7 @@ function Page() {
   useEffect(() => {
     let active = true;
     setStatus('loading');
-    getPosts(token, { view: activeView, time: activeTime, page: 1, limit: FEED_PAGE_SIZE, category: activeCategory })
+    getPosts(token, { view: activeView, page: 1, limit: FEED_PAGE_SIZE, category: activeCategory })
       .then(async (data) => {
         if (!active) return;
         setPosts(await withMyVotes(data.posts || []));
@@ -208,13 +214,13 @@ function Page() {
         setStatus('error');
       });
     return () => { active = false; };
-  }, [activeView, activeTime, activeCategory, token, isGuest, withMyVotes]);
+  }, [activeView, activeCategory, token, isGuest, withMyVotes]);
 
   async function loadMore() {
     setLoadingMore(true);
     try {
       const next = page + 1;
-      const data = await getPosts(token, { view: activeView, time: activeTime, page: next, limit: FEED_PAGE_SIZE, category: activeCategory });
+      const data = await getPosts(token, { view: activeView, page: next, limit: FEED_PAGE_SIZE, category: activeCategory });
       const merged = await withMyVotes(data.posts || []);
       setPosts((prev) => [...prev, ...merged]);
       setHasMore(!!data.hasMore);
@@ -304,24 +310,6 @@ function Page() {
               })}
             </div>
           </div>
-          {activeView === 'top' && (
-            <div className="community-time-filter" role="tablist" aria-label="Top time period">
-              {topTimeFilters.map((t) => {
-                const isActive = t.value === activeTime;
-                return (
-                  <a
-                    key={t.value}
-                    href={`?view=top&time=${t.value}`}
-                    role="tab"
-                    aria-selected={isActive}
-                    className={`community-time-tab${isActive ? ' is-active' : ''}`}
-                  >
-                    {t.label}
-                  </a>
-                );
-              })}
-            </div>
-          )}
         </div>
       </section>
 
@@ -532,7 +520,21 @@ function Page() {
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                   </svg>
                 </span>
-                {activeCategory ? (
+                {activeView === 'following' && isGuest ? (
+                  <>
+                    <h2 className="community-empty-title">Log in to see your Following feed</h2>
+                    <p className="community-empty-text">
+                      Posts from climbers you follow will appear here.
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-primary community-empty-btn"
+                      onClick={() => openAuthPrompt('Log in to see posts from people you follow.')}
+                    >
+                      Log In
+                    </button>
+                  </>
+                ) : activeCategory ? (
                   <>
                     <h2 className="community-empty-title">No posts in {activeCategory}</h2>
                     <p className="community-empty-text">There are no posts in this topic yet. Be the first to start a discussion!</p>

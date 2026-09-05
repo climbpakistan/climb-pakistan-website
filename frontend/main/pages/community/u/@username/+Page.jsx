@@ -14,6 +14,7 @@ import {
   unfollowUser,
   getFollowStatus,
   getMyVotes,
+  getSavedPosts,
   getSimilarUsers,
 } from '../../../../src/api';
 import { AnimatedPageHeader } from '../../../../src/hooks/animations';
@@ -347,6 +348,8 @@ function Page() {
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [followListBusy, setFollowListBusy] = useState(false);
+  const [savedPosts, setSavedPosts] = useState([]);
+  const [savedBusy, setSavedBusy] = useState(false);
 
   // Owner detection happens client-side (the cached user has the username).
   const isOwner = !isGuest && user?.username === profile?.username;
@@ -441,6 +444,12 @@ function Page() {
         })
         .catch(() => {})
         .finally(() => setFollowListBusy(false));
+    } else if (tab === 'saved') {
+      setSavedBusy(true);
+      getSavedPosts(token)
+        .then((data) => setSavedPosts(data.posts || []))
+        .catch(() => {})
+        .finally(() => setSavedBusy(false));
     }
   }, [tab, profile, token]);
 
@@ -494,11 +503,19 @@ function Page() {
 
   function renderTab() {
     if (tab === 'saved') {
+      if (savedBusy) return <EmptyTab title="Loading…" text="Fetching your saved posts." />;
+      if (savedPosts.length === 0) {
+        return (
+          <EmptyTab
+            title="No saved posts yet"
+            text="Posts you save will appear here — tap the bookmark icon on any post."
+          />
+        );
+      }
       return (
-        <EmptyTab
-          title="No saved posts yet"
-          text="Posts you save will appear here. Saving posts arrives in a later step."
-        />
+        <div className="community-feed-list">
+          {savedPosts.map((p) => <PostCard key={p.id} post={p} />)}
+        </div>
       );
     }
     if (tab === 'comments') {

@@ -5,6 +5,7 @@ import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
 import { requireUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
+import { createNotification } from '../utils/notifications.js';
 import { refreshPostScore } from './posts.js';
 
 const router = Router();
@@ -77,6 +78,21 @@ router.post('/', voteLimiter, requireUser, async (req, res) => {
     // Atomically apply the deltas to the denormalized counters.
     if (Object.keys(inc).length > 0) {
       await (target === 'post' ? Post : Comment).updateOne({ _id: targetId }, { $inc: inc });
+    }
+
+    // Notify the target's author when the vote results in an upvote that was
+    // not already in place (new upvote or a down→up switch).
+    if (voteType === 'upvote' && !(existing && existing.voteType === 'upvote')) {
+      const targetAuthorId = targetDoc.authorId;
+      if (targetAuthorId) {
+        await createNotification({
+          userId: targetAuthorId,
+          type: 'like',
+          actorId: req.user.id,
+          postId: target === 'post' ? targetId : null,
+          commentId: target === 'comment' ? targetId : null,
+        });
+      }
     }
 
     // Keep the post's cached popularity score fresh so the Popular feed stays

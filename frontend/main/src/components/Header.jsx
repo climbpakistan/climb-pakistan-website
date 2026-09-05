@@ -3,13 +3,45 @@ import { usePageContext } from 'vike-react/usePageContext';
 import { navigate } from 'vike/client/router';
 import { navLinks } from '../data/siteData';
 import useFetch from '../hooks/useFetch';
-import { getAthletes, getNews } from '../api';
+import { getAthletes, getNews, getNotifications, getUnreadNotificationCount, markNotificationsRead } from '../api';
 import { useTheme } from '../hooks/ThemeContext';
 import { useCommunity } from '../hooks/CommunityContext';
 
+// Compact relative time for the notification list.
+function timeAgo(value) {
+  if (!value) return '';
+  const diff = Date.now() - new Date(value).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function NotificationText({ n }) {
+  const actor = n.actor ? `@${n.actor.username}` : 'Someone';
+  switch (n.type) {
+    case 'like':
+      return <>{actor} liked your {n.postId ? 'post' : 'comment'}</>;
+    case 'comment':
+      return <>{actor} commented on your post</>;
+    case 'reply':
+      return <>{actor} replied to your comment</>;
+    case 'follow':
+      return <>{actor} started following you</>;
+    case 'mention':
+      return <>{actor} mentioned you in a {n.commentId ? 'comment' : 'post'}</>;
+    default:
+      return <>{actor} interacted with you</>;
+  }
+}
+
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
-  const { user, initializing, signOut } = useCommunity();
+  const { user, token, initializing, signOut } = useCommunity();
   const pageContext = usePageContext();
   const currentPath = pageContext?.urlPathname || '';
   const { data: athletes } = useFetch(getAthletes, []);
@@ -25,6 +57,59 @@ export default function Header() {
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
   const profileMenuRef = useRef(null);
+  const notifRef = useRef(null);
+
+  // ── Notifications ──
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifBusy, setNotifBusy] = useState(false);
+
+  // Close the notifications dropdown on outside click.
+  useEffect(() => {
+    function onClick(e) {
+      if (notifOpen && notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [notifOpen]);
+
+  // Poll the unread badge while logged in (every 30s).
+  useEffect(() => {
+    if (!user || !token) { setUnreadCount(0); return undefined; }
+    let active = true;
+    const fetchCount = () => {
+      getUnreadNotificationCount(token)
+        .then((d) => { if (active) setUnreadCount(d.count ?? 0); })
+        .catch(() => {});
+    };
+    fetchCount();
+    const timer = setInterval(fetchCount, 30000);
+    return () => { active = false; clearInterval(timer); };
+  }, [user, token]);
+
+  async function toggleNotif() {
+    if (!notifOpen) {
+      setNotifOpen(true);
+      setNotifBusy(true);
+      try {
+        const [list] = await Promise.all([
+          getNotifications(token, { limit: 20 }),
+          markNotificationsRead(token),
+        ]);
+        setNotifications(list.notifications || []);
+        setUnreadCount(0);
+      } catch {
+        // leave as-is; user can retry by reopening
+      } finally {
+        setNotifBusy(false);
+      }
+    } else {
+      setNotifOpen(false);
+    }
+  }
 
   // Animate profile dropdown close
   const closeProfileMenu = useCallback(() => {
@@ -167,6 +252,67 @@ export default function Header() {
         </ul>
 
         <div className="nav-actions">
+          {/* Notification bell — hides while the stored session validates */}
+          {!initializing && user && (
+            <div className="nav-notif" ref={notifRef}>
+              <button
+                className="nav-notif-btn"
+                type="button"
+                aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
+                aria-expanded={notifOpen}
+                onClick={toggleNotif}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="nav-notif-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+                )}
+              </button>
+              {notifOpen && (
+                <div className="nav-notif-dropdown">
+                  <div className="nav-notif-head">
+                    <span className="nav-notif-title">Notifications</span>
+                  </div>
+                  <div className="nav-notif-list">
+                    {notifBusy ? (
+                      <p className="nav-notif-empty">Loading…</p>
+                    ) : notifications.length === 0 ? (
+                      <p className="nav-notif-empty">No notifications yet.</p>
+                    ) : (
+                      notifications.map((n) => {
+                        const href = n.postId
+                          ? `/community/post/${n.postId}`
+                          : (n.actor ? `/community/u/${n.actor.username}` : '#');
+                        return (
+                          <a
+                            key={n.id}
+                            href={href}
+                            className="nav-notif-item"
+                            onClick={() => setNotifOpen(false)}
+                          >
+                            {n.actor?.profileImageUrl ? (
+                              <img src={n.actor.profileImageUrl} alt="" className="nav-notif-avatar" />
+                            ) : (
+                              <span className="nav-notif-avatar nav-notif-avatar--fallback">
+                                {(n.actor?.username || '?')[0].toUpperCase()}
+                              </span>
+                            )}
+                            <span className="nav-notif-body">
+                              <span className="nav-notif-text"><NotificationText n={n} /></span>
+                              <span className="nav-notif-time">{timeAgo(n.createdAt)}</span>
+                            </span>
+                          </a>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Community account menu — hides while the stored session validates */}
           {!initializing && user && (
             <div className="nav-auth" ref={profileMenuRef}>

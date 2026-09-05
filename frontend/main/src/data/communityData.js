@@ -21,14 +21,14 @@ export const communityNav = [
   { label: 'Community', to: '/community' },
   { label: 'Popular', to: '/community/feed?view=popular' },
   { label: 'New', to: '/community/feed?view=new' },
-  { label: 'Top', to: '/community/feed?view=top' },
+  { label: 'Following', to: '/community/feed?view=following' },
 ];
 
 // Feed sort tabs rendered inside the feed page header.
 export const feedSortTabs = [
   { label: 'Popular', to: '?view=popular', value: 'popular' },
   { label: 'New', to: '?view=new', value: 'new' },
-  { label: 'Top', to: '?view=top', value: 'top' },
+  { label: 'Following', to: '?view=following', value: 'following' },
 ];
 
 // Copy strings reused across the entry / feed / auth-prompt.

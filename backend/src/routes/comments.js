@@ -7,6 +7,7 @@ import User from '../models/User.js';
 import Vote from '../models/Vote.js';
 import { requireUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
+import { createNotification, notifyMentions } from '../utils/notifications.js';
 import { refreshPostScore } from './posts.js';
 
 const router = Router();
@@ -172,6 +173,27 @@ router.post('/', commentLimiter, requireUser, async (req, res) => {
     // and refresh its popularity score so engagement shows up in the feed.
     await Post.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
     await refreshPostScore(postId);
+
+    // Notify: a reply alerts the parent comment's author; a top-level comment
+    // alerts the post author. Mentioned users are notified either way.
+    if (parent) {
+      await createNotification({
+        userId: parent.authorId,
+        type: 'reply',
+        actorId: req.user.id,
+        postId,
+        commentId: comment._id,
+      });
+    } else {
+      await createNotification({
+        userId: post.authorId,
+        type: 'comment',
+        actorId: req.user.id,
+        postId,
+        commentId: comment._id,
+      });
+    }
+    await notifyMentions({ text: bodyResult.body, actorId: req.user.id, postId, commentId: comment._id });
 
     const fresh = await Comment.findById(comment._id).populate('authorId', AUTHOR_POPULATE);
     res.status(201).json({ comment: commentJSON(fresh) });
