@@ -5008,6 +5008,19 @@ input, textarea, select { font: inherit; color: inherit; }
   to { transform: rotate(360deg); }
 }
 
+/* Version toggling: classic choice grid on desktop, social login on mobile */
+.community-landing-desktop-only { display: none; }
+.community-landing-mobile-only { display: flex; }
+
+@media (min-width: 769px) {
+  .community-landing-desktop-only { display: block; }
+  .community-landing-mobile-only { display: none; }
+}
+@media (max-width: 768px) {
+  .community-landing-desktop-only { display: none; }
+  .community-landing-mobile-only { display: flex; }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .community-landing {
