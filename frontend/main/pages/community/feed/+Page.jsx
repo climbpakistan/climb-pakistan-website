@@ -377,54 +377,70 @@ function Page() {
               {/* Autocomplete dropdown */}
               {suggestionsOpen && (suggestions.posts.length > 0 || suggestions.users.length > 0) && (
                 <div className="community-search-suggestions" id="community-search-suggestions" role="listbox">
-                  {suggestions.posts.length > 0 && (
-                    <div className="community-search-suggestions-section">
-                      <p className="community-search-suggestions-title">Questions</p>
-                      {suggestions.posts.map((p, i) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          role="option"
-                          aria-selected={activeSuggestion === i}
-                          className={`community-search-suggestion${activeSuggestion === i ? ' is-active' : ''}`}
-                          onClick={() => selectSuggestion({ ...p, type: 'post' })}
-                        >
-                          <span className="community-search-suggestion-icon" aria-hidden="true">💬</span>
-                          <span className="community-search-suggestion-title">{p.title}</span>
-                          <span className="community-search-suggestion-meta">{p.category}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {suggestions.users.length > 0 && (
-                    <div className="community-search-suggestions-section">
-                      <p className="community-search-suggestions-title">Users</p>
-                      {suggestions.users.map((u, j) => {
-                        const idx = suggestions.posts.length + j;
-                        return (
+                  <div className="community-search-suggestions-body">
+                    {suggestions.posts.length > 0 && (
+                      <div className="community-search-suggestions-section">
+                        <p className="community-search-suggestions-title">
+                          <span className="community-search-suggestions-title-label">Questions</span>
+                          <span className="community-search-suggestions-title-count">{suggestions.posts.length}</span>
+                        </p>
+                        {suggestions.posts.map((p, i) => (
                           <button
-                            key={u.id}
+                            key={p.id}
                             type="button"
                             role="option"
-                            aria-selected={activeSuggestion === idx}
-                            className={`community-search-suggestion${activeSuggestion === idx ? ' is-active' : ''}`}
-                            onClick={() => selectSuggestion({ ...u, type: 'user' })}
+                            aria-selected={activeSuggestion === i}
+                            className={`community-search-suggestion${activeSuggestion === i ? ' is-active' : ''}`}
+                            onClick={() => selectSuggestion({ ...p, type: 'post' })}
                           >
-                            {u.profileImageUrl ? (
-                              <img src={u.profileImageUrl} alt="" className="community-avatar community-avatar--sm" />
-                            ) : (
-                              <span className="community-avatar community-avatar--sm community-avatar--fallback">
-                                {(u.username || '?')[0].toUpperCase()}
-                              </span>
-                            )}
-                            <span className="community-search-suggestion-title">@{u.username}</span>
-                            {u.name && <span className="community-search-suggestion-meta">{u.name}</span>}
+                            <span className="community-search-suggestion-chip" data-category={p.category}>{p.category}</span>
+                            <span className="community-search-suggestion-title">{p.title}</span>
                           </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
+
+                    {suggestions.users.length > 0 && (
+                      <div className="community-search-suggestions-section">
+                        <p className="community-search-suggestions-title">
+                          <span className="community-search-suggestions-title-label">Users</span>
+                          <span className="community-search-suggestions-title-count">{suggestions.users.length}</span>
+                        </p>
+                        {suggestions.users.map((u, j) => {
+                          const idx = suggestions.posts.length + j;
+                          return (
+                            <button
+                              key={u.id}
+                              type="button"
+                              role="option"
+                              aria-selected={activeSuggestion === idx}
+                              className={`community-search-suggestion${activeSuggestion === idx ? ' is-active' : ''}`}
+                              onClick={() => selectSuggestion({ ...u, type: 'user' })}
+                            >
+                              {u.profileImageUrl ? (
+                                <img src={u.profileImageUrl} alt="" className="community-search-suggestion-avatar" />
+                              ) : (
+                                <span className="community-search-suggestion-avatar community-search-suggestion-avatar--fallback">
+                                  {(u.username || '?')[0].toUpperCase()}
+                                </span>
+                              )}
+                              <span className="community-search-suggestion-user">
+                                <span className="community-search-suggestion-username">
+                                  @{u.username} <VerificationBadge verification={u.verification} size={12} />
+                                </span>
+                                {u.name && <span className="community-search-suggestion-name">{u.name}</span>}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                  <div className="community-search-suggestions-hint" aria-hidden="true">
+                    <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+                    <span><kbd>↵</kbd> open</span>
+                    <span><kbd>esc</kbd> close</span>
+                  </div>
                 </div>
               )}
             </div>

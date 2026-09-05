@@ -4467,33 +4467,59 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Autocomplete suggestions dropdown */
 .community-search-suggestions {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
   z-index: 50;
-  max-height: 340px;
-  overflow-y: auto;
   background: var(--cp-surface);
-  border: 1px solid var(--cp-border);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
   padding: var(--sp-2);
+  animation: community-suggest-in 0.14s ease-out;
+}
+@keyframes community-suggest-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.community-search-suggestions-body {
+  max-height: 320px;
+  overflow-y: auto;
 }
 .community-search-suggestions-section + .community-search-suggestions-section {
   margin-top: var(--sp-1);
   border-top: 1px solid var(--cp-border);
-  padding-top: var(--sp-1);
+  padding-top: var(--sp-2);
 }
 .community-search-suggestions-title {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--cp-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--sp-2) var(--sp-3);
   margin: 0;
 }
+.community-search-suggestions-title-label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cp-text-muted);
+}
+.community-search-suggestions-title-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 100px;
+  background: var(--cp-bg-alt);
+  color: var(--cp-text-dim);
+  font-size: 11px;
+  font-weight: 600;
+}
 .community-search-suggestion {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--sp-3);
@@ -4504,18 +4530,64 @@ input, textarea, select { font: inherit; color: inherit; }
   text-align: left;
   font-size: var(--fs-sm);
   color: var(--cp-text);
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.15s ease;
+  transition: background 0.12s ease;
 }
-.community-search-suggestion:hover,
-.community-search-suggestion.is-active {
+.community-search-suggestion:hover {
   background: var(--cp-bg-alt);
 }
-.community-search-suggestion-icon {
+.community-search-suggestion.is-active {
+  background: var(--cp-accent-soft);
+}
+/* Avatar */
+.community-search-suggestion-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
   flex: none;
-  font-size: 0.9rem;
+}
+.community-search-suggestion-avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+/* Question category chip */
+.community-search-suggestion-chip {
+  flex: none;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.35em 0.7em;
+  border-radius: 100px;
+  color: var(--cp-text-dim);
+  background: var(--cp-bg-alt);
+  border: 1px solid var(--cp-border);
+}
+.community-search-suggestion-chip[data-category="News"] {
+  color: #2563eb; background: rgba(37, 99, 235, 0.1); border-color: rgba(37, 99, 235, 0.28);
+}
+.community-search-suggestion-chip[data-category="Questions"] {
+  color: #d97706; background: rgba(217, 119, 6, 0.1); border-color: rgba(217, 119, 6, 0.28);
+}
+.community-search-suggestion-chip[data-category="Competition"] {
+  color: #7c3aed; background: rgba(124, 58, 237, 0.1); border-color: rgba(124, 58, 237, 0.28);
+}
+.community-search-suggestion-chip[data-category="Training"] {
+  color: #059669; background: rgba(5, 150, 105, 0.1); border-color: rgba(5, 150, 105, 0.28);
+}
+.community-search-suggestion-chip[data-category="Outdoor Climbing"] {
+  color: #0d9488; background: rgba(13, 148, 136, 0.1); border-color: rgba(13, 148, 136, 0.28);
+}
+.community-search-suggestion-chip[data-category="Climbing Gear"] {
+  color: #b45309; background: rgba(180, 83, 9, 0.1); border-color: rgba(180, 83, 9, 0.28);
 }
 .community-search-suggestion-title {
   flex: 1;
@@ -4523,10 +4595,59 @@ input, textarea, select { font: inherit; color: inherit; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
-.community-search-suggestion-meta {
-  flex: none;
+.community-search-suggestion-user {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.community-search-suggestion-username {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.community-search-suggestion-name {
   font-size: var(--fs-xs);
+  color: var(--cp-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Keyboard hint bar */
+.community-search-suggestions-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3) var(--sp-1);
+  border-top: 1px solid var(--cp-border);
+  color: var(--cp-text-dim);
+  font-size: var(--fs-xs);
+}
+.community-search-suggestions-hint span {
+  display: inline-flex;
+  align-items: center;
+}
+.community-search-suggestions-hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  margin-right: 4px;
+  border-radius: 4px;
+  border: 1px solid var(--cp-border-strong);
+  border-bottom-width: 2px;
+  background: var(--cp-bg-alt);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
   color: var(--cp-text-muted);
 }
 
