@@ -100,6 +100,24 @@ router.get('/status/:userId', requireUser, async (req, res) => {
   }
 });
 
+// POST /api/follows/status — batch version of the status check.
+// body: { userIds: [...] } → { following: { [userId]: true|false } }
+router.post('/status', requireUser, async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body.userIds) ? req.body.userIds.filter(isValidObjectId) : [];
+    const follows = await Follow.find({
+      followerId: req.user.id,
+      followingId: { $in: ids },
+    }).select('followingId');
+    const following = {};
+    for (const id of ids) following[id] = false;
+    for (const f of follows) following[String(f.followingId)] = true;
+    res.json({ following });
+  } catch {
+    res.status(500).json({ error: 'Could not load follow status.' });
+  }
+});
+
 // GET /api/follows/:username/followers — list of users following a profile.
 router.get('/:username/followers', async (req, res) => {
   try {

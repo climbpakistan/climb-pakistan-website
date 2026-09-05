@@ -13,6 +13,7 @@ import {
   followUser,
   unfollowUser,
   getFollowStatus,
+  getFollowStatusBatch,
   getMyVotes,
   getSavedPosts,
   getSimilarUsers,
@@ -448,13 +449,26 @@ function Page() {
     getSimilarUsers(profile.username)
       .then((data) => {
         if (!active) return;
-        setSimilar((data.users || []).filter(
+        const users = (data.users || []).filter(
           (u) => u.username !== profile.username && u.username !== user?.username
-        ));
+        );
+        setSimilar(users);
+        // Seed the follow buttons with the viewer's real follow state so
+        // accounts already followed show "Following" instead of "Follow".
+        if (!isGuest && users.length > 0) {
+          getFollowStatusBatch(token, users.map((u) => u.id))
+            .then((status) => {
+              if (!active) return;
+              setSimilarFollows(status.following || {});
+            })
+            .catch(() => {});
+        } else {
+          setSimilarFollows({});
+        }
       })
       .catch(() => {});
     return () => { active = false; };
-  }, [profile, user]);
+  }, [profile, user, token, isGuest]);
 
   async function handleSimilarFollow(u) {
     if (isGuest) {

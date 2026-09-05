@@ -590,6 +590,21 @@ export async function getFollowStatus(token, userId) {
   return data;
 }
 
+/** Batch version of getFollowStatus — returns { following: { [userId]: bool } }. */
+export async function getFollowStatusBatch(token, userIds) {
+  const res = await fetch(`${BASE_URL}/follows/status`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ userIds }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load follow status.');
+  return data;
+}
+
 /** List followers of a profile by username. */
 export async function getFollowers(username) {
   return fetchJSON(`${BASE_URL}/follows/${encodeURIComponent(username)}/followers`);
