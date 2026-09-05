@@ -4368,6 +4368,7 @@ input, textarea, select { font: inherit; color: inherit; }
   .profile-follow-stats { justify-content: center; padding-top: 0; }
   .profile-actions-row { justify-content: center; }
   .profile-actions-right { margin-left: 0; }
+  .profile-more-dropdown { max-width: calc(100vw - 2rem); }
   .profile-tabs { width: 100%; }
   .profile-tab { flex: 1; text-align: center; }
   .profile-tab-empty { padding: var(--sp-6); }
@@ -4695,6 +4696,20 @@ input, textarea, select { font: inherit; color: inherit; }
   .community-post-card--full { padding: var(--sp-4); }
   .community-post-footer { flex-direction: column; align-items: flex-start; }
   .community-post-menu-dropdown { bottom: auto; top: calc(100% + 6px); }
+
+  /* Report form: fixed width + right anchoring can overflow small screens */
+  .community-report-form {
+    position: fixed;
+    top: auto;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(300px, calc(100vw - 2rem));
+    z-index: 100;
+  }
+
+  /* 3-image gallery: too cramped at ~100px per image on phones */
+  .community-post-gallery--3 { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ── Community comments & votes (Steps 5 & 6) ─────────────────────────── */
@@ -5373,7 +5388,9 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 @media (max-width: 640px) {
   .community-badge-actions { grid-template-columns: 1fr; }
-}.community-badge-card {
+}
+
+.community-badge-card {
   border: 1px solid var(--cp-border);
   border-radius: var(--radius-md);
   padding: var(--sp-4);
