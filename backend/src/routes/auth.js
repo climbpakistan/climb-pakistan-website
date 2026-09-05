@@ -248,6 +248,12 @@ router.post('/register', registerLimiter, uploadAvatarField, async (req, res) =>
       return res.status(400).json({ error: 'Please select your role in the community.' });
     }
 
+    // Only individual climber roles pick disciplines + experience level — the
+    // signup form hides those fields for coaches and teams/organizations, so
+    // mirror that here (kept in sync with the frontend ROLES_WITH_DISCIPLINES).
+    const ROLES_WITH_DISCIPLINES = ['athlete', 'climbing_enthusiast'];
+    const needsDisciplines = ROLES_WITH_DISCIPLINES.includes(communityRole);
+
     let disciplines = [];
     if (req.body.disciplines) {
       try {
@@ -256,15 +262,15 @@ router.post('/register', registerLimiter, uploadAvatarField, async (req, res) =>
         disciplines = [];
       }
     }
-    if (!Array.isArray(disciplines) || disciplines.length === 0) {
-      return res.status(400).json({ error: 'Please select at least one discipline.' });
-    }
-    if (!disciplines.every((d) => DISCIPLINES.includes(d))) {
+    if (!Array.isArray(disciplines) || !disciplines.every((d) => DISCIPLINES.includes(d))) {
       return res.status(400).json({ error: 'Invalid discipline selected.' });
+    }
+    if (needsDisciplines && disciplines.length === 0) {
+      return res.status(400).json({ error: 'Please select at least one discipline.' });
     }
 
     const experienceLevel = String(req.body.experienceLevel || '').trim();
-    if (!EXPERIENCE_LEVELS.includes(experienceLevel)) {
+    if (needsDisciplines && !EXPERIENCE_LEVELS.includes(experienceLevel)) {
       return res.status(400).json({ error: 'Please select your experience level.' });
     }
 
