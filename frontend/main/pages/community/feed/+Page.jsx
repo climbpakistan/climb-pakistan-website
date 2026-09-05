@@ -39,7 +39,7 @@ function TopicsSidebar({ activeCategory, counts }) {
           <li key={topic} className="community-topics-sidebar-item">
             <a href={`/community/feed?category=${encodeURIComponent(topic)}`} className={`community-topics-sidebar-link${activeCategory === topic ? ' is-active' : ''}`}>
               <span>{topic}</span>
-              {counts && <span className="community-topics-sidebar-count">{formatCount(counts.byCategory[topic])}</span>}
+              {counts && <span className="community-topics-sidebar-count">{formatCount(counts.byCategory[topic] ?? 0)}</span>}
             </a>
           </li>
         ))}
