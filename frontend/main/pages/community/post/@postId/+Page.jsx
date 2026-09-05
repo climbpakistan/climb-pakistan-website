@@ -7,6 +7,7 @@ import CommentSection from '../../../../src/components/community/CommentSection'
 import ReportMenu from '../../../../src/components/community/ReportMenu';
 import Poll from '../../../../src/components/community/Poll';
 import RichText from '../../../../src/components/community/RichText';
+import PostGallery from '../../../../src/components/community/PostGallery';
 import { useCommunity } from '../../../../src/hooks/CommunityContext';
 import { getPost, deletePost, getMyVotes } from '../../../../src/api';
 import {
@@ -172,14 +173,13 @@ function Page() {
 
               {post.body && <p className="community-post-body"><RichText text={post.body} /></p>}
 
-              {post.type === 'image' && post.imageUrl && (
-                <img
-                  src={post.imageUrl}
-                  alt={post.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="community-post-image community-post-image--full"
-                />
+              {post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl) && (
+                <div className="community-post-image-link community-post-image-link--full">
+                  <PostGallery
+                    images={post.images && post.images.length > 0 ? post.images : post.imageUrl}
+                    alt={post.title}
+                  />
+                </div>
               )}
 
               {post.type === 'link' && post.externalUrl && (

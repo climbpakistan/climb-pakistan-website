@@ -12,6 +12,9 @@ const commentSchema = new mongoose.Schema({
   parentCommentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: null, index: true },
   // Plain text only — never rendered as HTML on the client.
   body: { type: String, required: true, trim: true, minlength: 1, maxlength: MAX_COMMENT_LENGTH },
+  // Optional single image attached to the comment (Cloudinary).
+  imageUrl: { type: String, default: '' },
+  imagePublicId: { type: String, default: '' },
   upvoteCount: { type: Number, default: 0, min: 0 },
   downvoteCount: { type: Number, default: 0, min: 0 },
   // Moderation soft-delete: removed comments stay in the DB for admin review

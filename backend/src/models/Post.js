@@ -24,6 +24,14 @@ export const POLL_DURATIONS = [
   { value: null, label: 'No expiry' },
 ];
 
+// A single uploaded post image (up to 3 per post). Kept as a subdocument
+// array so galleries render in order; imageUrl/imagePublicId stay in sync with
+// the first image for backward compatibility with older clients.
+const postImageSchema = new mongoose.Schema({
+  url: { type: String, required: true },
+  publicId: { type: String, default: '' },
+}, { _id: false });
+
 const pollOptionSchema = new mongoose.Schema({
   // Stable client-supplied id so the frontend can track options without relying on array indexes.
   key: { type: String, required: true },
@@ -40,6 +48,8 @@ const postSchema = new mongoose.Schema({
   imageUrl: { type: String, default: '' },
   // Cloudinary public id — lets us delete/replace the stored image.
   imagePublicId: { type: String, default: '' },
+  // Gallery of uploaded images (max 3). First entry mirrors imageUrl.
+  images: { type: [postImageSchema], default: [] },
   externalUrl: { type: String, default: '' },
   upvoteCount: { type: Number, default: 0, min: 0 },
   downvoteCount: { type: Number, default: 0, min: 0 },

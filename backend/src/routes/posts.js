@@ -45,12 +45,16 @@ const upload = multer({
   },
 });
 
-// Wrap multer so file-upload errors become clean JSON.
-function uploadImageField(req, res, next) {
-  upload.single('image')(req, res, (err) => {
+// Wrap multer so file-upload errors become clean JSON. Accepts up to 3 images
+// via the `images` field (the client sends one FormData entry per file).
+function uploadImagesField(req, res, next) {
+  upload.array('images', 3)(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ error: 'Post images must be smaller than 5 MB.' });
+        return res.status(400).json({ error: 'Post images must be smaller than 5 MB each.' });
+      }
+      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).json({ error: 'Image posts can have at most 3 images.' });
       }
       return res.status(400).json({ error: err.message || 'Invalid image upload.' });
     }
@@ -194,7 +198,8 @@ function postJSON(post) {
     title: post.title,
     body: post.body,
     category: post.category,
-    imageUrl: post.imageUrl,
+    images: (post.images || []).map((i) => i.url),
+    imageUrl: post.imageUrl || (post.images && post.images[0] ? post.images[0].url : ''),
     externalUrl: post.externalUrl,
     upvoteCount: post.upvoteCount,
     downvoteCount: post.downvoteCount,
@@ -617,7 +622,7 @@ router.get('/:id', optionalUser, async (req, res) => {
 });
 
 // POST /api/posts — create a post (logged-in users only).
-router.post('/', createLimiter, requireUser, uploadImageField, async (req, res) => {
+router.post('/', createLimiter, requireUser, uploadImagesField, async (req, res) => {
   try {
     // Suspended/banned accounts cannot create posts.
     const { restriction } = await loadUserAndRestriction(req.user.id);
@@ -630,12 +635,13 @@ router.post('/', createLimiter, requireUser, uploadImageField, async (req, res) 
     if (!categoryResult.ok) return res.status(400).json({ error: categoryResult.error });
 
     // Type: explicit field wins; fall back to image/link detection.
+    const files = req.files || [];
     let type = req.body.type;
     if (type) {
       const typeResult = validateType(type);
       if (!typeResult.ok) return res.status(400).json({ error: typeResult.error });
       type = typeResult.type;
-    } else if (req.file) {
+    } else if (files.length > 0) {
       type = 'image';
     } else if (validateExternalUrl(req.body.externalUrl).url) {
       type = 'link';
@@ -656,18 +662,20 @@ router.post('/', createLimiter, requireUser, uploadImageField, async (req, res) 
       return res.status(400).json({ error: 'Link posts need a URL.' });
     }
 
-    // Image posts require an uploaded image.
-    let imageUrl = '';
-    let imagePublicId = '';
-    if (req.file) {
-      const uploaded = await uploadPostImage(req.file.buffer);
-      imageUrl = uploaded.url;
-      imagePublicId = uploaded.publicId;
+    // Image posts require at least one uploaded image (up to 3).
+    const images = [];
+    if (files.length > 0) {
+      for (const f of files) {
+        const uploaded = await uploadPostImage(f.buffer);
+        images.push({ url: uploaded.url, publicId: uploaded.publicId });
+      }
       if (type === 'text') type = 'image';
     }
-    if (type === 'image' && !imageUrl) {
+    if (type === 'image' && images.length === 0) {
       return res.status(400).json({ error: 'Image posts need an image (JPG, PNG, or WebP).' });
     }
+    const imageUrl = images[0]?.url || '';
+    const imagePublicId = images[0]?.publicId || '';
 
     // Poll posts require validated options + a duration.
     let poll = undefined;
@@ -688,6 +696,7 @@ router.post('/', createLimiter, requireUser, uploadImageField, async (req, res) 
       category: categoryResult.category,
       imageUrl,
       imagePublicId,
+      images,
       externalUrl,
       poll,
       // Seed the popularity score so a brand-new post ranks sensibly and the
@@ -709,7 +718,7 @@ router.post('/', createLimiter, requireUser, uploadImageField, async (req, res) 
 });
 
 // PUT /api/posts/:id — edit a post (owner only).
-router.put('/:id', requireUser, uploadImageField, async (req, res) => {
+router.put('/:id', requireUser, uploadImagesField, async (req, res) => {
   try {
     const { restriction } = await loadUserAndRestriction(req.user.id);
     if (restriction) return res.status(403).json({ error: restrictionError(restriction) });
@@ -758,11 +767,19 @@ router.put('/:id', requireUser, uploadImageField, async (req, res) => {
       if (urlResult.url && post.type === 'text') post.type = 'link';
     }
 
-    if (req.file && post.type !== 'poll') {
-      const uploaded = await uploadPostImage(req.file.buffer);
-      await deletePostImage(post.imagePublicId);
-      post.imageUrl = uploaded.url;
-      post.imagePublicId = uploaded.publicId;
+    if ((req.files || []).length > 0 && post.type !== 'poll') {
+      const uploaded = [];
+      for (const f of req.files) {
+        const u = await uploadPostImage(f.buffer);
+        uploaded.push({ url: u.url, publicId: u.publicId });
+      }
+      // Replace: delete the previous images (legacy single + gallery).
+      const oldPublicIds = (post.images || []).map((i) => i.publicId).filter(Boolean);
+      if (post.imagePublicId) oldPublicIds.push(post.imagePublicId);
+      await Promise.all(oldPublicIds.map((pid) => deletePostImage(pid)));
+      post.images = uploaded;
+      post.imageUrl = uploaded[0]?.url || '';
+      post.imagePublicId = uploaded[0]?.publicId || '';
       post.type = 'image';
     }
 
@@ -792,7 +809,9 @@ router.delete('/:id', requireUser, async (req, res) => {
       return res.status(403).json({ error: 'You can only delete your own posts.' });
     }
 
-    await deletePostImage(post.imagePublicId);
+    const imagePublicIds = (post.images || []).map((i) => i.publicId).filter(Boolean);
+    if (post.imagePublicId) imagePublicIds.push(post.imagePublicId);
+    await Promise.all(imagePublicIds.map((pid) => deletePostImage(pid)));
     await Vote.deleteMany({ postId: post._id });
     await PollVote.deleteMany({ postId: post._id });
     await post.deleteOne();

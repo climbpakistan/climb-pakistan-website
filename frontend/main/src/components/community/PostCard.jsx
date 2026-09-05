@@ -4,6 +4,7 @@ import VoteControls from './VoteControls';
 import ReportMenu from './ReportMenu';
 import Poll from './Poll';
 import RichText from './RichText';
+import PostGallery from './PostGallery';
 import { useCommunity } from '../../hooks/CommunityContext';
 import { savePost, unsavePost } from '../../api';
 import {
@@ -73,14 +74,11 @@ export default function PostCard({ post }) {
         <a href={`/community/post/${post.id}`}>{post.title}</a>
       </h3>
 
-      {post.type === 'image' && post.imageUrl && (
+      {(post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl)) && (
         <a href={`/community/post/${post.id}`} className="community-post-image-link">
-          <img
-            src={post.imageUrl}
+          <PostGallery
+            images={post.images && post.images.length > 0 ? post.images : post.imageUrl}
             alt={post.title}
-            loading="lazy"
-            decoding="async"
-            className="community-post-image"
           />
         </a>
       )}

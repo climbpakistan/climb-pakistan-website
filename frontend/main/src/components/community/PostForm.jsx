@@ -20,11 +20,18 @@ export default function PostForm({ initial, onSubmit, onCancel, submitLabel = 'P
   const [body, setBody] = useState(initial?.body || '');
   const [category, setCategory] = useState(initial?.category || '');
   const [externalUrl, setExternalUrl] = useState(initial?.externalUrl || '');
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(initial?.imageUrl || '');
+  // Up to 3 images. `images` holds newly chosen files; `imagePreviews` shows
+  // both existing gallery urls (when editing) and local previews of new files.
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState(() =>
+    Array.isArray(initial?.images) && initial.images.length > 0
+      ? initial.images
+      : (initial?.imageUrl ? [initial.imageUrl] : [])
+  );
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef(null);
+  const MAX_IMAGES = 3;
 
   // ── Poll state ──
   const [pollOptions, setPollOptions] = useState(() =>
@@ -38,25 +45,38 @@ export default function PostForm({ initial, onSubmit, onCancel, submitLabel = 'P
     setType(next);
     setError('');
     if (next !== 'image') {
-      setImage(null);
-      setImagePreview('');
+      setImages([]);
+      setImagePreviews([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
 
-  function handleImageChange(e) {
-    const file = e.target.files?.[0];
-    const check = validateImageFile(file);
-    if (!check.ok) {
-      setError(check.error);
-      e.target.value = '';
-      setImage(null);
-      setImagePreview('');
+  function handleImagesChange(e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+
+    const allowed = [];
+    for (const file of files) {
+      const check = validateImageFile(file);
+      if (!check.ok) { setError(check.error); return; }
+      allowed.push(file);
+    }
+    if (allowed.length + images.length > MAX_IMAGES) {
+      setError(`Image posts can have at most ${MAX_IMAGES} images.`);
       return;
     }
     setError('');
-    setImage(file || null);
-    setImagePreview(file ? URL.createObjectURL(file) : '');
+    setImages((prev) => [...prev, ...allowed]);
+    setImagePreviews((prev) => [
+      ...prev,
+      ...allowed.map((f) => URL.createObjectURL(f)),
+    ]);
+  }
+
+  function removeImage(index) {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   }
 
   function addPollOption() {
@@ -86,7 +106,7 @@ export default function PostForm({ initial, onSubmit, onCancel, submitLabel = 'P
     if (body.length > MAX_POST_BODY_LENGTH) {
       return setError(`Body must be ${MAX_POST_BODY_LENGTH} characters or fewer.`);
     }
-    if (type === 'image' && !image && !imagePreview) {
+    if (type === 'image' && images.length === 0 && imagePreviews.length === 0) {
       return setError('Image posts need an image (JPG, PNG, or WebP).');
     }
     if (type === 'link') {
@@ -113,7 +133,7 @@ export default function PostForm({ initial, onSubmit, onCancel, submitLabel = 'P
           body: body.trim(),
           category,
           externalUrl: '',
-          image: null,
+          images: [],
           pollOptions: clean,
           pollDuration,
         });
@@ -132,7 +152,7 @@ export default function PostForm({ initial, onSubmit, onCancel, submitLabel = 'P
         body: body.trim(),
         category,
         externalUrl: type === 'link' ? externalUrl.trim() : '',
-        image,
+        images,
       });
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -205,22 +225,37 @@ export default function PostForm({ initial, onSubmit, onCancel, submitLabel = 'P
 
       {type === 'image' && (
         <div className="form-row">
-          <label htmlFor="post-image">Image (JPG, PNG, or WebP — max 5 MB)</label>
+          <label htmlFor="post-image">Images (JPG, PNG, or WebP — max 5 MB each, up to 3)</label>
           <input
             id="post-image"
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            onChange={handleImageChange}
+            multiple
+            onChange={handleImagesChange}
           />
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Upload preview"
-              className="community-image-preview"
-              loading="lazy"
-              decoding="async"
-            />
+          {imagePreviews.length > 0 && (
+            <div className="community-image-preview-grid">
+              {imagePreviews.map((src, i) => (
+                <div key={`${src}-${i}`} className="community-image-preview-item">
+                  <img
+                    src={src}
+                    alt={`Upload preview ${i + 1}`}
+                    className="community-image-preview"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <button
+                    type="button"
+                    className="community-image-preview-remove"
+                    aria-label="Remove image"
+                    onClick={() => removeImage(i)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

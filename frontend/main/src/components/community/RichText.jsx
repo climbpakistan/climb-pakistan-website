@@ -1,5 +1,6 @@
 /**
- * RichText — renders plain-text bodies/comments with social links:
+ * RichText — renders plain-text bodies/comments with social formatting:
+ *   **bold**   → <strong>
  *   @username  → the user's community profile
  *   #hashtag   → the feed search for that term
  *   https://…  → the external URL (new tab)
@@ -8,7 +9,8 @@
  * stays safe even though the source is user-generated plain text.
  */
 
-const TOKEN_RE = /(@[a-zA-Z][a-zA-Z0-9_]{2,19}|#[a-zA-Z0-9_]{2,40}|https?:\/\/[^\s<>"']+)/g;
+// Bold is matched first so its ** delimiters aren't consumed by the URL rule.
+const TOKEN_RE = /(\*\*[^*]+\*\*|@[a-zA-Z][a-zA-Z0-9_]{2,19}|#[a-zA-Z0-9_]{2,40}|https?:\/\/[^\s<>"']+)/g;
 
 export default function RichText({ text }) {
   if (!text) return null;
@@ -22,7 +24,9 @@ export default function RichText({ text }) {
     if (match.index > last) nodes.push(text.slice(last, match.index));
     const token = match[0];
 
-    if (token.startsWith('@')) {
+    if (token.startsWith('**') && token.endsWith('**')) {
+      nodes.push(<strong key={`${match.index}-${token}`}>{token.slice(2, -2)}</strong>);
+    } else if (token.startsWith('@')) {
       const username = token.slice(1).toLowerCase();
       nodes.push(
         <a

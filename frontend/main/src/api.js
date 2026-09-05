@@ -258,15 +258,15 @@ export async function getPost(token, id) {
   return data;
 }
 
-/** Create a post (multipart; image travels with the fields). For polls, pass pollOptions + pollDuration. */
-export async function createPost(token, { type, title, body, category, externalUrl, image, pollOptions, pollDuration }) {
+/** Create a post (multipart; images travel with the fields, up to 3). For polls, pass pollOptions + pollDuration. */
+export async function createPost(token, { type, title, body, category, externalUrl, images = [], pollOptions, pollDuration }) {
   const formData = new FormData();
   formData.append('type', type);
   formData.append('title', title);
   formData.append('body', body ?? '');
   formData.append('category', category);
   if (externalUrl) formData.append('externalUrl', externalUrl);
-  if (image) formData.append('image', image);
+  for (const img of images) formData.append('images', img);
   if (type === 'poll') {
     formData.append('pollOptions', JSON.stringify(pollOptions || []));
     if (pollDuration !== undefined && pollDuration !== null) {
@@ -284,14 +284,14 @@ export async function createPost(token, { type, title, body, category, externalU
   return data;
 }
 
-/** Edit a post (owner only, multipart). */
-export async function updatePost(token, id, { title, body, category, externalUrl, image }) {
+/** Edit a post (owner only, multipart). Pass images=[] to replace the gallery. */
+export async function updatePost(token, id, { title, body, category, externalUrl, images = [] }) {
   const formData = new FormData();
   if (title !== undefined) formData.append('title', title);
   if (body !== undefined) formData.append('body', body);
   if (category !== undefined) formData.append('category', category);
   if (externalUrl !== undefined) formData.append('externalUrl', externalUrl);
-  if (image) formData.append('image', image);
+  for (const img of images) formData.append('images', img);
 
   const res = await fetch(`${BASE_URL}/posts/${id}`, {
     method: 'PUT',
@@ -320,15 +320,25 @@ export async function getComments(postId) {
   return fetchJSON(`${BASE_URL}/comments/${postId}`);
 }
 
-/** Add a comment or reply. Pass parentCommentId to reply. */
-export async function createComment(token, postId, { body, parentCommentId }) {
+/** Add a comment or reply. Pass parentCommentId to reply; pass image (File) to attach one. */
+export async function createComment(token, postId, { body, parentCommentId, image }) {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  let payload;
+  if (image) {
+    const formData = new FormData();
+    formData.append('postId', postId);
+    formData.append('body', body);
+    if (parentCommentId) formData.append('parentCommentId', parentCommentId);
+    formData.append('image', image);
+    payload = formData;
+  } else {
+    headers['Content-Type'] = 'application/json';
+    payload = JSON.stringify({ postId, body, parentCommentId: parentCommentId || undefined });
+  }
   const res = await fetch(`${BASE_URL}/comments`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ postId, body, parentCommentId: parentCommentId || undefined }),
+    headers,
+    body: payload,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Could not add your comment.');

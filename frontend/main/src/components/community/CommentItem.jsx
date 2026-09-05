@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import VerificationBadge from './VerificationBadge';
 import VoteControls from './VoteControls';
 import ReportMenu from './ReportMenu';
@@ -19,6 +19,9 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
   const [replyBody, setReplyBody] = useState('');
   const [replyError, setReplyError] = useState('');
   const [replyBusy, setReplyBusy] = useState(false);
+  const [replyImage, setReplyImage] = useState(null);
+  const [replyImagePreview, setReplyImagePreview] = useState('');
+  const replyImageInputRef = useRef(null);
 
   const [editing, setEditing] = useState(false);
   const [editBody, setEditBody] = useState(comment.body);
@@ -52,8 +55,11 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
       const { comment: created } = await createComment(token, comment.postId, {
         body,
         parentCommentId: comment.id,
+        image: replyImage,
       });
       setReplyBody('');
+      setReplyImage(null);
+      setReplyImagePreview('');
       setReplyOpen(false);
       onCommentChanged({ type: 'added', comment: created, parentCommentId: comment.id });
     } catch (err) {
@@ -61,6 +67,23 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
     } finally {
       setReplyBusy(false);
     }
+  }
+
+  function handleReplyImageChange(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setReplyError('Reply images must be JPG, PNG, or WebP.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setReplyError('Reply images must be smaller than 5 MB.');
+      return;
+    }
+    setReplyError('');
+    setReplyImage(file);
+    setReplyImagePreview(URL.createObjectURL(file));
   }
 
   async function submitEdit(e) {
@@ -140,7 +163,14 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
           </div>
         </form>
       ) : (
-        <p className="community-comment-body"><RichText text={comment.body} /></p>
+        <>
+          <p className="community-comment-body"><RichText text={comment.body} /></p>
+          {comment.imageUrl && (
+            <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer" className="community-comment-image-link">
+              <img src={comment.imageUrl} alt="" loading="lazy" decoding="async" className="community-comment-image" />
+            </a>
+          )}
+        </>
       )}
 
       <div className="community-comment-actions">
@@ -229,8 +259,34 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
             onChange={(e) => setReplyBody(e.target.value)}
             autoFocus
           />
+          {replyImagePreview && (
+            <div className="community-comment-image-preview">
+              <img src={replyImagePreview} alt="Reply image preview" />
+              <button
+                type="button"
+                aria-label="Remove image"
+                onClick={() => { setReplyImage(null); setReplyImagePreview(''); }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
           {replyError && <p className="form-error" role="alert">{replyError}</p>}
           <div className="community-form-actions">
+            <button
+              type="button"
+              className="community-comment-image-btn"
+              onClick={() => replyImageInputRef.current?.click()}
+            >
+              🖼 Image
+            </button>
+            <input
+              ref={replyImageInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              hidden
+              onChange={handleReplyImageChange}
+            />
             <button type="submit" className="btn btn-primary" disabled={replyBusy}>
               {replyBusy ? 'Posting…' : 'Reply'}
             </button>

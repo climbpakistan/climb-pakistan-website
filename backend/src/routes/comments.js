@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { Types } from 'mongoose';
+import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import Comment, { MAX_COMMENT_LENGTH } from '../models/Comment.js';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
 import Vote from '../models/Vote.js';
 import UserBlock from '../models/UserBlock.js';
+import cloudinary from '../cloudinary.js';
 import { requireUser, optionalUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
 import { loadHiddenUserIds } from '../utils/userBlocks.js';
@@ -47,6 +49,59 @@ function isValidObjectId(value) {
   return typeof value === 'string' && Types.ObjectId.isValid(value);
 }
 
+// ── Comment images (optional, single JPG/PNG/WebP up to 5 MB) ──
+const commentUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file) return cb(null, true);
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+      return cb(new Error('Comment images must be JPG, PNG, or WebP.'));
+    }
+    cb(null, true);
+  },
+});
+
+function uploadCommentImageField(req, res, next) {
+  commentUpload.single('image')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'Comment images must be smaller than 5 MB.' });
+      }
+      return res.status(400).json({ error: err.message || 'Invalid image upload.' });
+    }
+    next();
+  });
+}
+
+async function uploadCommentImage(buffer) {
+  const result = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'climb-pakistan/community/comments',
+        resource_type: 'image',
+        width: 1200,
+        height: 1200,
+        crop: 'limit',
+        quality: 'auto',
+        fetch_format: 'auto',
+      },
+      (err, r) => (err ? reject(err) : resolve(r))
+    );
+    stream.end(buffer);
+  });
+  return { url: result.secure_url, publicId: result.public_id };
+}
+
+async function deleteCommentImage(publicId) {
+  if (!publicId) return;
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (err) {
+    console.warn('Could not delete comment image from storage:', err.message);
+  }
+}
+
 const AUTHOR_POPULATE = 'username name profileImageUrl verification';
 
 export { commentJSON, AUTHOR_POPULATE, isValidObjectId };
@@ -60,6 +115,7 @@ function commentJSON(comment) {
     postId: comment.postId,
     parentCommentId: comment.parentCommentId || null,
     body: comment.body,
+    imageUrl: comment.imageUrl || '',
     upvoteCount: comment.upvoteCount,
     downvoteCount: comment.downvoteCount,
     createdAt: comment.createdAt,
@@ -147,7 +203,7 @@ router.get('/:postId', optionalUser, async (req, res) => {
 
 // POST /api/comments — create a comment or reply (logged-in users only).
 // Body: { postId, body, parentCommentId? }
-router.post('/', commentLimiter, requireUser, async (req, res) => {
+router.post('/', commentLimiter, requireUser, uploadCommentImageField, async (req, res) => {
   try {
     // Suspended/banned accounts cannot comment or reply.
     const { restriction } = await loadUserAndRestriction(req.user.id);
@@ -182,11 +238,22 @@ router.post('/', commentLimiter, requireUser, async (req, res) => {
       }
     }
 
+    // Optional image attachment.
+    let imageUrl = '';
+    let imagePublicId = '';
+    if (req.file) {
+      const uploaded = await uploadCommentImage(req.file.buffer);
+      imageUrl = uploaded.url;
+      imagePublicId = uploaded.publicId;
+    }
+
     const comment = await Comment.create({
       postId,
       parentCommentId: parent ? parent._id : null,
       authorId: req.user.id,
       body: bodyResult.body,
+      imageUrl,
+      imagePublicId,
       // upvoteCount / downvoteCount default to 0
     });
 
@@ -285,6 +352,10 @@ router.delete('/:id', requireUser, async (req, res) => {
       frontier = children.map((c) => c._id);
       toDelete.push(...frontier);
     }
+
+    // Free the uploaded images (the deleted comment may have one).
+    const deletedDocs = await Comment.find({ _id: { $in: toDelete } }).select('imagePublicId');
+    await Promise.all(deletedDocs.map((c) => deleteCommentImage(c.imagePublicId)));
 
     await Comment.deleteMany({ _id: { $in: toDelete } });
     await Vote.deleteMany({ commentId: { $in: toDelete } });

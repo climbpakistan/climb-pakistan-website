@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCommunity } from '../../hooks/CommunityContext';
 import { getComments, createComment, getMyVotes } from '../../api';
 import { MAX_COMMENT_LENGTH } from '../../utils/communityPosts';
@@ -19,6 +19,26 @@ export default function CommentSection({ postId, onCountChange }) {
   const [body, setBody] = useState('');
   const [composerError, setComposerError] = useState('');
   const [posting, setPosting] = useState(false);
+  const [commentImage, setCommentImage] = useState(null);
+  const [commentImagePreview, setCommentImagePreview] = useState('');
+  const imageInputRef = useRef(null);
+
+  function handleImageChange(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setComposerError('Comment images must be JPG, PNG, or WebP.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setComposerError('Comment images must be smaller than 5 MB.');
+      return;
+    }
+    setComposerError('');
+    setCommentImage(file);
+    setCommentImagePreview(URL.createObjectURL(file));
+  }
 
   const load = useCallback(async () => {
     setStatus('loading');
@@ -107,8 +127,10 @@ export default function CommentSection({ postId, onCountChange }) {
     setPosting(true);
     setComposerError('');
     try {
-      const { comment: created } = await createComment(token, postId, { body: clean });
+      const { comment: created } = await createComment(token, postId, { body: clean, image: commentImage });
       setBody('');
+      setCommentImage(null);
+      setCommentImagePreview('');
       handleChanged({ type: 'added', comment: created });
     } catch (err) {
       setComposerError(err.message || 'Could not add your comment.');
@@ -140,8 +162,34 @@ export default function CommentSection({ postId, onCountChange }) {
             placeholder="Add a comment…"
             onChange={(e) => setBody(e.target.value)}
           />
+          {commentImagePreview && (
+            <div className="community-comment-image-preview">
+              <img src={commentImagePreview} alt="Comment image preview" />
+              <button
+                type="button"
+                aria-label="Remove image"
+                onClick={() => { setCommentImage(null); setCommentImagePreview(''); }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
           {composerError && <p className="form-error" role="alert">{composerError}</p>}
           <div className="community-form-actions">
+            <button
+              type="button"
+              className="community-comment-image-btn"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              🖼 Image
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              hidden
+              onChange={handleImageChange}
+            />
             <button type="submit" className="btn btn-primary" disabled={posting}>
               {posting ? 'Posting…' : 'Comment'}
             </button>
