@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { navigate } from 'vike/client/router';
 import { usePageContext } from 'vike-react/usePageContext';
 import Seo from '../../../src/components/Seo';
