@@ -8,26 +8,38 @@
  *   national      → green  (#22c55e)  Verified National Athlete
  *   international → blue   (#3b82f6)  Verified International Athlete
  *   organization  → yellow (#eab308)  Verified Organization / Club
+ *   official      → white circle with black tick (Climb Pakistan Official)
  *
  * Renders nothing for `none` or unknown types.
  *
  * Props:
- *   verification — one of 'national' | 'international' | 'organization' | 'none'
+ *   verification — one of 'national' | 'international' | 'organization' | 'official' | 'none'
  *   size         — optional pixel size (default 14)
  */
 
 const CONFIG = {
   national: {
     bg: '#22c55e',
+    check: '#ffffff',
     label: 'Verified National Athlete',
   },
   international: {
     bg: '#3b82f6',
+    check: '#ffffff',
     label: 'Verified International Athlete',
   },
   organization: {
     bg: '#eab308',
+    check: '#ffffff',
     label: 'Verified Organization / Club',
+  },
+  // Twitter-style legacy badge: white circle with a black tick. A subtle ring
+  // keeps the white circle visible on light backgrounds.
+  official: {
+    bg: '#ffffff',
+    check: '#000000',
+    ring: 'rgba(0, 0, 0, 0.18)',
+    label: 'Climb Pakistan Official',
   },
 };
 
@@ -54,12 +66,19 @@ export default function VerificationBadge({ verification, size = 14 }) {
         aria-hidden="true"
         style={{ display: 'block' }}
       >
-        {/* Filled circle */}
-        <circle cx="12" cy="12" r="12" fill={config.bg} />
-        {/* White checkmark */}
+        {/* Filled circle (with a subtle ring for the white official badge) */}
+        <circle
+          cx="12"
+          cy="12"
+          r={config.ring ? 11.5 : 12}
+          fill={config.bg}
+          stroke={config.ring || 'none'}
+          strokeWidth="1"
+        />
+        {/* Checkmark */}
         <path
           d="M7 12.5l3.5 3.5 6.5-7"
-          stroke="#fff"
+          stroke={config.check}
           strokeWidth="2.8"
           strokeLinecap="round"
           strokeLinejoin="round"

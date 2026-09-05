@@ -1195,6 +1195,10 @@ tbody tr:hover {
   text-decoration: none;
 }
 
+.verification-official {
+  color: #000000;
+}
+
 .verification-national {
   color: #16a34a;
 }

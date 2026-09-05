@@ -38,8 +38,10 @@ const POST_TYPES = ['text', 'image', 'link', 'poll'];
 
 const VERIFICATION_OPTIONS = [
   { value: 'none', label: 'None' },
+  { value: 'official', label: 'Climb Pakistan Official' },
   { value: 'national', label: 'Verified National Climber' },
   { value: 'international', label: 'Verified International Sport Climber' },
+  { value: 'organization', label: 'Verified Organization / Club' },
 ];
 
 const ROLE_LABELS = {
@@ -59,6 +61,7 @@ const REPORT_BADGE = { pending: 'badge-warning', reviewed: 'badge-info', dismiss
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || 'https://climbpakistan.com';
 
 const VERIFICATION_LABELS = {
+  official: 'Climb Pakistan Official',
   national: 'Verified National Climber',
   international: 'Verified International Sport Climber',
   organization: 'Verified Organization / Club',

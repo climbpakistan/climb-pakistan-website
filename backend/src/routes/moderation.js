@@ -411,7 +411,7 @@ router.post('/verification/:userId', requireAdminDb, async (req, res) => {
       return res.status(400).json({ error: 'Invalid user id.' });
     }
     const verification = String(req.body.verification || 'none');
-    if (!['none', 'national', 'international'].includes(verification)) {
+    if (!['none', 'national', 'international', 'organization', 'official'].includes(verification)) {
       return res.status(400).json({ error: 'Invalid verification level.' });
     }
     const user = await User.findById(userId);
