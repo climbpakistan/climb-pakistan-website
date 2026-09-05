@@ -4031,7 +4031,7 @@ input, textarea, select { font: inherit; color: inherit; }
   .community-post-card { padding: var(--sp-4); border-radius: 12px; }
   .community-comment { padding: var(--sp-3); border-radius: 12px; }
   .community-search-bar { flex-wrap: wrap; border-radius: 12px; }
-  .community-search-filters { border-right: none; border-bottom: 1px solid var(--cp-border); width: 100%; }
+  .community-search-filters { border-right: none; border-bottom: 1px solid var(--cp-border); border-radius: 11px 11px 0 0; width: 100%; }
   .community-search-filter { flex: 1; text-align: center; }
   .community-search-btn { width: 100%; border-radius: 0 0 11px 11px; }
   .nav-auth-username { display: none; }
@@ -4301,7 +4301,9 @@ input, textarea, select { font: inherit; color: inherit; }
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
   border-radius: 12px;
-  overflow: hidden;
+  /* No overflow:hidden here — it would clip the absolutely-positioned
+     suggestions dropdown that hangs below the bar. The rounded corners of
+     the inner tabs/button are handled on those elements instead. */
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .community-search-bar:focus-within {
@@ -4313,6 +4315,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-search-filters {
   display: flex;
   border-right: 1px solid var(--cp-border);
+  border-radius: 11px 0 0 11px;
+  overflow: hidden;
   flex-shrink: 0;
 }
 .community-search-filter {
@@ -4445,7 +4449,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* Search button */
 .community-search-btn {
-  border-radius: 0;
+  border-radius: 0 11px 11px 0;
   padding: var(--sp-3) var(--sp-5);
   font-size: var(--fs-sm);
   font-weight: 600;
