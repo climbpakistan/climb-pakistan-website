@@ -43,6 +43,19 @@ export function postExcerpt(body, max = 180) {
   return `${text.slice(0, max).trimEnd()}…`;
 }
 
+/**
+ * postBodyExcerpt — like postExcerpt, but also reports whether the body was
+ * truncated so the UI can offer a "See more" toggle for the full text.
+ */
+export function postBodyExcerpt(body, max = 180) {
+  const text = String(body || '').replace(/\s+/g, ' ').trim();
+  const truncated = text.length > max;
+  return {
+    text: truncated ? `${text.slice(0, max).trimEnd()}…` : text,
+    truncated,
+  };
+}
+
 /** Client-side image validation — mirrors the backend file filter. */
 export function validateImageFile(file) {
   if (!file) return { ok: true };

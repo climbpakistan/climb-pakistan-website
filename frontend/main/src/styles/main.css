@@ -3270,6 +3270,24 @@ input, textarea, select { font: inherit; color: inherit; }
   margin-top: var(--sp-2);
   line-height: 1.6;
 }
+.community-post-body-card .community-post-excerpt {
+  margin: 0;
+}
+.community-post-body-card .community-post-excerpt.is-expanded {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.community-post-see-more {
+  margin-top: var(--sp-2);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--cp-accent);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.community-post-see-more:hover { text-decoration: underline; }
 .community-post-meta {
   display: flex;
   gap: var(--sp-3);
@@ -4469,7 +4487,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-post-card .community-post-title a:hover { color: var(--cp-accent); }
 .community-post-image-link { display: block; margin-top: var(--sp-3); border-radius: 12px; overflow: hidden; }
 .community-post-image {
-  width: 100%;
+  width: 50%;
+  max-width: 50%;
   height: auto;
   border-radius: 12px;
   display: block;

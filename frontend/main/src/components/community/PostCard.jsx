@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { postBodyExcerpt } from '../../utils/communityPosts';
 import VerificationBadge from './VerificationBadge';
 import VoteControls from './VoteControls';
 import ReportMenu from './ReportMenu';
@@ -7,10 +8,7 @@ import RichText from './RichText';
 import PostGallery from './PostGallery';
 import { useCommunity } from '../../hooks/CommunityContext';
 import { savePost, unsavePost } from '../../api';
-import {
-  formatPostDate,
-  postExcerpt,
-} from '../../utils/communityPosts';
+import { formatPostDate } from '../../utils/communityPosts';
 
 /**
  * PostCard — feed card for a community post. Voting/commenting are functional.
@@ -20,9 +18,11 @@ export default function PostCard({ post }) {
   const [saved, setSaved] = useState(!!post?.saved);
   const [saveBusy, setSaveBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   if (!post) return null;
   const author = post.author || {};
+  const bodyExcerpt = postBodyExcerpt(post.body || '');
 
   async function handleSave() {
     if (isGuest) {
@@ -84,7 +84,21 @@ export default function PostCard({ post }) {
       )}
 
       {post.body && (
-        <p className="community-post-excerpt"><RichText text={postExcerpt(post.body)} /></p>
+        <div className="community-post-body-card">
+          <p className={`community-post-excerpt${expanded ? ' is-expanded' : ''}`}>
+            <RichText text={expanded ? post.body : bodyExcerpt.text} />
+          </p>
+          {bodyExcerpt.truncated && (
+            <button
+              type="button"
+              className="community-post-see-more"
+              onClick={() => setExpanded((v) => !v)}
+              aria-expanded={expanded}
+            >
+              {expanded ? 'See less' : 'See more'}
+            </button>
+          )}
+        </div>
       )}
 
       {post.type === 'link' && post.externalUrl && (
