@@ -10,5 +10,10 @@ export default {
   // Pre-render the whole site, but allow dynamic pages that provide their own
   // onBeforePrerenderStart() URLs (e.g. community profiles) to be skipped when
   // the API returns none — without failing the build.
-  prerender: { partial: true },
+  // Keep dist/server/ after pre-rendering: the Vercel SSR function (vike_fetch)
+  // needs it to server-render dynamic routes that didn't exist at build time
+  // (e.g. community profiles created after deploy). Without keepDistServer,
+  // Vike deletes the server payload and every non-pre-rendered route returns
+  // HTTP 500.
+  prerender: { partial: true, keepDistServer: true },
 }
