@@ -5788,3 +5788,67 @@ input, textarea, select { font: inherit; color: inherit; }
 
 
 
+/* ──────────────────────────────────────────────────────────────
+   Mobile (≤860px) corrections for the community pages.
+
+   These rules are intentionally appended last in the file so they win
+   the cascade over the base definitions above.
+
+   1. Nav drawer → contained right-side panel instead of a full-width
+      (100vw) overlay. The old `inset: 72px 0 0 0` + `translateX(100%)`
+      made the closed drawer a full-viewport element that, depending on
+      the browser's scrollbar handling, produced horizontal overflow
+      (the "big page") and let the full menu show up on the right.
+   2. Header drop-downs (notifications + profile) have no mobile
+      override, so on narrow screens the 360px panel — anchored to the
+      bell/avatar that sit mid-header — drifted off the left edge.
+      Mirror the existing `.search-dropdown` treatment: pin to the
+      viewport edges so the panel is always page-aligned.
+   3. Feed search bar: keep it (and its Questions/Users autocomplete
+      suggestions) above the sticky header (z-index 100) and full-width
+      so the suggestions grouped under "Questions"/"Users" actually
+      appear instead of being hidden behind the header.
+   ────────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  /* Contained right-side nav panel — no full-viewport overflow */
+  .nav-links {
+    left: auto;
+    right: 0;
+    width: min(280px, 85vw);
+    max-width: 100vw;
+    box-sizing: border-box;
+    transform: translateX(100%);
+  }
+  .nav-links.is-open { transform: translateX(0); }
+
+  /* Header drop-downs: anchor to the viewport, page-aligned */
+  .nav-notif-dropdown,
+  .nav-profile-dropdown {
+    position: fixed;
+    top: 72px;
+    left: var(--sp-4);
+    right: var(--sp-4);
+    width: auto;
+    max-width: calc(100vw - var(--sp-8));
+    min-width: 200px;
+    box-sizing: border-box;
+  }
+
+  /* Search bar: stay above the sticky header and span the page */
+  .community-search-section {
+    position: relative;
+    z-index: 101;
+  }
+  .community-search-bar { align-items: stretch; }
+  .community-search-filters { width: 100%; }
+  .community-search-input-wrap { width: 100%; }
+  .community-search-btn { width: 100%; }
+  .community-search-suggestions {
+    z-index: 150;
+    left: 0;
+    right: 0;
+    max-width: calc(100vw - var(--sp-8));
+    box-sizing: border-box;
+  }
+}
+
