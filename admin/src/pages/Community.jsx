@@ -218,7 +218,7 @@ function UserManageModal({ user, athletes, onRefresh, onClose }) {
         </div>
 
         <div style={{ textAlign: 'right', marginBottom: 'var(--sp-2)' }}>
-          <a className="btn btn-ghost btn-xs" href={`${FRONTEND_URL}/community/u/@${user.username}`} target="_blank" rel="noreferrer">
+          <a className="btn btn-ghost btn-xs" href={`${FRONTEND_URL}/community/u/${user.username}`} target="_blank" rel="noreferrer">
             View profile →
           </a>
         </div>
@@ -422,7 +422,7 @@ function UsersTab() {
                 <td><StatusBadge status={u.accountStatus} /></td>
                 <td className="col-actions">
                   <div className="cell-actions">
-                    <a className="btn btn-ghost btn-xs" href={`${FRONTEND_URL}/community/u/@${u.username}`} target="_blank" rel="noreferrer">
+                    <a className="btn btn-ghost btn-xs" href={`${FRONTEND_URL}/community/u/${u.username}`} target="_blank" rel="noreferrer">
                       View
                     </a>
                     <button className="btn btn-outline btn-xs" type="button" onClick={() => { setActive(u); setError(''); setNotice(''); }}>Manage</button>
@@ -1083,7 +1083,7 @@ function BadgeApplicationsTab() {
                   <td className="col-actions">
                     <div className="cell-actions">
                       {a.user && (
-                        <a className="btn btn-ghost btn-xs" href={`${FRONTEND_URL}/community/u/@${a.user.username}`} target="_blank" rel="noreferrer">Profile</a>
+                        <a className="btn btn-ghost btn-xs" href={`${FRONTEND_URL}/community/u/${a.user.username}`} target="_blank" rel="noreferrer">Profile</a>
                       )}
                       {a.status === 'pending' && (
                         <>
