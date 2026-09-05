@@ -3,6 +3,7 @@ import { navigate } from 'vike/client/router';
 import { usePageContext } from 'vike-react/usePageContext';
 import { AnimatedPageHeader } from '../../../src/hooks/animations';
 import Seo from '../../../src/components/Seo';
+import PasswordInput from '../../../src/components/community/PasswordInput';
 import { communityLogin } from '../../../src/api';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 
@@ -82,8 +83,7 @@ function Page() {
                 <label htmlFor="password">Password</label>
                 <a href="/community/forgot-password" className="form-link">Forgot password?</a>
               </div>
-              <input
-                type="password"
+              <PasswordInput
                 id="password"
                 name="password"
                 autoComplete="current-password"

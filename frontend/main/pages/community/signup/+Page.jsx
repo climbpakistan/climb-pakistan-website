@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { navigate } from 'vike/client/router';
 import { AnimatedPageHeader } from '../../../src/hooks/animations';
 import Seo from '../../../src/components/Seo';
+import PasswordInput from '../../../src/components/community/PasswordInput';
 import { communityRegister } from '../../../src/api';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 
@@ -307,8 +308,7 @@ function Page() {
 
             <div className="form-row">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
+              <PasswordInput
                 id="password"
                 name="password"
                 autoComplete="new-password"

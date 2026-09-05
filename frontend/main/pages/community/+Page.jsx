@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { navigate } from 'vike/client/router';
 import Seo from '../../src/components/Seo';
+import PasswordInput from '../../src/components/community/PasswordInput';
 import { useCommunity } from '../../src/hooks/CommunityContext';
 import { communityLogin } from '../../src/api';
 
@@ -112,8 +113,7 @@ function Page() {
                 {errors.identifier && <p className="form-error">{errors.identifier}</p>}
               </div>
               <div className="community-landing-input-group">
-                <input
-                  type="password"
+                <PasswordInput
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { navigate } from 'vike/client/router';
 import { AnimatedPageHeader } from '../../../src/hooks/animations';
 import Seo from '../../../src/components/Seo';
+import PasswordInput from '../../../src/components/community/PasswordInput';
 import { forgotPassword, verifyResetCode, resetPassword } from '../../../src/api';
 
 export { Page };
@@ -168,8 +169,7 @@ function Page() {
               <>
                 <div className="form-row">
                   <label htmlFor="new-password">New password</label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     id="new-password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -180,8 +180,7 @@ function Page() {
                 </div>
                 <div className="form-row">
                   <label htmlFor="confirm-password">Confirm new password</label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     id="confirm-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
