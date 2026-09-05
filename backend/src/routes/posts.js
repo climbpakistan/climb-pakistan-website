@@ -452,6 +452,34 @@ router.get('/counts', async (req, res) => {
   }
 });
 
+// GET /api/posts/suggest?q= — lightweight title autocomplete (public).
+// Returns just id/title/category so the feed search box can show a
+// suggestions dropdown without shipping full post payloads.
+// Registered before /:id so 'suggest' is not treated as a post id.
+router.get('/suggest', async (req, res) => {
+  try {
+    const query = String(req.query.q || '').trim();
+    if (!query || query.length < 2) return res.json({ suggestions: [] });
+
+    const re = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    const posts = await Post.find({ removed: { $ne: true }, title: re })
+      .select('title category')
+      .sort({ score: -1, createdAt: -1 })
+      .limit(6)
+      .lean();
+
+    res.json({
+      suggestions: posts.map((p) => ({
+        id: String(p._id),
+        title: p.title,
+        category: p.category,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not load suggestions.' });
+  }
+});
+
 // GET /api/posts/:id — single post (public; removed posts are hidden unless
 // the request carries an admin token).
 router.get('/:id', optionalUser, async (req, res) => {

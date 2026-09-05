@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
+import { navigate } from 'vike/client/router';
 import { usePageContext } from 'vike-react/usePageContext';
 import Seo from '../../../src/components/Seo';
 import PostCard from '../../../src/components/community/PostCard';
 import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, topTimeFilters, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes, getTopicCounts, searchCommunityUsers } from '../../../src/api';
+import { getPosts, getMyVotes, getPostSuggestions, getTopicCounts, searchCommunityUsers } from '../../../src/api';
 
 export { Page };
 
@@ -97,6 +98,76 @@ function Page() {
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Autocomplete dropdown state
+  const [suggestions, setSuggestions] = useState({ posts: [], users: [] });
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+
+  // Flattened list of suggestions for keyboard navigation.
+  const flatSuggestions = [
+    ...suggestions.posts.map((p) => ({ ...p, type: 'post' })),
+    ...suggestions.users.map((u) => ({ ...u, type: 'user' })),
+  ];
+
+  // Debounced fetch of matching questions + users as the user types.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSuggestions({ posts: [], users: [] });
+      setSuggestionsOpen(false);
+      return;
+    }
+    const t = setTimeout(async () => {
+      try {
+        const [postData, userData] = await Promise.all([
+          getPostSuggestions(q),
+          searchCommunityUsers(q),
+        ]);
+        const next = {
+          posts: (postData.suggestions || []).slice(0, 5),
+          users: (userData.users || []).slice(0, 5),
+        };
+        setSuggestions(next);
+        setActiveSuggestion(-1);
+        setSuggestionsOpen(next.posts.length > 0 || next.users.length > 0);
+      } catch {
+        setSuggestions({ posts: [], users: [] });
+        setSuggestionsOpen(false);
+      }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  function selectSuggestion(s) {
+    setSuggestionsOpen(false);
+    setSearchQuery('');
+    setHasSearched(false);
+    setSearchResults({ posts: [], users: [] });
+    if (s.type === 'post') {
+      navigate(`/community/post/${s.id}`);
+    } else {
+      navigate(`/community/u/${s.username}`);
+    }
+  }
+
+  function handleSearchKeyDown(e) {
+    if (!suggestionsOpen || flatSuggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestion((i) => (i + 1) % flatSuggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestion((i) => (i <= 0 ? flatSuggestions.length - 1 : i - 1));
+    } else if (e.key === 'Enter') {
+      if (activeSuggestion >= 0) {
+        e.preventDefault();
+        selectSuggestion(flatSuggestions[activeSuggestion]);
+      }
+    } else if (e.key === 'Escape') {
+      setSuggestionsOpen(false);
+    }
+  }
+
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -166,6 +237,7 @@ function Page() {
 
   async function handleSearch(e) {
     e.preventDefault();
+    setSuggestionsOpen(false);
     const q = searchQuery.trim();
     if (!q) {
       setHasSearched(false);
@@ -191,6 +263,8 @@ function Page() {
 
   function clearSearch() {
     setSearchQuery('');
+    setSuggestions({ posts: [], users: [] });
+    setSuggestionsOpen(false);
     setHasSearched(false);
     setSearchResults({ posts: [], users: [] });
   }
@@ -282,11 +356,76 @@ function Page() {
                 placeholder={searchFilter === 'posts' ? 'Search questions...' : 'Search users...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSuggestionsOpen(suggestions.posts.length > 0 || suggestions.users.length > 0)}
+                onBlur={(e) => {
+                  if (!e.currentTarget.parentElement.contains(e.relatedTarget)) {
+                    setSuggestionsOpen(false);
+                  }
+                }}
+                onKeyDown={handleSearchKeyDown}
+                autoComplete="off"
+                role="combobox"
+                aria-expanded={suggestionsOpen}
+                aria-controls="community-search-suggestions"
               />
               {searchQuery && (
                 <button type="button" className="community-search-clear" onClick={clearSearch} aria-label="Clear search">
                   ✕
                 </button>
+              )}
+
+              {/* Autocomplete dropdown */}
+              {suggestionsOpen && (suggestions.posts.length > 0 || suggestions.users.length > 0) && (
+                <div className="community-search-suggestions" id="community-search-suggestions" role="listbox">
+                  {suggestions.posts.length > 0 && (
+                    <div className="community-search-suggestions-section">
+                      <p className="community-search-suggestions-title">Questions</p>
+                      {suggestions.posts.map((p, i) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          role="option"
+                          aria-selected={activeSuggestion === i}
+                          className={`community-search-suggestion${activeSuggestion === i ? ' is-active' : ''}`}
+                          onClick={() => selectSuggestion({ ...p, type: 'post' })}
+                        >
+                          <span className="community-search-suggestion-icon" aria-hidden="true">💬</span>
+                          <span className="community-search-suggestion-title">{p.title}</span>
+                          <span className="community-search-suggestion-meta">{p.category}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {suggestions.users.length > 0 && (
+                    <div className="community-search-suggestions-section">
+                      <p className="community-search-suggestions-title">Users</p>
+                      {suggestions.users.map((u, j) => {
+                        const idx = suggestions.posts.length + j;
+                        return (
+                          <button
+                            key={u.id}
+                            type="button"
+                            role="option"
+                            aria-selected={activeSuggestion === idx}
+                            className={`community-search-suggestion${activeSuggestion === idx ? ' is-active' : ''}`}
+                            onClick={() => selectSuggestion({ ...u, type: 'user' })}
+                          >
+                            {u.profileImageUrl ? (
+                              <img src={u.profileImageUrl} alt="" className="community-avatar community-avatar--sm" />
+                            ) : (
+                              <span className="community-avatar community-avatar--sm community-avatar--fallback">
+                                {(u.username || '?')[0].toUpperCase()}
+                              </span>
+                            )}
+                            <span className="community-search-suggestion-title">@{u.username}</span>
+                            {u.name && <span className="community-search-suggestion-meta">{u.name}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             <button type="submit" className="btn btn-primary community-search-btn" disabled={searching}>

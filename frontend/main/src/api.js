@@ -242,6 +242,12 @@ export function getTopicCounts() {
   return fetchJSON(`${BASE_URL}/posts/counts`);
 }
 
+/** Lightweight post-title suggestions for the search autocomplete dropdown. */
+export function getPostSuggestions(q) {
+  const params = new URLSearchParams({ q });
+  return fetchJSON(`${BASE_URL}/posts/suggest?${params.toString()}`);
+}
+
 /** Single post by id. token is optional (enables vote/poll personalization). */
 export async function getPost(token, id) {
   const res = await fetch(`${BASE_URL}/posts/${id}`, {

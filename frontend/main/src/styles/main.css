@@ -4345,6 +4345,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* Search input */
 .community-search-input-wrap {
+  position: relative;
   flex: 1;
   display: flex;
   align-items: center;
@@ -4381,6 +4382,72 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-search-clear:hover {
   background: var(--cp-bg-alt);
   color: var(--cp-text);
+}
+
+/* Autocomplete suggestions dropdown */
+.community-search-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  padding: var(--sp-2);
+}
+.community-search-suggestions-section + .community-search-suggestions-section {
+  margin-top: var(--sp-1);
+  border-top: 1px solid var(--cp-border);
+  padding-top: var(--sp-1);
+}
+.community-search-suggestions-title {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cp-text-muted);
+  padding: var(--sp-2) var(--sp-3);
+  margin: 0;
+}
+.community-search-suggestion {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: var(--fs-sm);
+  color: var(--cp-text);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+.community-search-suggestion:hover,
+.community-search-suggestion.is-active {
+  background: var(--cp-bg-alt);
+}
+.community-search-suggestion-icon {
+  flex: none;
+  font-size: 0.9rem;
+}
+.community-search-suggestion-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.community-search-suggestion-meta {
+  flex: none;
+  font-size: var(--fs-xs);
+  color: var(--cp-text-muted);
 }
 
 /* Search button */
