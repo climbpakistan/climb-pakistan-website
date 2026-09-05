@@ -3459,8 +3459,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-empty-btn { margin-top: var(--sp-2); }
 
 .community-post-card {
-  width: 400px;
-  aspect-ratio: 1 / 1;
+  width: 520px;
+  aspect-ratio: 4 / 3;
   padding: 12px;
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
@@ -4583,7 +4583,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .community-post-image:hover { transform: scale(1.01); }
 .community-post-card .community-post-image {
-  max-height: 240px;
+  max-height: 312px;
   width: 50%;
   max-width: 50%;
   object-fit: cover;
