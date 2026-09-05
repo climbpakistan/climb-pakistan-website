@@ -4664,38 +4664,7 @@ input, textarea, select { font: inherit; color: inherit; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Keyboard hint bar */
-.community-search-suggestions-hint {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  margin-top: var(--sp-1);
-  padding: var(--sp-2) var(--sp-3) var(--sp-1);
-  border-top: 1px solid var(--cp-border);
-  color: var(--cp-text-dim);
-  font-size: var(--fs-xs);
-}
-.community-search-suggestions-hint span {
-  display: inline-flex;
-  align-items: center;
-}
-.community-search-suggestions-hint kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  margin-right: 4px;
-  border-radius: 4px;
-  border: 1px solid var(--cp-border-strong);
-  border-bottom-width: 2px;
-  background: var(--cp-bg-alt);
-  font-family: inherit;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--cp-text-muted);
-}
+
 
 /* Search button */
 .community-search-btn {

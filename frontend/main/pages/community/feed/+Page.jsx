@@ -436,11 +436,6 @@ function Page() {
                       </div>
                     )}
                   </div>
-                  <div className="community-search-suggestions-hint" aria-hidden="true">
-                    <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-                    <span><kbd>↵</kbd> open</span>
-                    <span><kbd>esc</kbd> close</span>
-                  </div>
                 </div>
               )}
             </div>
