@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { navigate } from 'vike/client/router';
-import { AnimatedPageHeader, AnimatedSection } from '../../src/hooks/animations';
 import Seo from '../../src/components/Seo';
-import { communityCopy } from '../../src/data/communityData';
 import { useCommunity } from '../../src/hooks/CommunityContext';
 import { communityLogin } from '../../src/api';
 
@@ -64,67 +62,41 @@ function Page() {
         path="/community"
       />
 
-      {/* ── Desktop: classic choice layout (hidden on mobile) ── */}
-      <div className="community-landing-desktop-only">
-        <AnimatedPageHeader>
-          <h1 className="page-title">A place for climbers to connect</h1>
-          <p className="page-sub" style={{ marginInline: 'auto', textAlign: 'center' }}>
-            {communityCopy.tagline}
-          </p>
-        </AnimatedPageHeader>
-
-        <AnimatedSection className="section-tight community-actions-section">
-          <div className="container">
-            <div className="community-choice-grid">
-              <div className="community-action-card">
-                <span className="community-action-index" aria-hidden="true">01</span>
-                <h3 className="community-action-title">Sign Up</h3>
-                <p className="community-action-blurb">{communityCopy.signUpBlurb}</p>
-                <a href="/community/signup" className="btn btn-primary community-action-btn">
-                  Sign Up
-                </a>
-              </div>
-
-              <div className="community-action-card">
-                <span className="community-action-index" aria-hidden="true">02</span>
-                <h3 className="community-action-title">Log In</h3>
-                <p className="community-action-blurb">{communityCopy.logInBlurb}</p>
-                <a href="/community/login" className="btn btn-outline community-action-btn">
-                  Log In
-                </a>
-              </div>
-
-              <div className="community-action-card community-action-card--guest">
-                <span className="community-action-index" aria-hidden="true">03</span>
-                <h3 className="community-action-title">Continue as Guest</h3>
-                <p className="community-action-blurb">{communityCopy.guestBlurb}</p>
-                <a href="/community/feed" className="btn btn-ghost community-action-btn">
-                  Continue as Guest
-                </a>
-              </div>
-            </div>
-
-            <p className="community-guest-note">
-              No account? No problem — guests can browse every post. Create an
-              account whenever you&apos;re ready to join the conversation.
+      <div className="community-landing">
+        {/* Left side - Branding + feature highlights (desktop) */}
+        <div className="community-landing-hero">
+          {/* Branding */}
+          <div className="community-landing-brand">
+            <h1 className="community-landing-logo">
+              <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
+            </h1>
+            <p className="community-landing-tagline">
+              A community for climbers to connect, share and grow together.
             </p>
           </div>
-        </AnimatedSection>
-      </div>
 
-      {/* ── Mobile: social-media login layout (hidden on desktop) ── */}
-      <div className="community-landing community-landing-mobile-only">
-        {/* Branding */}
-        <div className="community-landing-brand">
-          <h1 className="community-landing-logo">
-            <span className="logo-climb">Climb</span>&nbsp;<span className="logo-pakistan">Pakistan</span>
-          </h1>
-          <p className="community-landing-tagline">
-            A community for climbers to connect, share and grow together.
-          </p>
+          {/* Features */}
+          <div className="community-landing-features">
+            <div className="community-landing-feature">
+              <span className="community-landing-feature-icon">💬</span>
+              <span>Discuss climbing</span>
+            </div>
+            <div className="community-landing-feature">
+              <span className="community-landing-feature-icon">📸</span>
+              <span>Share your climbing experiences</span>
+            </div>
+            <div className="community-landing-feature">
+              <span className="community-landing-feature-icon">🧗</span>
+              <span>Discover climbing in Pakistan</span>
+            </div>
+            <div className="community-landing-feature">
+              <span className="community-landing-feature-icon">🤝</span>
+              <span>Connect with climbers</span>
+            </div>
+          </div>
         </div>
 
-        {/* Login/Signup form */}
+        {/* Right side - Login/Signup */}
         <div className="community-landing-form-area">
           <div className="community-landing-form-card">
             {/* Quick Login */}
@@ -173,26 +145,6 @@ function Page() {
           <p className="community-landing-guest">
             <a href="/community/feed">Browse as Guest</a>
           </p>
-        </div>
-
-        {/* Features */}
-        <div className="community-landing-features">
-          <div className="community-landing-feature">
-            <span className="community-landing-feature-icon">💬</span>
-            <span>Discuss climbing</span>
-          </div>
-          <div className="community-landing-feature">
-            <span className="community-landing-feature-icon">📸</span>
-            <span>Share your climbing experiences</span>
-          </div>
-          <div className="community-landing-feature">
-            <span className="community-landing-feature-icon">🧗</span>
-            <span>Discover climbing in Pakistan</span>
-          </div>
-          <div className="community-landing-feature">
-            <span className="community-landing-feature-icon">🤝</span>
-            <span>Connect with climbers</span>
-          </div>
         </div>
       </div>
     </>
