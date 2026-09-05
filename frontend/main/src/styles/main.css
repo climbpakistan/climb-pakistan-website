@@ -3459,6 +3459,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-empty-btn { margin-top: var(--sp-2); }
 
 .community-post-card {
+  width: 400px;
+  aspect-ratio: 1 / 1;
   padding: 12px;
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
@@ -4694,7 +4696,11 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* Full post page */
 .community-post-page { max-width: 720px; margin-inline: auto; }
-.community-post-card--full { padding: var(--sp-6); }
+.community-post-card--full {
+  width: auto;
+  aspect-ratio: auto;
+  padding: var(--sp-6);
+}
 .community-post-title--full { font-size: var(--fs-xl); }
 .community-post-body {
   margin-top: var(--sp-4);
