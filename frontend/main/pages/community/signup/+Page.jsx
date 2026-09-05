@@ -10,7 +10,9 @@ export { Page };
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // match backend limit (5 MB)
 const MAX_IMAGE_DIMENSION = 4000;
 
-const RESERVED = ['admin', 'administrator', 'mod', 'moderator', 'support', 'climbpakistan', 'team', 'official', 'staff', 'system', 'root'];
+const RESERVED = ['admin', 'administrator', 'mod', 'moderator', 'support', 'team', 'official', 'staff', 'system', 'root'];
+// Note: 'climbpakistan' is intentionally not reserved — the owner registers
+// the official community account with it through normal signup.
 
 const USERNAME_HINT = '3–20 characters: lowercase letters, numbers, underscores — must start with a letter.';
 

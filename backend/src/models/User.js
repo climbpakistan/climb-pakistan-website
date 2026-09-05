@@ -2,14 +2,15 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 // Usernames that cannot be registered by the public (system/trusted accounts).
-// Expandable — add future reserved names here.
+// Expandable — add future reserved names here. 'climbpakistan' is NOT listed:
+// the official Climb Pakistan community account registers it through normal
+// signup (the owner claims it, then gets the official badge via the admin tool).
 export const RESERVED_USERNAMES = [
   'admin',
   'administrator',
   'mod',
   'moderator',
   'support',
-  'climbpakistan',
   'team',
   'official',
   'staff',
