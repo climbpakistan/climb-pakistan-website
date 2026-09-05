@@ -4346,7 +4346,36 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Community responsive */
 @media (max-width: 1100px) {
   .community-feed-layout { grid-template-columns: 1fr; }
-  .community-topics-sidebar { display: none; }
+
+  /* Topics: instead of hiding the sidebar on narrow screens, turn it into a
+     horizontally scrollable chip row above the posts. */
+  .community-topics-sidebar {
+    display: block;
+    position: static;
+    margin-bottom: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+  }
+  .community-topics-sidebar-title { margin-bottom: var(--sp-2); }
+  .community-topics-sidebar-list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--sp-2);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .community-topics-sidebar-list::-webkit-scrollbar { display: none; }
+  .community-topics-sidebar-item { margin-bottom: 0; flex: none; }
+  .community-topics-sidebar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    white-space: nowrap;
+    padding: var(--sp-1) var(--sp-3);
+    background: var(--cp-bg-alt);
+    border: 1px solid var(--cp-border);
+    border-radius: 999px;
+  }
 }
 @media (max-width: 640px) {
   .community-choice-grid { grid-template-columns: 1fr; }
