@@ -243,12 +243,13 @@ router.post('/content/:targetType/:targetId/restore', requireAdminDb, async (req
 });
 
 // ── User actions: warn / suspend / ban / lift ──
-async function loadUserTarget(req, res) {  const targetId = req.params.userId;
+async function loadUserTarget(req, res, opts = {}) {
+  const targetId = req.params.userId;
   if (!isValidObjectId(targetId)) {
     res.status(400).json({ error: 'Invalid user id.' });
     return null;
   }
-  if (String(targetId) === String(req.user.id)) {
+  if (!opts.allowSelf && String(targetId) === String(req.user.id)) {
     res.status(400).json({ error: 'You cannot moderate your own account.' });
     return null;
   }
@@ -363,15 +364,12 @@ router.post('/users/:userId/lift', requireAdminDb, async (req, res) => {
 });
 
 // POST /api/moderation/users/:userId/delete — permanently delete a user and all their content.
+// Deleting is allowed for admin accounts and for your own account so site owners
+// can rotate the admin account; all other moderation actions keep their guards.
 router.post('/users/:userId/delete', requireAdminDb, async (req, res) => {
   try {
-    const user = await loadUserTarget(req, res);
+    const user = await loadUserTarget(req, res, { allowSelf: true });
     if (!user) return;
-
-    // Prevent deleting admin accounts
-    if (user.role === 'admin') {
-      return res.status(400).json({ error: 'Cannot delete admin accounts.' });
-    }
 
     const userId = user._id;
 

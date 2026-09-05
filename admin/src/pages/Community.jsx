@@ -281,7 +281,7 @@ function UserManageModal({ user, athletes, onRefresh, onClose }) {
             type="button"
             disabled={saving}
             onClick={async () => {
-              const ok = window.confirm(`Are you sure you want to permanently delete @${user.username}? This will remove all their posts, comments, and account data. This action cannot be undone.`);
+              const ok = window.confirm(`Are you sure you want to permanently delete @${user.username || user.email}? This will remove all their posts, comments, and account data. This action cannot be undone.`);
               if (!ok) return;
               setSaving(true);
               setError('');
