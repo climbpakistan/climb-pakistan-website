@@ -4208,6 +4208,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .profile-more {
   position: relative;
   display: inline-flex;
+  margin-left: auto;
 }
 .profile-more-btn {
   display: inline-flex;
@@ -4364,6 +4365,7 @@ input, textarea, select { font: inherit; color: inherit; }
   .profile-username { justify-content: center; }
   .profile-follow-stats { justify-content: center; padding-top: 0; }
   .profile-actions-row { justify-content: center; }
+  .profile-more { margin-left: 0; }
   .profile-tabs { width: 100%; }
   .profile-tab { flex: 1; text-align: center; }
   .profile-tab-empty { padding: var(--sp-6); }
