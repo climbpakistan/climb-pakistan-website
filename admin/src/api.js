@@ -20,7 +20,10 @@ async function apiFetch(url, options = {}) {
     },
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
+    // 401 = invalid/expired token; 403 = the token's user no longer exists or
+    // is no longer an active admin (e.g. the account was deleted). Both mean
+    // this session cannot reach any dashboard data, so clear it and re-login.
     localStorage.removeItem('admin-token');
     localStorage.removeItem('admin-user');
     window.location.href = '/login';
@@ -68,7 +71,10 @@ export async function importAthletesExcel(file) {
     body: formData,
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
+    // 401 = invalid/expired token; 403 = the token's user no longer exists or
+    // is no longer an active admin (e.g. the account was deleted). Both mean
+    // this session cannot reach any dashboard data, so clear it and re-login.
     localStorage.removeItem('admin-token');
     localStorage.removeItem('admin-user');
     window.location.href = '/login';
@@ -125,7 +131,10 @@ export async function uploadPhoto(file, name, category) {
     body: formData,
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
+    // 401 = invalid/expired token; 403 = the token's user no longer exists or
+    // is no longer an active admin (e.g. the account was deleted). Both mean
+    // this session cannot reach any dashboard data, so clear it and re-login.
     localStorage.removeItem('admin-token');
     localStorage.removeItem('admin-user');
     window.location.href = '/login';
@@ -152,7 +161,10 @@ export async function uploadPhotoFromUrl(url, label) {
     body: JSON.stringify({ url, label }),
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
+    // 401 = invalid/expired token; 403 = the token's user no longer exists or
+    // is no longer an active admin (e.g. the account was deleted). Both mean
+    // this session cannot reach any dashboard data, so clear it and re-login.
     localStorage.removeItem('admin-token');
     localStorage.removeItem('admin-user');
     window.location.href = '/login';
@@ -183,7 +195,10 @@ export async function importRankingsExcel(file) {
     body: formData,
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
+    // 401 = invalid/expired token; 403 = the token's user no longer exists or
+    // is no longer an active admin (e.g. the account was deleted). Both mean
+    // this session cannot reach any dashboard data, so clear it and re-login.
     localStorage.removeItem('admin-token');
     localStorage.removeItem('admin-user');
     window.location.href = '/login';
@@ -214,7 +229,10 @@ export async function importTeamRankingsExcel(file) {
     body: formData,
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
+    // 401 = invalid/expired token; 403 = the token's user no longer exists or
+    // is no longer an active admin (e.g. the account was deleted). Both mean
+    // this session cannot reach any dashboard data, so clear it and re-login.
     localStorage.removeItem('admin-token');
     localStorage.removeItem('admin-user');
     window.location.href = '/login';
@@ -270,7 +288,10 @@ export async function importResultsExcel(file) {
     body: formData,
   });
 
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
+    // 401 = invalid/expired token; 403 = the token's user no longer exists or
+    // is no longer an active admin (e.g. the account was deleted). Both mean
+    // this session cannot reach any dashboard data, so clear it and re-login.
     localStorage.removeItem('admin-token');
     localStorage.removeItem('admin-user');
     window.location.href = '/login';

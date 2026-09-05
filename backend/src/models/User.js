@@ -32,9 +32,12 @@ const userSchema = new mongoose.Schema({
   profileImageUrl: { type: String, default: '' },
   bio: { type: String, default: '', maxlength: 300 },
   // ── New registration fields (all optional/backward-compatible) ──
-  communityRole: { type: String, enum: COMMUNITY_ROLES, default: '' },
+  // '' is the "unset" sentinel used across the app (serializers render it as
+  // empty), so the enums must accept it — users created without these fields
+  // (e.g. the legacy admin bootstrap) would otherwise fail validation.
+  communityRole: { type: String, enum: [...COMMUNITY_ROLES, ''], default: '' },
   disciplines: { type: [String], enum: DISCIPLINES, default: [] },
-  experienceLevel: { type: String, enum: EXPERIENCE_LEVELS, default: '' },
+  experienceLevel: { type: String, enum: [...EXPERIENCE_LEVELS, ''], default: '' },
   city: { type: String, default: '', maxlength: 100 },
   instagramUrl: { type: String, default: '', maxlength: 300 },
   agreedToCommunityTerms: { type: Boolean, default: false },
