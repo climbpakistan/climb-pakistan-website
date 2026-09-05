@@ -4376,7 +4376,7 @@ input, textarea, select { font: inherit; color: inherit; }
 
 /* Community responsive */
 @media (max-width: 1100px) {
-  .community-feed-layout { grid-template-columns: 1fr; }
+  .community-feed-layout { grid-template-columns: minmax(0, 1fr); }
 
   /* Topics: instead of hiding the sidebar on narrow screens, turn it into a
      horizontally scrollable chip row above the posts. */
@@ -4388,6 +4388,7 @@ input, textarea, select { font: inherit; color: inherit; }
   }
   .community-topics-sidebar-title { margin-bottom: var(--sp-2); }
   .community-topics-sidebar-list {
+    min-width: 0;
     display: flex;
     flex-wrap: nowrap;
     gap: var(--sp-2);
@@ -5840,9 +5841,9 @@ input, textarea, select { font: inherit; color: inherit; }
     z-index: 101;
   }
   .community-search-bar { align-items: stretch; }
-  .community-search-filters { width: 100%; }
-  .community-search-input-wrap { width: 100%; }
-  .community-search-btn { width: 100%; }
+  .community-search-filters { flex: 0 0 100%; width: 100%; }
+  .community-search-input-wrap { flex: 1 0 100%; width: 100%; }
+  .community-search-btn { flex: 0 0 100%; width: 100%; }
   .community-search-suggestions {
     z-index: 150;
     left: 0;
