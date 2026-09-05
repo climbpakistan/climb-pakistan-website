@@ -6,7 +6,7 @@ import PostCard from '../../../src/components/community/PostCard';
 import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers } from '../../../src/api';
+import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers, followUser, unfollowUser, getFollowStatusBatch } from '../../../src/api';
 
 export { Page };
 
@@ -109,11 +109,51 @@ function Page() {
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
+  // Follow state for the user suggestions in the dropdown — seeded from the
+  // server so accounts already followed show "Following" instead of "Follow".
+  const [suggestFollows, setSuggestFollows] = useState({});
+  const [suggestFollowBusy, setSuggestFollowBusy] = useState({});
+
   // Flattened list of suggestions for keyboard navigation.
   const flatSuggestions = [
     ...suggestions.posts.map((p) => ({ ...p, type: 'post' })),
     ...suggestions.users.map((u) => ({ ...u, type: 'user' })),
   ];
+
+  // Refresh follow state whenever the suggested users change.
+  useEffect(() => {
+    let active = true;
+    const ids = suggestions.users.map((u) => u.id);
+    if (isGuest || ids.length === 0) {
+      setSuggestFollows({});
+      return () => { active = false; };
+    }
+    getFollowStatusBatch(token, ids)
+      .then((status) => { if (active) setSuggestFollows(status.following || {}); })
+      .catch(() => { if (active) setSuggestFollows({}); });
+    return () => { active = false; };
+  }, [suggestions.users, token, isGuest]);
+
+  async function toggleSuggestionFollow(u, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isGuest) { openAuthPrompt('Log in to follow accounts.'); return; }
+    if (suggestFollowBusy[u.id]) return;
+    setSuggestFollowBusy((m) => ({ ...m, [u.id]: true }));
+    try {
+      if (suggestFollows[u.id]) {
+        await unfollowUser(token, u.id);
+        setSuggestFollows((m) => ({ ...m, [u.id]: false }));
+      } else {
+        await followUser(token, u.id);
+        setSuggestFollows((m) => ({ ...m, [u.id]: true }));
+      }
+    } catch {
+      // leave state unchanged; user can retry
+    } finally {
+      setSuggestFollowBusy((m) => ({ ...m, [u.id]: false }));
+    }
+  }
 
   // Debounced fetch of matching questions + users as the user types.
   useEffect(() => {
@@ -414,28 +454,39 @@ function Page() {
                         {suggestions.users.map((u, j) => {
                           const idx = suggestions.posts.length + j;
                           return (
-                            <button
+                            <div
                               key={u.id}
-                              type="button"
                               role="option"
                               aria-selected={activeSuggestion === idx}
                               className={`community-search-suggestion${activeSuggestion === idx ? ' is-active' : ''}`}
                               onClick={() => selectSuggestion({ ...u, type: 'user' })}
                             >
-                              {u.profileImageUrl ? (
-                                <img src={u.profileImageUrl} alt="" className="community-search-suggestion-avatar" />
-                              ) : (
-                                <span className="community-search-suggestion-avatar community-search-suggestion-avatar--fallback">
-                                  {(u.username || '?')[0].toUpperCase()}
+                              <span className="community-search-suggestion-user-info">
+                                {u.profileImageUrl ? (
+                                  <img src={u.profileImageUrl} alt="" className="community-search-suggestion-avatar" />
+                                ) : (
+                                  <span className="community-search-suggestion-avatar community-search-suggestion-avatar--fallback">
+                                    {(u.username || '?')[0].toUpperCase()}
+                                  </span>
+                                )}
+                                <span className="community-search-suggestion-user">
+                                  <span className="community-search-suggestion-username">
+                                    @{u.username} <VerificationBadge verification={u.verification} size={12} />
+                                  </span>
+                                  {u.name && <span className="community-search-suggestion-name">{u.name}</span>}
                                 </span>
-                              )}
-                              <span className="community-search-suggestion-user">
-                                <span className="community-search-suggestion-username">
-                                  @{u.username} <VerificationBadge verification={u.verification} size={12} />
-                                </span>
-                                {u.name && <span className="community-search-suggestion-name">{u.name}</span>}
                               </span>
-                            </button>
+                              {!isGuest && (
+                                <button
+                                  type="button"
+                                  className={`community-suggestion-follow${suggestFollows[u.id] ? ' is-following' : ''}`}
+                                  disabled={suggestFollowBusy[u.id]}
+                                  onClick={(e) => toggleSuggestionFollow(u, e)}
+                                >
+                                  {suggestFollowBusy[u.id] ? '…' : suggestFollows[u.id] ? 'Following' : 'Follow'}
+                                </button>
+                              )}
+                            </div>
                           );
                         })}
                       </div>

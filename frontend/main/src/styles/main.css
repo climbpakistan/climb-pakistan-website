@@ -4927,6 +4927,7 @@ input, textarea, select { font: inherit; color: inherit; }
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--sp-3);
   width: 100%;
   padding: var(--sp-2) var(--sp-3);
@@ -4939,6 +4940,38 @@ input, textarea, select { font: inherit; color: inherit; }
   cursor: pointer;
   font-family: inherit;
   transition: background 0.12s ease;
+}
+.community-search-suggestion-user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+/* Follow button inside a user suggestion */
+.community-suggestion-follow {
+  flex: none;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--cp-accent);
+  border-radius: 100px;
+  background: none;
+  color: var(--cp-accent);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.community-suggestion-follow:hover {
+  background: var(--cp-accent-soft);
+}
+.community-suggestion-follow.is-following {
+  border-color: var(--cp-border);
+  color: var(--cp-text-muted);
+  background: var(--cp-bg-alt);
+}
+.community-suggestion-follow:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 .community-search-suggestion:hover {
   background: var(--cp-bg-alt);
