@@ -255,7 +255,7 @@ function EditProfile({ profile, onCancel, onSaved }) {
   );
 }
 
-function SimilarAccounts({ users, viewerIsGuest, isOwnerOfProfile, follows, busy, onToggleFollow, onDismiss }) {
+function SimilarAccounts({ users, follows, busy, onToggleFollow, onDismiss }) {
   return (
     <div className="profile-similar">
       <h2 className="profile-similar-title">Similar accounts</h2>
@@ -285,16 +285,14 @@ function SimilarAccounts({ users, viewerIsGuest, isOwnerOfProfile, follows, busy
               </span>
               <span className="profile-similar-name">{u.name || u.city || 'Community member'}</span>
             </a>
-            {!viewerIsGuest && !isOwnerOfProfile && (
-              <button
-                type="button"
-                className={`btn profile-similar-follow ${follows[u.id] ? 'btn-outline' : 'btn-primary'}`}
-                onClick={() => onToggleFollow(u)}
-                disabled={busy[u.id]}
-              >
-                {busy[u.id] ? '…' : follows[u.id] ? 'Following' : 'Follow'}
-              </button>
-            )}
+            <button
+              type="button"
+              className={`profile-similar-follow${follows[u.id] ? ' is-following' : ''}`}
+              onClick={() => onToggleFollow(u)}
+              disabled={busy[u.id]}
+            >
+              {busy[u.id] ? '…' : follows[u.id] ? 'Following' : 'Follow'}
+            </button>
           </div>
         ))}
       </div>
@@ -331,7 +329,7 @@ function FollowList({ list, busy, denormalized }) {
 
 function Page() {
   const { username, profile } = useData();
-  const { user, token, isGuest, updateUser } = useCommunity();
+  const { user, token, isGuest, updateUser, openAuthPrompt } = useCommunity();
   const [tab, setTab] = useState('posts');
   const [editing, setEditing] = useState(false);
 
@@ -365,14 +363,20 @@ function Page() {
     getSimilarUsers(profile.username)
       .then((data) => {
         if (!active) return;
-        setSimilar((data.users || []).filter((u) => u.username !== profile.username));
+        setSimilar((data.users || []).filter(
+          (u) => u.username !== profile.username && u.username !== user?.username
+        ));
       })
       .catch(() => {});
     return () => { active = false; };
-  }, [profile]);
+  }, [profile, user]);
 
   async function handleSimilarFollow(u) {
-    if (isGuest || similarBusy[u.id]) return;
+    if (isGuest) {
+      openAuthPrompt('Log in to follow accounts.');
+      return;
+    }
+    if (similarBusy[u.id]) return;
     setSimilarBusy((m) => ({ ...m, [u.id]: true }));
     try {
       if (similarFollows[u.id]) {
@@ -565,8 +569,6 @@ function Page() {
           {!editing && tab === 'posts' && similar.length > 0 && (
             <SimilarAccounts
               users={similar}
-              viewerIsGuest={isGuest}
-              isOwnerOfProfile={isOwner}
               follows={similarFollows}
               busy={similarBusy}
               onToggleFollow={handleSimilarFollow}

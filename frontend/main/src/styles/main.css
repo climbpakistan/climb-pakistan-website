@@ -4056,9 +4056,27 @@ input, textarea, select { font: inherit; color: inherit; }
   width: 100%;
   margin-top: var(--sp-1);
   padding: var(--sp-2) var(--sp-3);
+  border: none;
   border-radius: 8px;
+  background: #0095f6;
+  color: #fff;
+  font-family: inherit;
   font-size: var(--fs-sm);
   font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.profile-similar-follow:hover {
+  background: #1877f2;
+}
+.profile-similar-follow.is-following {
+  background: var(--cp-bg-alt);
+  color: var(--cp-text);
+}
+.profile-similar-follow:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .profile-edit-form { margin-top: var(--sp-6); }
