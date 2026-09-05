@@ -62,13 +62,35 @@ export default function PostCard({ post }) {
 
   return (
     <article className="community-post-card">
-      <div className="community-post-card-top">
-        <span className="tag">{post.category}</span>
-        <div className="community-post-card-top-right">
+      <div className="community-post-card-head">
+        <a href={`/community/u/${encodeURIComponent(author.username || '')}`} className="community-post-author community-post-author--head">
+          {author.profileImageUrl ? (
+            <img
+              src={author.profileImageUrl}
+              alt=""
+              loading="lazy"
+              className="community-avatar community-avatar--sm"
+            />
+          ) : (
+            <span className="community-avatar community-avatar--sm community-avatar--fallback" aria-hidden="true">
+              {(author.username || '?').charAt(0).toUpperCase()}
+            </span>
+          )}
+          <span className="community-post-author-meta">
+            <span className="community-post-author-username">
+              @{author.username || 'unknown'}
+              <VerificationBadge verification={author.verification} />
+            </span>
+            {author.name && <span className="community-post-author-name">{author.name}</span>}
+          </span>
+        </a>
+        <div className="community-post-card-head-right">
           <span className="community-post-date">{formatPostDate(post.createdAt)}</span>
           <ReportMenu postId={post.id} marker="Post" />
         </div>
       </div>
+
+      <span className="community-post-topic">{post.category}</span>
 
       <h3 className="community-post-title">
         <a href={`/community/post/${post.id}`}>{post.title}</a>
@@ -119,23 +141,6 @@ export default function PostCard({ post }) {
       )}
 
       <div className="community-post-footer">
-        <a href={`/community/u/${encodeURIComponent(author.username || '')}`} className="community-post-author">
-          {author.profileImageUrl ? (
-            <img
-              src={author.profileImageUrl}
-              alt=""
-              loading="lazy"
-              className="community-avatar community-avatar--sm"
-            />
-          ) : (
-            <span className="community-avatar community-avatar--sm community-avatar--fallback" aria-hidden="true">
-              {(author.username || '?').charAt(0).toUpperCase()}
-            </span>
-          )}
-          <span>@{author.username || 'unknown'}</span>
-          <VerificationBadge verification={author.verification} />
-        </a>
-
         <div className="community-post-actions">
           <button
             type="button"
