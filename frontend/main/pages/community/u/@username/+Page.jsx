@@ -140,16 +140,32 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
               >
                 {followBusy ? '…' : isFollowing ? 'Following' : 'Follow'}
               </button>
-              <div className="profile-more">
-                <button
-                  type="button"
-                  className="profile-more-btn"
-                  aria-label="More options"
-                  aria-expanded={moreOpen || confirmBlock}
-                  onClick={() => { setConfirmBlock(false); setMoreOpen((v) => !v); }}
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" /></svg>
-                </button>
+            </>
+          ) : null}
+
+          {athlete ? (
+            <a href={`/athletes/${athlete.slug}`} className="btn profile-action-btn profile-action-btn--athlete profile-actions-right">
+              Athlete Profile
+            </a>
+          ) : null}
+
+          {profile.instagramUrl ? (
+            <a href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" className={`btn profile-action-btn profile-action-btn--instagram${athlete ? '' : ' profile-actions-right'}`}>
+              Instagram
+            </a>
+          ) : null}
+
+          {!isOwner && canFollow ? (
+            <div className={`profile-more${athlete || profile.instagramUrl ? '' : ' profile-actions-right'}`}>
+              <button
+                type="button"
+                className="profile-more-btn"
+                aria-label="More options"
+                aria-expanded={moreOpen || confirmBlock}
+                onClick={() => { setConfirmBlock(false); setMoreOpen((v) => !v); }}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" /></svg>
+              </button>
                 {confirmBlock ? (
                   <div className="profile-more-dropdown" role="dialog" aria-label="Confirm block">
                     <p className="profile-more-confirm-text">
@@ -208,24 +224,11 @@ function ProfileHeader({ profile, isOwner, isFollowing, followBusy, canFollow, o
                   </div>
                 )}
               </div>
-            </>
-          ) : null}
-
-          {profile.instagramUrl ? (
-            <a href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" className="btn profile-action-btn profile-action-btn--instagram">
-              Instagram
-            </a>
-          ) : null}
-
-          {athlete ? (
-            <a href={`/athletes/${athlete.slug}`} className="btn profile-action-btn profile-action-btn--athlete">
-              Athlete Profile
-            </a>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 function EditProfile({ profile, onCancel, onSaved }) {
