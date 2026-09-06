@@ -3,8 +3,15 @@ import vike from 'vike/plugin'
 import { vercel } from 'vite-plugin-vercel/vite'
 
 // https://vite.dev/config/
+// Only enable the Vercel output plugin during Vercel builds. Its
+// @vercel/nft file-tracing spins forever on Windows (junction/glob bug in
+// nft), so keep it off for local builds; Vercel CI sets VERCEL=1 and still
+// produces .vercel/output exactly as before.
+const plugins = [vike()];
+if (process.env.VERCEL) plugins.push(vercel());
+
 export default defineConfig({
-  plugins: [vike(), vercel()],
+  plugins,
   css: {
     transformer: 'lightningcss',
     // Pin conservative targets so lightningcss downlevels modern CSS — most

@@ -2,8 +2,8 @@ node_modules
 dist
 .DS_Store
 
-# Build-time generated sitemap
-public/sitemap.xml
+# Local build log artifact
+build-log.txt
 
 # vite-plugin-vercel build output (Vercel Build Output API)
 .vercel
