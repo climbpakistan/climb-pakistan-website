@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { postBodyExcerpt } from '../../utils/communityPosts';
 import VerificationBadge from './VerificationBadge';
 import VoteControls from './VoteControls';
@@ -19,6 +19,26 @@ export default function PostCard({ post }) {
   const [saveBusy, setSaveBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const lightboxImages = ((post?.images && post.images.length > 0) ? post.images : post?.imageUrl ? [post.imageUrl] : []).filter(Boolean);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowLeft') setLightboxIndex((i) => (i - 1 + lightboxImages.length) % lightboxImages.length);
+      if (e.key === 'ArrowRight') setLightboxIndex((i) => (i + 1) % lightboxImages.length);
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [lightboxOpen, lightboxImages.length]);
 
   if (!post) return null;
   const author = post.author || {};
@@ -92,15 +112,6 @@ export default function PostCard({ post }) {
 
       <span className="community-post-topic">{post.category}</span>
 
-      {(post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl)) && (
-        <a href={`/community/post/${post.id}`} className="community-post-image-link">
-          <PostGallery
-            images={post.images && post.images.length > 0 ? post.images : post.imageUrl}
-            alt={post.title}
-          />
-        </a>
-      )}
-
       <div className="community-post-body-card">
         <h3 className="community-post-title">
           <a href={`/community/post/${post.id}`}>{post.title}</a>
@@ -121,6 +132,88 @@ export default function PostCard({ post }) {
           </button>
         )}
       </div>
+
+      {(post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl)) && (
+        <div
+          className="community-post-image-link"
+          role="button"
+          tabIndex={0}
+          aria-label="View image full screen"
+          onClick={(e) => {
+            if (e.target !== e.currentTarget) return;
+            setLightboxIndex(0);
+            setLightboxOpen(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setLightboxIndex(0);
+              setLightboxOpen(true);
+            }
+          }}
+        >
+          <PostGallery
+            images={post.images && post.images.length > 0 ? post.images : post.imageUrl}
+            alt={post.title}
+            onImageClick={(i) => {
+              setLightboxIndex(i);
+              setLightboxOpen(true);
+            }}
+          />
+        </div>
+      )}
+
+      {lightboxOpen && lightboxImages.length > 0 && (
+        <div
+          className="community-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            className="community-lightbox-close"
+            aria-label="Close image"
+            onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          {lightboxImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="community-lightbox-nav community-lightbox-nav--prev"
+                aria-label="Previous image"
+                onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + lightboxImages.length) % lightboxImages.length); }}
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="community-lightbox-nav community-lightbox-nav--next"
+                aria-label="Next image"
+                onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % lightboxImages.length); }}
+              >
+                ›
+              </button>
+            </>
+          )}
+          <img
+            className="community-lightbox-img"
+            src={lightboxImages[lightboxIndex]}
+            alt={post.title}
+            onClick={(e) => e.stopPropagation()}
+          />
+          {lightboxImages.length > 1 && (
+            <span className="community-lightbox-count">
+              {lightboxIndex + 1} / {lightboxImages.length}
+            </span>
+          )}
+        </div>
+      )}
 
       {post.type === 'link' && post.externalUrl && (
         <a

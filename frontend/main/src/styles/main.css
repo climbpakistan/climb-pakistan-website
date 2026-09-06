@@ -4603,6 +4603,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-post-card .community-post-image-link {
   flex: none;
   display: flex;
+  cursor: zoom-in;
 }
 .community-post-card--full .community-post-image-link {
   flex: none;
@@ -4653,6 +4654,76 @@ input, textarea, select { font: inherit; color: inherit; }
   object-fit: cover;
 }
 .community-post-image--full { margin-top: var(--sp-4); }
+/* Feed image lightbox */
+.community-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.92);
+  cursor: zoom-out;
+}
+.community-lightbox-img {
+  max-width: 94vw;
+  max-height: 88vh;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.community-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.community-lightbox-close:hover { background: rgba(255, 255, 255, 0.3); }
+.community-lightbox-close svg { width: 20px; height: 20px; }
+.community-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.community-lightbox-nav:hover { background: rgba(255, 255, 255, 0.3); }
+.community-lightbox-nav--prev { left: 16px; }
+.community-lightbox-nav--next { right: 16px; }
+.community-lightbox-count {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 13px;
+}
 /* Multi-image gallery (2–3 images) */
 .community-post-gallery {
   display: grid;

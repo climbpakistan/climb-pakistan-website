@@ -1,8 +1,9 @@
 /**
  * PostGallery — renders a post's images: a single image as-is, or 2–3 images
  * in a grid. Accepts either an array of urls (post.images) or a single url.
+ * When `onImageClick` is provided, each image invokes it with its index.
  */
-export default function PostGallery({ images, alt = '' }) {
+export default function PostGallery({ images, alt = '', onImageClick }) {
   const list = (Array.isArray(images) ? images : [images]).filter(Boolean);
   if (list.length === 0) return null;
 
@@ -14,6 +15,7 @@ export default function PostGallery({ images, alt = '' }) {
         loading="lazy"
         decoding="async"
         className="community-post-image"
+        onClick={() => onImageClick?.(0)}
       />
     );
   }
@@ -27,6 +29,7 @@ export default function PostGallery({ images, alt = '' }) {
           alt={`${alt} ${i + 1}`}
           loading="lazy"
           decoding="async"
+          onClick={() => onImageClick?.(i)}
         />
       ))}
     </div>
