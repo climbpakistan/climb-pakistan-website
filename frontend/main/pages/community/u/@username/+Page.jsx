@@ -397,8 +397,11 @@ function FollowList({ list, busy, denormalized }) {
               {(m.username || m.name || '?')[0].toUpperCase()}
             </span>
             <span className="profile-follow-row-meta">
-              <span className="profile-follow-row-name">@{m.username} <VerificationBadge verification={m.verification} size={12} /></span>
-              {m.name ? <span className="profile-follow-row-bio">{m.name}</span> : null}
+              <span className="profile-follow-row-name">
+                {m.name || `@${m.username}`}
+                <VerificationBadge verification={m.verification} size={12} />
+              </span>
+              {m.name ? <span className="profile-follow-row-bio">@{m.username}</span> : null}
             </span>
           </a>
         ))
