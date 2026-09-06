@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "migrate:questions": "node scripts/migrate-questions-category.js"
+    "migrate:questions": "node scripts/migrate-questions-category.js",
+    "migrate:badges": "node scripts/remove-international-badge.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

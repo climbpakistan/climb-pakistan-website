@@ -5783,10 +5783,6 @@ input, textarea, select { font: inherit; color: inherit; }
   color: #2e8b57;
   background: rgba(46, 139, 87, 0.12);
 }
-.community-badge-icon--international {
-  color: #4169e1;
-  background: rgba(65, 105, 225, 0.12);
-}
 .community-badge-card-text {
   color: var(--cp-text-muted);
   font-size: var(--fs-sm);

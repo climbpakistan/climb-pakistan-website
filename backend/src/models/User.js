@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema({
   // Verification. No user can set this themselves — managed by the admin team
   // via the admin tool. 'none' until then. 'official' is reserved for the
   // Climb Pakistan official account (white circle + black tick badge).
-  verification: { type: String, enum: ['none', 'national', 'international', 'organization', 'official'], default: 'none' },
+  verification: { type: String, enum: ['none', 'national', 'organization', 'official'], default: 'none' },
   // Verification audit — which admin set the current verification and when.
   verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   verifiedAt: { type: Date, default: null },

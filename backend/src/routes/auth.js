@@ -4,7 +4,6 @@ import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import { Resend } from 'resend';
 import User, { RESERVED_USERNAMES, COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS } from '../models/User.js';
-import BadgeApplication, { BADGE_TYPES } from '../models/BadgeApplication.js';
 import { requireUser } from '../middleware/auth.js';
 import cloudinary from '../cloudinary.js';
 
@@ -535,59 +534,6 @@ router.get('/u/:username/similar', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Could not load similar accounts.' });
-  }
-});
-
-// ── Badge Applications ──
-
-// POST /api/auth/badge-applications — submit a badge application.
-router.post('/badge-applications', requireUser, async (req, res) => {
-  try {
-    const { badgeType, message } = req.body;
-    if (!BADGE_TYPES.includes(badgeType)) {
-      return res.status(400).json({ error: 'Invalid badge type.' });
-    }
-
-    // Prevent duplicate active applications
-    const existing = await BadgeApplication.findOne({
-      userId: req.user.id,
-      badgeType,
-      status: 'pending',
-    });
-    if (existing) {
-      return res.status(409).json({ error: 'You already have a pending application for this badge.' });
-    }
-
-    const application = await BadgeApplication.create({
-      userId: req.user.id,
-      badgeType,
-      message: String(message || '').trim().slice(0, 1000),
-    });
-
-    res.status(201).json({ application: { id: application._id, badgeType: application.badgeType, status: application.status, createdAt: application.createdAt } });
-  } catch (err) {
-    console.error('Badge application error:', err);
-    res.status(500).json({ error: 'Could not submit your application.' });
-  }
-});
-
-// GET /api/auth/badge-applications/my — get current user's badge applications.
-router.get('/badge-applications/my', requireUser, async (req, res) => {
-  try {
-    const applications = await BadgeApplication.find({ userId: req.user.id })
-      .sort({ createdAt: -1 });
-    res.json({
-      applications: applications.map((a) => ({
-        id: a._id,
-        badgeType: a.badgeType,
-        status: a.status,
-        message: a.message,
-        createdAt: a.createdAt,
-        handledAt: a.handledAt,
-      })),
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Could not load your applications.' });
   }
 });
 
