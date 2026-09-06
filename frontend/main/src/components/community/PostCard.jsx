@@ -8,26 +8,41 @@ import RichText from './RichText';
 import PostGallery from './PostGallery';
 import PostLightbox from './PostLightbox';
 import { useCommunity } from '../../hooks/CommunityContext';
-import { savePost, unsavePost } from '../../api';
+import { savePost, unsavePost, deletePost } from '../../api';
 import { formatPostDate } from '../../utils/communityPosts';
 
 /**
  * PostCard — feed card for a community post. Voting/commenting are functional.
  */
 export default function PostCard({ post }) {
-  const { token, isGuest, openAuthPrompt } = useCommunity();
+  const { token, isGuest, openAuthPrompt, user } = useCommunity();
   const [saved, setSaved] = useState(!!post?.saved);
   const [saveBusy, setSaveBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const lightboxImages = ((post?.images && post.images.length > 0) ? post.images : post?.imageUrl ? [post.imageUrl] : []).filter(Boolean);
 
   if (!post) return null;
   const author = post.author || {};
   const bodyExcerpt = postBodyExcerpt(post.body || '');
+  const isOwner = !!(user && author.username && user.username === author.username);
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await deletePost(token, post.id);
+      window.location.reload();
+    } catch {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  }
 
   async function handleSave() {
     if (isGuest) {
@@ -91,7 +106,63 @@ export default function PostCard({ post }) {
         </a>
         <div className="community-post-card-head-right">
           <span className="community-post-date">{formatPostDate(post.createdAt)}</span>
-          <ReportMenu postId={post.id} marker="Post" />
+          {isOwner ? (
+            <div className="community-post-menu">
+              <button
+                type="button"
+                className="community-post-action community-post-menu-btn"
+                aria-label="Post options"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((v) => !v)}
+              >
+                ⋯
+              </button>
+              {menuOpen && (
+                <div className="community-post-menu-dropdown" role="menu">
+                  {!confirmDelete ? (
+                    <>
+                      <a
+                        role="menuitem"
+                        className="community-post-menu-item"
+                        href={`/community/post/${post.id}/edit`}
+                      >
+                        Edit post
+                      </a>
+                      <button
+                        role="menuitem"
+                        type="button"
+                        className="community-post-menu-item community-post-menu-item--danger"
+                        onClick={() => setConfirmDelete(true)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <span className="community-post-menu-confirm">
+                      Delete this post?
+                      <button
+                        type="button"
+                        className="community-post-menu-item community-post-menu-item--danger"
+                        onClick={handleDelete}
+                        disabled={deleting}
+                      >
+                        {deleting ? 'Deleting…' : 'Yes, delete'}
+                      </button>
+                      <button
+                        type="button"
+                        className="community-post-menu-item"
+                        onClick={() => setConfirmDelete(false)}
+                      >
+                        Keep it
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <ReportMenu postId={post.id} marker="Post" />
+          )}
         </div>
       </div>
 

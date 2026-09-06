@@ -4841,6 +4841,13 @@ input, textarea, select { font: inherit; color: inherit; }
 /* ⋯ owner menu */
 .community-post-menu { position: relative; }
 .community-post-menu-btn { letter-spacing: 1px; font-weight: 700; }
+.community-post-menu-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.community-post-menu-btn.community-report-btn svg { color: var(--cp-text-muted); }
+.community-post-menu-btn.community-report-btn:hover svg { color: var(--cp-danger, #e5484d); }
 .community-post-menu-dropdown {
   position: absolute;
   right: 0;

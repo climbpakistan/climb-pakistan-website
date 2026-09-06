@@ -4,11 +4,11 @@ import { submitReport } from '../../api';
 import { reportReasons } from '../../data/communityData';
 
 /**
- * ReportMenu — the `⋯` menu with a Report option, available on any post or
- * comment. Logged-in users can report with a reason (and optional details).
- * Duplicate reports are rejected server-side.
+ * ReportMenu — the report (flag) button with a Report form, available on any
+ * post or comment. Logged-in users can report with a reason (and optional
+ * details). Duplicate reports are rejected server-side.
  */
-export default function ReportMenu({ postId, commentId, marker = 'More' }) {
+export default function ReportMenu({ postId, commentId }) {
   const { token, isGuest, openAuthPrompt } = useCommunity();
 
   const [open, setOpen] = useState(false);
@@ -53,12 +53,15 @@ export default function ReportMenu({ postId, commentId, marker = 'More' }) {
     <div className="community-post-menu">
       <button
         type="button"
-        className="community-post-action community-post-menu-btn"
-        aria-label={`${marker} menu`}
+        className="community-post-action community-post-menu-btn community-report-btn"
+        aria-label={`Report ${postId ? 'post' : 'comment'}`}
         aria-expanded={open}
         onClick={handleOpen}
       >
-        ⋯
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+          <line x1="4" y1="22" x2="4" y2="15" />
+        </svg>
       </button>
 
       {open && (
