@@ -92,10 +92,6 @@ export default function PostCard({ post }) {
 
       <span className="community-post-topic">{post.category}</span>
 
-      <h3 className="community-post-title">
-        <a href={`/community/post/${post.id}`}>{post.title}</a>
-      </h3>
-
       {(post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl)) && (
         <a href={`/community/post/${post.id}`} className="community-post-image-link">
           <PostGallery
@@ -105,23 +101,26 @@ export default function PostCard({ post }) {
         </a>
       )}
 
-      {post.body && (
-        <div className="community-post-body-card">
+      <div className="community-post-body-card">
+        <h3 className="community-post-title">
+          <a href={`/community/post/${post.id}`}>{post.title}</a>
+        </h3>
+        {post.body && (
           <p className={`community-post-excerpt${expanded ? ' is-expanded' : ''}`}>
             <RichText text={expanded ? post.body : bodyExcerpt.text} />
           </p>
-          {bodyExcerpt.truncated && (
-            <button
-              type="button"
-              className="community-post-see-more"
-              onClick={() => setExpanded((v) => !v)}
-              aria-expanded={expanded}
-            >
-              {expanded ? 'See less' : 'See more'}
-            </button>
-          )}
-        </div>
-      )}
+        )}
+        {post.body && bodyExcerpt.truncated && (
+          <button
+            type="button"
+            className="community-post-see-more"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+          >
+            {expanded ? 'See less' : 'See more'}
+          </button>
+        )}
+      </div>
 
       {post.type === 'link' && post.externalUrl && (
         <a
