@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vike dev",
-    "build": "node scripts/generate-sitemap.js && vike build",
+    "build": "vike build",
+    "generate-sitemap": "node scripts/generate-sitemap.js",
     "lint": "oxlint",
     "preview": "vike preview"
   },

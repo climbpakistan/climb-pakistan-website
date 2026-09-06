@@ -12,10 +12,11 @@
  * framework/routing incompatibilities on Vercel.
  *
  * Usage:
- *   node scripts/generate-sitemap.js
+ *   npm run generate-sitemap
  *
- * Called automatically before `vite build` via the `build` script
- * in package.json.
+ * Run intentionally to refresh public/sitemap.xml; it is intentionally
+ * decoupled from `npm run build` so a normal production build never
+ * unexpectedly rewrites the tracked sitemap.xml.
  */
 
 const API_BASE = 'https://climb-pakistan-backend.onrender.com/api';
