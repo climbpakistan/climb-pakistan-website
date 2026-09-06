@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { postBodyExcerpt } from '../../utils/communityPosts';
 import VerificationBadge from './VerificationBadge';
 import VoteControls from './VoteControls';
@@ -6,6 +6,7 @@ import ReportMenu from './ReportMenu';
 import Poll from './Poll';
 import RichText from './RichText';
 import PostGallery from './PostGallery';
+import PostLightbox from './PostLightbox';
 import { useCommunity } from '../../hooks/CommunityContext';
 import { savePost, unsavePost } from '../../api';
 import { formatPostDate } from '../../utils/communityPosts';
@@ -23,22 +24,6 @@ export default function PostCard({ post }) {
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const lightboxImages = ((post?.images && post.images.length > 0) ? post.images : post?.imageUrl ? [post.imageUrl] : []).filter(Boolean);
-
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const onKey = (e) => {
-      if (e.key === 'Escape') setLightboxOpen(false);
-      if (e.key === 'ArrowLeft') setLightboxIndex((i) => (i - 1 + lightboxImages.length) % lightboxImages.length);
-      if (e.key === 'ArrowRight') setLightboxIndex((i) => (i + 1) % lightboxImages.length);
-    };
-    document.addEventListener('keydown', onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [lightboxOpen, lightboxImages.length]);
 
   if (!post) return null;
   const author = post.author || {};
@@ -163,56 +148,14 @@ export default function PostCard({ post }) {
         </div>
       )}
 
-      {lightboxOpen && lightboxImages.length > 0 && (
-        <div
-          className="community-lightbox"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Image preview"
-          onClick={() => setLightboxOpen(false)}
-        >
-          <button
-            type="button"
-            className="community-lightbox-close"
-            aria-label="Close image"
-            onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-          {lightboxImages.length > 1 && (
-            <>
-              <button
-                type="button"
-                className="community-lightbox-nav community-lightbox-nav--prev"
-                aria-label="Previous image"
-                onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + lightboxImages.length) % lightboxImages.length); }}
-              >
-                ‹
-              </button>
-              <button
-                type="button"
-                className="community-lightbox-nav community-lightbox-nav--next"
-                aria-label="Next image"
-                onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % lightboxImages.length); }}
-              >
-                ›
-              </button>
-            </>
-          )}
-          <img
-            className="community-lightbox-img"
-            src={lightboxImages[lightboxIndex]}
-            alt={post.title}
-            onClick={(e) => e.stopPropagation()}
-          />
-          {lightboxImages.length > 1 && (
-            <span className="community-lightbox-count">
-              {lightboxIndex + 1} / {lightboxImages.length}
-            </span>
-          )}
-        </div>
+      {lightboxOpen && (
+        <PostLightbox
+          images={lightboxImages}
+          index={lightboxIndex}
+          alt={post.title}
+          onClose={() => setLightboxOpen(false)}
+          onIndexChange={setLightboxIndex}
+        />
       )}
 
       {post.type === 'link' && post.externalUrl && (

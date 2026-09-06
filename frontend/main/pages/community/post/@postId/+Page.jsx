@@ -8,6 +8,7 @@ import ReportMenu from '../../../../src/components/community/ReportMenu';
 import Poll from '../../../../src/components/community/Poll';
 import RichText from '../../../../src/components/community/RichText';
 import PostGallery from '../../../../src/components/community/PostGallery';
+import PostLightbox from '../../../../src/components/community/PostLightbox';
 import { useCommunity } from '../../../../src/hooks/CommunityContext';
 import { getPost, deletePost, getMyVotes } from '../../../../src/api';
 import {
@@ -31,6 +32,8 @@ function Page() {
   const [copied, setCopied] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [postMyVote, setPostMyVote] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Keep the latest token in a ref so the initial-load effect runs once per
   // postId (on mount) without re-fetching when the token resolves.
@@ -174,12 +177,43 @@ function Page() {
               {post.body && <p className="community-post-body"><RichText text={post.body} /></p>}
 
               {post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl) && (
-                <div className="community-post-image-link community-post-image-link--full">
+                <div
+                  className="community-post-image-link community-post-image-link--full"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="View image full screen"
+                  onClick={(e) => {
+                    if (e.target !== e.currentTarget) return;
+                    setLightboxIndex(0);
+                    setLightboxOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setLightboxIndex(0);
+                      setLightboxOpen(true);
+                    }
+                  }}
+                >
                   <PostGallery
                     images={post.images && post.images.length > 0 ? post.images : post.imageUrl}
                     alt={post.title}
+                    onImageClick={(i) => {
+                      setLightboxIndex(i);
+                      setLightboxOpen(true);
+                    }}
                   />
                 </div>
+              )}
+
+              {lightboxOpen && (
+                <PostLightbox
+                  images={post.images && post.images.length > 0 ? post.images : post.imageUrl}
+                  index={lightboxIndex}
+                  alt={post.title}
+                  onClose={() => setLightboxOpen(false)}
+                  onIndexChange={setLightboxIndex}
+                />
               )}
 
               {post.type === 'link' && post.externalUrl && (
