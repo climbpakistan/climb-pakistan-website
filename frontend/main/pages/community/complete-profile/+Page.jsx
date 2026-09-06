@@ -186,17 +186,9 @@ function Page() {
                 <div className="community-badge-card">
                   <div className="community-badge-card-header">
                     <VerificationBadgeMini color="#22c55e" />
-                    <h4>National Climber</h4>
+                    <h4>Verified Athlete</h4>
                   </div>
-                  <p className="community-badge-card-text">For climbers recognized at the national level in Pakistan.</p>
-                </div>
-
-                <div className="community-badge-card">
-                  <div className="community-badge-card-header">
-                    <VerificationBadgeMini color="#3b82f6" />
-                    <h4>International Climber</h4>
-                  </div>
-                  <p className="community-badge-card-text">For climbers recognized at the international level.</p>
+                  <p className="community-badge-card-text">For climbers recognized at the national or international level in Pakistan.</p>
                 </div>
 
                 <div className="community-badge-card">

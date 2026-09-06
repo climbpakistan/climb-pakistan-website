@@ -5,36 +5,37 @@
  * visually inspired by Instagram / Facebook verified badges.
  *
  * Badge colours:
- *   national      → green  (#22c55e)  Verified National Athlete
- *   international → blue   (#3b82f6)  Verified International Athlete
- *   organization  → yellow (#eab308)  Verified Organization / Club
- *   official      → white circle with black tick (Climb Pakistan Official)
+ *   athlete      → green  (#22c55e)  Verified Athlete
+ *   national     → green  (legacy athlete level, shown as Verified Athlete)
+ *   international→ green  (legacy athlete level, shown as Verified Athlete)
+ *   organization → yellow (#eab308)  Verified Organization / Team
+ *   official     → white circle with black tick (Climb Pakistan Official)
  *
  * Renders nothing for `none` or unknown types.
  *
  * Props:
- *   verification — one of 'national' | 'international' | 'organization' | 'official' | 'none'
+ *   verification — one of 'athlete' | 'national' | 'international' | 'organization' | 'official' | 'none'
  *   size         — optional pixel size (default 14)
  */
 
+const ATHLETE = {
+  bg: '#22c55e',
+  check: '#ffffff',
+  label: 'Verified Athlete',
+};
+
 const CONFIG = {
-  national: {
-    bg: '#22c55e',
-    check: '#ffffff',
-    label: 'Verified National Athlete',
-  },
-  international: {
-    bg: '#3b82f6',
-    check: '#ffffff',
-    label: 'Verified International Athlete',
-  },
+  athlete: ATHLETE,
+  national: ATHLETE,
+  international: ATHLETE,
   organization: {
     bg: '#eab308',
     check: '#ffffff',
-    label: 'Verified Organization / Club',
+    label: 'Verified Organization / Team',
   },
   // Twitter-style legacy badge: white circle with a black tick. A subtle ring
-  // keeps the white circle visible on light backgrounds.
+  // keeps the white circle visible on light backgrounds. Only used for the
+  // Climb Pakistan official account.
   official: {
     bg: '#ffffff',
     check: '#000000',
