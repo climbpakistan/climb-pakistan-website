@@ -3182,6 +3182,14 @@ input, textarea, select { font: inherit; color: inherit; }
   max-width: 1100px;
   margin: 0 auto;
 }
+/* Desktop: sit the feed a little left of center so post cards don't crowd
+   the middle of the screen. Clamped so narrow desktop widths keep padding. */
+@media (min-width: 1101px) {
+  .community-feed-layout {
+    margin-left: max(var(--sp-6), calc((100% - 1100px) / 2 - 40px));
+    margin-right: auto;
+  }
+}
 .community-feed-headrow {
   display: flex;
   align-items: center;
@@ -4538,15 +4546,18 @@ input, textarea, select { font: inherit; color: inherit; }
   gap: 5px;
   margin-bottom: var(--sp-2);
   padding: 3px 10px;
-  border-radius: 100px;
+  border-radius: 8px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #fff;
+  text-decoration: none;
   background: linear-gradient(135deg, var(--cp-accent) 0%, var(--cp-accent-2) 100%);
   box-shadow: 0 2px 8px rgba(63, 191, 106, 0.3);
+  transition: filter 0.15s ease, transform 0.15s ease;
 }
+a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .community-post-topic::before {
   content: "";
   width: 5px;
@@ -4876,6 +4887,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .community-post-menu-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--cp-white); }
 .community-post-menu-item--danger { color: var(--cp-danger, #e5484d); }
+
 .community-post-menu-confirm {
   display: flex;
   flex-direction: column;
@@ -5596,7 +5608,6 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-time-tab.is-active { color: var(--cp-accent); background: rgba(74, 222, 128, 0.1); }
 
 /* ── Report menu (Step 8) ─────────────────────────────────────────── */
-.community-report-menu { position: relative; }
 .community-report-form {
   position: absolute;
   right: 0;
@@ -5609,6 +5620,7 @@ input, textarea, select { font: inherit; color: inherit; }
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   padding: var(--sp-4);
 }
+.community-report-panel { padding: var(--sp-4); overflow: hidden; }
 .community-report-form-title { font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--sp-3); }
 .community-report-marker { font-size: var(--fs-xs); color: var(--cp-text-muted); margin-top: var(--sp-1); }
 .community-report-reasons { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-3); }

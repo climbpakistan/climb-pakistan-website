@@ -12,7 +12,7 @@ import RichText from './RichText';
  * itself recursively for replies; the UI keeps nesting visually flat so
  * threads stay simple.
  */
-export default function CommentItem({ comment, replies = [], onCommentChanged }) {
+export default function CommentItem({ comment, replies = [], onCommentChanged, isDeleted = false }) {
   const { user, token, isGuest, openAuthPrompt } = useCommunity();
 
   const [replyOpen, setReplyOpen] = useState(false);
@@ -189,39 +189,28 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
           Reply
         </button>
 
-        {isOwner && (
-          <div className="community-post-menu">
+        {isOwner && !isDeleted && (            <div className="community-post-menu">
             <button
               type="button"
               className="community-post-action community-post-menu-btn"
               aria-label="Comment options"
               aria-expanded={menuOpen}
+              aria-haspopup="menu"
               onClick={() => setMenuOpen((v) => !v)}
             >
               ⋯
             </button>
             {menuOpen && (
               <div className="community-post-menu-dropdown" role="menu">
-                {!confirmDelete ? (
-                  <>
-                    <button
-                      role="menuitem"
-                      type="button"
-                      className="community-post-menu-item"
-                      onClick={() => { setMenuOpen(false); setEditBody(comment.body); setEditing(true); }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      role="menuitem"
-                      type="button"
-                      className="community-post-menu-item community-post-menu-item--danger"
-                      onClick={() => setConfirmDelete(true)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                ) : (
+                <button
+                  role="menuitem"
+                  type="button"
+                  className="community-post-menu-item community-post-menu-item--danger"
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  Delete comment
+                </button>
+                {confirmDelete && (
                   <span className="community-post-menu-confirm">
                     Delete this comment?
                     <button
@@ -297,6 +286,11 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
         </form>
       )}
 
+      {isDeleted && (
+        <div className="community-comment community-comment--deleted" aria-label="Comment deleted">
+          <p className="community-comment-body">This comment has been removed.</p>
+        </div>
+      )}
       {replies.length > 0 && (
         <div className="community-comment-replies">
           {replies.map((reply) => (
@@ -305,6 +299,7 @@ export default function CommentItem({ comment, replies = [], onCommentChanged })
               comment={reply}
               replies={reply.replies || []}
               onCommentChanged={onCommentChanged}
+              isDeleted={isDeleted}
             />
           ))}
         </div>

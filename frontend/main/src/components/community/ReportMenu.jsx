@@ -54,8 +54,9 @@ export default function ReportMenu({ postId, commentId }) {
       <button
         type="button"
         className="community-post-action community-post-menu-btn community-report-btn"
-        aria-label={`Report ${postId ? 'post' : 'comment'}`}
+        aria-label={`Report this ${postId ? 'post' : 'comment'}`}
         aria-expanded={open}
+        aria-haspopup="menu"
         onClick={handleOpen}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -65,7 +66,8 @@ export default function ReportMenu({ postId, commentId }) {
       </button>
 
       {open && (
-        <div className="community-report-panel">
+        <div className="community-post-menu-dropdown" role="menu">
+          <div className="community-report-panel">
           {success ? (
             <p className="community-report-success">
               Thank you. Your report has been submitted and our moderators will review it.
@@ -111,6 +113,7 @@ export default function ReportMenu({ postId, commentId }) {
               </div>
             </form>
           )}
+          </div>
         </div>
       )}
     </div>

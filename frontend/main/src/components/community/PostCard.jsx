@@ -26,6 +26,15 @@ export default function PostCard({ post }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // If the API drops the post (404 / removed), the owning card still renders
+  // the shell. We keep this flag so we can hide the owner delete menu and show a
+  // placeholder instead of a dangling control.
+  const isDeleted =
+    !post ||
+    (post.removed === true) ||
+    (post.deletedAt != null) ||
+    (Array.isArray(post.images) && post.images.length === 0 && !post.imageUrl && post.type === 'image');
+
   const lightboxImages = ((post?.images && post.images.length > 0) ? post.images : post?.imageUrl ? [post.imageUrl] : []).filter(Boolean);
 
   if (!post) return null;
@@ -105,39 +114,34 @@ export default function PostCard({ post }) {
           </span>
         </a>
         <div className="community-post-card-head-right">
-          <span className="community-post-date">{formatPostDate(post.createdAt)}</span>
-          {isOwner ? (
+          {isDeleted ? (
+            <span className="community-post-date">—</span>
+          ) : (
+            <span className="community-post-date">{formatPostDate(post.createdAt)}</span>
+          )}
+          {isOwner && !isDeleted ? (
             <div className="community-post-menu">
               <button
                 type="button"
                 className="community-post-action community-post-menu-btn"
-                aria-label="Post options"
+                aria-label={isDeleted ? 'Post unavailable' : 'Post options'}
                 aria-expanded={menuOpen}
+                aria-haspopup="menu"
                 onClick={() => setMenuOpen((v) => !v)}
               >
                 ⋯
               </button>
               {menuOpen && (
                 <div className="community-post-menu-dropdown" role="menu">
-                  {!confirmDelete ? (
-                    <>
-                      <a
-                        role="menuitem"
-                        className="community-post-menu-item"
-                        href={`/community/post/${post.id}/edit`}
-                      >
-                        Edit post
-                      </a>
-                      <button
-                        role="menuitem"
-                        type="button"
-                        className="community-post-menu-item community-post-menu-item--danger"
-                        onClick={() => setConfirmDelete(true)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  ) : (
+                  <button
+                    role="menuitem"
+                    type="button"
+                    className="community-post-menu-item community-post-menu-item--danger"
+                    onClick={() => setConfirmDelete(true)}
+                  >
+                    Delete post
+                  </button>
+                  {confirmDelete && (
                     <span className="community-post-menu-confirm">
                       Delete this post?
                       <button
@@ -166,14 +170,17 @@ export default function PostCard({ post }) {
         </div>
       </div>
 
-      <span className="community-post-topic">{post.category}</span>
-
+      <a className="community-post-topic" href={`/community/feed?category=${encodeURIComponent(post.category)}`}>{post.category}</a>
       <div className="community-post-body-card">
-        <h3 className="community-post-title">
-          <a href={`/community/post/${post.id}`}>{post.title}</a>
-        </h3>
-        {post.body && (
-          <p className={`community-post-excerpt${expanded ? ' is-expanded' : ''}`}>
+        {isDeleted ? (
+          <h3 className="community-post-title">[This post has been removed]</h3>
+        ) : (
+          <h3 className="community-post-title">
+            <a href={`/community/post/${post.id}`}>{post.title}</a>
+          </h3>
+        )}
+        {post.body && !isDeleted && (
+            <p className={`community-post-excerpt${expanded ? ' is-expanded' : ''}`}>
             <RichText text={expanded ? post.body : bodyExcerpt.text} />
           </p>
         )}

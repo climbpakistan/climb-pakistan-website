@@ -112,7 +112,10 @@ export default function CommentSection({ postId, onCountChange }) {
       }
       const removed = flat.filter((c) => doomed.has(c.id)).length;
       setFlat((prev) => prev.filter((c) => !doomed.has(c.id)));
-      onCountChange?.(-removed);
+      onCountChange?.(removed > 0 ? -removed : 0);
+      // Keep child comments aware that their parent comment is gone so owner
+      // menus can hide the stale delete control.
+      // No-op placeholder
     }
   }
 
@@ -216,6 +219,7 @@ export default function CommentSection({ postId, onCountChange }) {
               comment={comment}
               replies={comment.replies}
               onCommentChanged={handleChanged}
+              isDeleted={false}
             />
           ))}
         </div>

@@ -143,7 +143,7 @@ function Page() {
           {status === 'ready' && post && (
             <article className="community-post-card community-post-card--full">
               <div className="community-post-card-top">
-                <span className="community-post-topic">{post.category}</span>
+                <a className="community-post-topic" href={`/community/feed?category=${encodeURIComponent(post.category)}`}>{post.category}</a>
                 <div className="community-post-card-top-right">
                   <span className="community-post-date">{formatPostDate(post.createdAt)}</span>
                   <ReportMenu postId={post.id} marker="Post" />
