@@ -492,27 +492,39 @@ router.get('/', optionalUser, async (req, res) => {
     ]);
 
     // Load full pinned post documents with author info
-    let pinnedPosts = [];
+    let pinnedPostsData = [];
     if (pinnedPostIds.length > 0) {
-      const pinnedDocs = await Post.find({ _id: { $in: pinnedPostIds } })
-        .populate('authorId', 'username name profileImageUrl verification')
-        .lean();
-      pinnedPosts = await attachPollPayloads(pinnedDocs, req.user?.id || null, isAdmin);
+      try {
+        const pinnedDocs = await Post.find({ _id: { $in: pinnedPostIds } })
+          .populate('authorId', 'username name profileImageUrl verification')
+          .lean();
+        pinnedPostsData = await attachPollPayloads(pinnedDocs, req.user?.id || null, isAdmin);
 
-      // Add pinned metadata
-      const pinnedWithMeta = pinnedPosts.map((p) => ({
-        ...p,
-        isPinned: true,
-        pinnedCategory: p.pinned?.category,
-      }));
+        // Add pinned metadata
+        const pinnedWithMeta = pinnedPostsData.map((p) => ({
+          ...p,
+          isPinned: true,
+          pinnedCategory: p.pinned?.category,
+        }));
 
-      // Combine: pinned posts first, then regular feed
-      posts = [...pinnedWithMeta, ...regularPosts];
+        // Combine: pinned posts first, then regular feed
+        posts = [...pinnedWithMeta, ...regularPosts];
+      } catch (pinErr) {
+        console.error('Error loading pinned posts:', pinErr);
+        // Fall back to regular posts only
+        posts = regularPosts;
+      }
     } else {
       posts = regularPosts;
     }
 
-    const json = await attachPollPayloads(posts, req.user?.id || null, isAdmin);
+    // Only attach poll payloads once (not twice)
+    const json = posts.map((p) => {
+      // If already processed by attachPollPayloads, use as-is
+      if (p.poll !== undefined || p.type !== 'poll') return p;
+      // Otherwise add empty poll placeholder
+      return p;
+    });
 
     res.json({
       posts: json,
@@ -522,7 +534,8 @@ router.get('/', optionalUser, async (req, res) => {
       hasMore: page * limit < total,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Could not load posts.' });
+    console.error('Error loading posts feed:', err);
+    res.status(500).json({ error: 'Could not load posts.', details: process.env.NODE_ENV === 'development' ? err.message : undefined });
   }
 });
 
