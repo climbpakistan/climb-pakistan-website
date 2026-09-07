@@ -3190,8 +3190,6 @@ input, textarea, select { font: inherit; color: inherit; }
     margin-left: auto;
     margin-right: auto;
   }
-  /* About card aligns with the top of the posts area and follows scroll. */
-  .community-about-sidebar { position: sticky; top: 100px; }
 }
 /* Keep the page header (title + sort tabs) on the same width as the grid
    and search bar so all left/right edges line up on the feed page. */
@@ -4413,6 +4411,15 @@ input, textarea, select { font: inherit; color: inherit; }
   font-weight: 600;
 }
 
+/* Right rail wrapper: About card + Suggested accounts stacked together. The
+   rail scrolls naturally with the page — deliberately not sticky. */
+.community-feed-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
 /* About community sidebar (right column, desktop) */
 .community-about-sidebar {
   background: var(--cp-surface);
@@ -4447,6 +4454,112 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-about-link:hover { color: var(--cp-accent-strong); text-decoration: underline; }
 .community-about-link-arrow { transition: transform 0.15s ease; }
 .community-about-link:hover .community-about-link-arrow { transform: translateX(3px); }
+
+/* Suggested accounts — Instagram-style rail under the About card */
+.community-suggest {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4);
+}
+.community-suggest-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--cp-text-muted);
+  margin-bottom: var(--sp-1);
+}
+.community-suggest-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) 0;
+}
+.community-suggest-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+.community-suggest-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+.community-suggest-avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+.community-suggest-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+.community-suggest-username {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.community-suggest-name {
+  max-width: 100%;
+  font-size: var(--fs-xs);
+  color: var(--cp-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.community-suggest-follow {
+  flex: none;
+  border: none;
+  background: none;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--cp-accent);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.community-suggest-follow:hover { background: var(--cp-accent-soft); }
+.community-suggest-follow.is-following { color: var(--cp-text-muted); }
+.community-suggest-follow:disabled { opacity: 0.6; cursor: default; }
+.community-suggest-dismiss {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--cp-text-muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.community-suggest-dismiss:hover {
+  background: var(--cp-bg-alt);
+  color: var(--cp-text);
+}
 
 /* About the Community page (/community/about) */
 .community-about-page { max-width: 760px; }
@@ -4524,9 +4637,9 @@ input, textarea, select { font: inherit; color: inherit; }
 @media (max-width: 1100px) {
   .community-feed-layout { grid-template-columns: minmax(0, 1fr); }
 
-  /* About card stacks below the feed on tablet/mobile — full width within
+  /* Right rail stacks below the feed on tablet/mobile — full width within
      the container padding, so it never causes horizontal scroll. */
-  .community-about-sidebar { position: static; margin-top: var(--sp-4); }
+  .community-feed-sidebar { margin-top: var(--sp-4); }
 
   /* Topics: instead of hiding the sidebar on narrow screens, turn it into a
      horizontally scrollable chip row above the posts. */

@@ -628,6 +628,18 @@ export async function searchCommunityUsers(query) {
   return fetchJSON(`${BASE_URL}/auth/search?${params.toString()}`);
 }
 
+/** Instagram-style suggested accounts for the feed sidebar. token is optional
+ * (when logged in the backend excludes the viewer and accounts they follow). */
+export async function getSuggestedAccounts(token, limit = 8) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  const res = await fetch(`${BASE_URL}/auth/suggested?${params.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not load suggested accounts.');
+  return data;
+}
+
 // ── Profile posts & comments ──
 /** A public user's posts (newest first, removed content excluded). */
 export async function getUserPosts(username, { page = 1, limit = 20 } = {}) {

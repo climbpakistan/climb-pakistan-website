@@ -6,7 +6,7 @@ import PostCard from '../../../src/components/community/PostCard';
 import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers, followUser, unfollowUser, getFollowStatusBatch } from '../../../src/api';
+import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers, getSuggestedAccounts, followUser, unfollowUser, getFollowStatusBatch } from '../../../src/api';
 
 export { Page };
 
@@ -48,21 +48,133 @@ function TopicsSidebar({ activeCategory, counts }) {
   );
 }
 
-// Right sidebar: compact "About this community" card (desktop). On narrow
-// screens it stacks below the feed via the existing single-column layout.
-function AboutSidebar() {
+// Right rail: "About this community" card on top, then an Instagram-style
+// "Suggested for you" list below. Both scroll naturally with the page —
+// nothing on the rail is fixed or sticky. On narrow screens the rail stacks
+// below the feed via the existing single-column layout.
+function RightRail() {
+  const { token, isGuest, openAuthPrompt } = useCommunity();
+
+  // ── Suggested accounts ──
+  const [suggested, setSuggested] = useState([]);
+  const [suggestLoaded, setSuggestLoaded] = useState(false);
+  const [suggFollows, setSuggFollows] = useState({});
+  const [suggBusy, setSuggBusy] = useState({});
+
+  useEffect(() => {
+    let active = true;
+    getSuggestedAccounts(token, 5)
+      .then(async (data) => {
+        if (!active) return;
+        const list = data.users || [];
+        setSuggested(list);
+        setSuggestLoaded(true);
+        // Seed follow buttons with the viewer's real follow state so accounts
+        // already followed show "Following" instead of "Follow".
+        if (!isGuest && list.length > 0) {
+          try {
+            const status = await getFollowStatusBatch(token, list.map((u) => u.id));
+            if (active) setSuggFollows(status.following || {});
+          } catch {
+            // best-effort; buttons default to Follow
+          }
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setSuggested([]);
+        setSuggestLoaded(true);
+      });
+    return () => { active = false; };
+  }, [token, isGuest]);
+
+  async function toggleSuggestFollow(u) {
+    if (isGuest) {
+      openAuthPrompt('Log in to follow accounts.');
+      return;
+    }
+    if (suggBusy[u.id]) return;
+    setSuggBusy((m) => ({ ...m, [u.id]: true }));
+    try {
+      if (suggFollows[u.id]) {
+        await unfollowUser(token, u.id);
+        setSuggFollows((m) => ({ ...m, [u.id]: false }));
+      } else {
+        await followUser(token, u.id);
+        setSuggFollows((m) => ({ ...m, [u.id]: true }));
+      }
+    } catch {
+      // leave state unchanged; user can retry
+    } finally {
+      setSuggBusy((m) => ({ ...m, [u.id]: false }));
+    }
+  }
+
+  function dismissSuggestion(id) {
+    setSuggested((prev) => prev.filter((u) => u.id !== id));
+  }
+
   return (
-    <aside className="community-about-sidebar">
-      <h2 className="community-about-title">About this community</h2>
-      <p className="community-about-text">
-        The Climb Pakistan Community is where the country&rsquo;s sport climbers
-        come together. From beginners to national team athletes. Ask questions
-        about training or technique, share beta, swap gear advice and follow the
-        climbers and organizations shaping the sport in Pakistan.
-      </p>
-      <a href="/community/about" className="community-about-link">
-        About the Community <span className="community-about-link-arrow" aria-hidden="true">→</span>
-      </a>
+    <aside className="community-feed-sidebar">
+      <section className="community-about-sidebar">
+        <h2 className="community-about-title">About this community</h2>
+        <p className="community-about-text">
+          The Climb Pakistan Community is where the country&rsquo;s sport climbers
+          come together. From beginners to national team athletes. Ask questions
+          about training or technique, share beta, swap gear advice and follow the
+          climbers and organizations shaping the sport in Pakistan.
+        </p>
+        <a href="/community/about" className="community-about-link">
+          About the Community <span className="community-about-link-arrow" aria-hidden="true">→</span>
+        </a>
+      </section>
+
+      {suggestLoaded && suggested.length > 0 && (
+        <section className="community-suggest">
+          <h2 className="community-suggest-title">Suggested for you</h2>
+          <div className="community-suggest-list">
+            {suggested.map((u) => (
+              <div key={u.id} className="community-suggest-row">
+                <a href={`/community/u/${u.username}`} className="community-suggest-link">
+                  {u.profileImageUrl ? (
+                    <img src={u.profileImageUrl} alt="" className="community-suggest-avatar" />
+                  ) : (
+                    <span className="community-suggest-avatar community-suggest-avatar--fallback">
+                      {(u.username || '?')[0].toUpperCase()}
+                    </span>
+                  )}
+                  <span className="community-suggest-meta">
+                    <span className="community-suggest-username">
+                      @{u.username} <VerificationBadge verification={u.verification} size={12} />
+                    </span>
+                    {u.name && <span className="community-suggest-name">{u.name}</span>}
+                  </span>
+                </a>
+                {!isGuest && (
+                  <button
+                    type="button"
+                    className={`community-suggest-follow${suggFollows[u.id] ? ' is-following' : ''}`}
+                    onClick={() => toggleSuggestFollow(u)}
+                    disabled={suggBusy[u.id]}
+                  >
+                    {suggBusy[u.id] ? '…' : suggFollows[u.id] ? 'Following' : 'Follow'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="community-suggest-dismiss"
+                  aria-label={`Dismiss ${u.username}`}
+                  onClick={() => dismissSuggestion(u.id)}
+                >
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                    <path d="m13.414 12 7.293-7.293a1 1 0 1 0-1.414-1.414L12 10.586 4.707 3.293a1 1 0 1 0-1.414 1.414L10.586 12l-7.293 7.293a1 1 0 1 0 1.414 1.414L12 13.414l7.293 7.293a.997.997 0 0 0 1.414 0 1 1 0 0 0 0-1.414L13.414 12z" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </aside>
   );
 }
@@ -677,7 +789,7 @@ function Page() {
             )}
           </div>
 
-          <AboutSidebar />
+          <RightRail />
         </FeedShell>
       </section>
     </>
