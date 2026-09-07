@@ -4476,6 +4476,26 @@ input, textarea, select { font: inherit; color: inherit; }
   color: var(--cp-text-muted);
   margin: var(--sp-5) 0 var(--sp-2);
 }
+.community-about-guidelines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.community-about-guideline {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--cp-bg-alt);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--cp-text);
+}
+.community-about-guideline-icon { flex: none; font-size: var(--fs-md); line-height: 1; }
 .community-about-topics {
   display: flex;
   flex-wrap: wrap;

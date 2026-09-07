@@ -3,6 +3,14 @@ import { communityTopics } from '../../../src/data/communityData';
 
 export { Page };
 
+// Community guidelines — kept short and scannable. Rendered as a checklist.
+const guidelines = [
+  { icon: '🤝', text: 'Respect other climbers' },
+  { icon: '🧗', text: 'Keep discussions climbing-related' },
+  { icon: '✅', text: 'Share accurate information' },
+  { icon: '🚫', text: 'No spam or harassment' },
+];
+
 // Static "About the Community" page — linked from the feed's right sidebar
 // card (/community/about). Public, no data fetching.
 function Page() {
@@ -36,9 +44,29 @@ function Page() {
               share and learn.
             </p>
             <p className="community-about-body">
-              Ask questions, share beta from your latest crag, post competition results,
-              swap gear advice and follow the climbers you care about — all in one place.
+              The Climb Pakistan Community is where the country&rsquo;s sport climbers
+              come together — from first-time gym visitors to national team athletes.
+              Ask questions about training or technique, share beta from the crags
+              you&rsquo;ve explored, post competition results, swap gear advice, and
+              follow the climbers and organizations shaping the sport in Pakistan.
             </p>
+            <p className="community-about-body">
+              Every post is organized by topic, so whether you&rsquo;re chasing your
+              first lead climb or following the national competition circuit, the
+              discussions you care about are easy to find. Verified athlete and
+              organization profiles keep the conversation grounded in real
+              experience, and moderators keep the space welcoming for everyone.
+            </p>
+
+            <h2 className="community-about-subtitle">Community Guidelines 📋</h2>
+            <ul className="community-about-guidelines">
+              {guidelines.map((g) => (
+                <li key={g.text} className="community-about-guideline">
+                  <span className="community-about-guideline-icon" aria-hidden="true">{g.icon}</span>
+                  <span>{g.text}</span>
+                </li>
+              ))}
+            </ul>
 
             <h2 className="community-about-subtitle">Topics you can discuss</h2>
             <div className="community-about-topics">
