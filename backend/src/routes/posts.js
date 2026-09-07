@@ -345,7 +345,8 @@ router.get('/', optionalUser, async (req, res) => {
     const filter = { removed: { $ne: true } };
 
     // Hide posts by users the viewer blocked, muted, or who blocked them.
-    if (req.user) {
+    // Only apply this if there's no specific author filter (profile view)
+    if (req.user && !authorFilter) {
       const hidden = await loadHiddenUserIds(req.user.id);
       const hiddenIds = [...hidden.blockedIds, ...hidden.mutedIds, ...hidden.blockedByIds];
       if (hiddenIds.length > 0) filter.authorId = { $nin: hiddenIds };
@@ -365,14 +366,28 @@ router.get('/', optionalUser, async (req, res) => {
     }
 
     // Optional author filter for profile pages.
+    let authorFilter = null;
     if (req.query.author) {
       const author = await UserModel.findOne({ username: String(req.query.author).trim().toLowerCase().replace(/^@/, '') });
-      if (author) filter.authorId = author._id;
+      if (author) authorFilter = author._id;
       else return res.json({ posts: [], page, limit, total: 0, hasMore: false });
     }
 
     // Check if user is admin (for showing admin-only fields and pinned posts)
     const isAdmin = req.user?.role === 'admin';
+
+    // If viewing own profile or not blocked, allow the author filter
+    if (authorFilter) {
+      // Check if viewer has blocked this author
+      if (req.user) {
+        const hidden = await loadHiddenUserIds(req.user.id);
+        if (hidden.blockedIds.includes(authorFilter) || hidden.blockedByIds.includes(authorFilter)) {
+          // Viewer blocked this author, don't show their posts
+          return res.json({ posts: [], page, limit, total: 0, hasMore: false });
+        }
+      }
+      filter.authorId = authorFilter;
+    }
 
     let sort = { createdAt: -1 };
 
