@@ -3177,7 +3177,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-feed-layout {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr) 280px;
-  gap: var(--sp-8);
+  gap: var(--sp-5);
   align-items: start;
   max-width: 1100px;
   margin: 0 auto;
@@ -3192,6 +3192,11 @@ input, textarea, select { font: inherit; color: inherit; }
   }
   /* About card aligns with the top of the posts area and follows scroll. */
   .community-about-sidebar { position: sticky; top: 100px; }
+}
+/* Keep the page header (title + sort tabs) on the same width as the grid
+   and search bar so all left/right edges line up on the feed page. */
+.community-feed-header .container {
+  max-width: 1240px;
 }
 .community-feed-headrow {
   display: flex;
@@ -3401,7 +3406,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-feed-layout {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr) 280px;
-  gap: var(--sp-6);
+  gap: var(--sp-5);
   align-items: start;
 }
 .community-feed-headrow {
@@ -5175,9 +5180,10 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
 .community-search-section {
   padding: 0 0 var(--sp-4);
 }
-/* Match the bar's width to the topics + posts layout below (1100px). */
+/* Match the bar's width to the 3-column feed grid below (1240px) so the
+   search bar and the cards share left/right edges on desktop. */
 .community-search-section .container {
-  max-width: 1100px;
+  max-width: 1240px;
 }
 .community-search-bar {
   display: flex;
