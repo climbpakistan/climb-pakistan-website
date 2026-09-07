@@ -427,3 +427,14 @@ export function getModerationComments(params = {}) {
 export function deleteModerationPost(postId) {
   return apiFetch(`${BASE_URL}/moderation/posts/${postId}/delete`, { method: 'POST' });
 }
+
+export function pinModerationPost(postId, category, reason = '') {
+  return apiFetch(`${BASE_URL}/moderation/posts/${postId}/pin`, {
+    method: 'POST',
+    body: JSON.stringify({ category: category || null, reason }),
+  });
+}
+
+export function getPinnedPosts() {
+  return apiFetch(`${BASE_URL}/moderation/pinned-posts`);
+}

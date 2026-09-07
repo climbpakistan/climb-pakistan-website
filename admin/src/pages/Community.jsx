@@ -18,6 +18,8 @@ import {
   banUser,
   liftUser,
   deleteUser,
+  pinModerationPost,
+  getPinnedPosts,
 } from '../api';
 
 const TABS = [
@@ -545,9 +547,9 @@ function UsersTab() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="9" className="table-empty">Loading users...</td></tr>
+              <tr>              <td colSpan="10" className="table-empty">Loading users...</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan="9" className="table-empty">No users found.</td></tr>
+              <tr>              <td colSpan="10" className="table-empty">No users found.</td></tr>
             ) : users.map((u) => (
               <tr key={u.id}>
                 <td>
@@ -630,6 +632,30 @@ function PostsTab() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busyId, setBusyId] = useState(null);
+  const [pinnedPostsData, setPinnedPostsData] = useState(null);
+  const [showPinnedModal, setShowPinnedModal] = useState(false);
+
+  async function loadPinnedPosts() {
+    try {
+      const data = await getPinnedPosts();
+      setPinnedPostsData(data);
+    } catch (err) {
+      console.error('Failed to load pinned posts:', err);
+    }
+  }
+
+  async function pinPost(p) {
+    const category = prompt('Pin this post to which category?',
+      Object.values(POST_CATEGORIES).join(', '));
+    if (!category || !POST_CATEGORIES.includes(category)) return;
+    await run(() => pinModerationPost(p.id, category), p, `Post pinned to ${category}`);
+  }
+
+  async function unpinPost(p) {
+    const ok = window.confirm('Unpin this post?');
+    if (!ok) return;
+    await run(() => pinModerationPost(p.id, null), p, 'Post unpinned');
+  }
 
   async function load(nextPage = 1) {
     setLoading(true);
@@ -663,6 +689,10 @@ function PostsTab() {
       .catch((err) => {
         if (activeRun) { setError(err.message); setLoading(false); }
       });
+    // Load pinned posts
+    getPinnedPosts().then((data) => {
+      if (activeRun) setPinnedPostsData(data);
+    }).catch(() => {});
     return () => { activeRun = false; };
   }, []);
 
@@ -726,6 +756,9 @@ function PostsTab() {
             <option value="removed">Removed</option>
           </select>
           <button className="btn btn-primary" type="submit" disabled={loading}>Search</button>
+          <button className="btn btn-outline" type="button" onClick={loadPinnedPosts} disabled={loading}>
+            📌 Pinned Posts
+          </button>
         </form>
       </div>
 
@@ -741,14 +774,27 @@ function PostsTab() {
               <th>Votes</th>
               <th>Comments</th>
               <th>Status</th>
-              <th className="col-actions"></th>
+              <th className="col-actions">Actions</th>
+              <th className="col-pin">Pin</th>
             </tr>
           </thead>
           <tbody>
+            {pinnedPostsData && pinnedPostsData.pinned && Object.keys(pinnedPostsData.pinned).length > 0 && (
+              <tr className="pinned-header-row">
+                <td colSpan="10" style={{ background: 'var(--cp-accent-soft)', padding: 'var(--sp-3)', cursor: 'pointer' }}
+                  onClick={() => setShowPinnedModal(true)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
+                    <span style={{ fontSize: 'var(--fs-lg)' }}>📌</span>
+                    <span className="cell-strong">Pinned Posts ({pinnedPostsData.total})</span>
+                    <span className="text-muted" style={{ fontSize: 'var(--fs-xs)' }}>Click to manage</span>
+                  </div>
+                </td>
+              </tr>
+            )}
             {loading ? (
-              <tr><td colSpan="9" className="table-empty">Loading posts...</td></tr>
+              <tr>              <td colSpan="10" className="table-empty">Loading posts...</td></tr>
             ) : posts.length === 0 ? (
-              <tr><td colSpan="9" className="table-empty">No posts found.</td></tr>
+              <tr>              <td colSpan="10" className="table-empty">No posts found.</td></tr>
             ) : posts.map((p) => (
               <tr key={p.id} className={p.removed ? 'row-removed' : undefined}>
                 <td>
@@ -778,6 +824,19 @@ function PostsTab() {
                     <button className="btn btn-danger btn-xs" type="button" disabled={busyId === p.id} onClick={() => deletePermanent(p)}>Delete</button>
                   </div>
                 </td>
+              <td className="col-pin">
+                {p.pinned ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span title="Pinned post">📌</span>
+                    <span className="badge badge-success" style={{ fontSize: 'var(--fs-xs)' }}>{p.pinned.category}</span>
+                    <button className="btn btn-ghost btn-xs" type="button" onClick={() => unpinPost(p)} title="Unpin">✕</button>
+                  </div>
+                ) : (
+                  <button className="btn btn-outline btn-xs" type="button" disabled={busyId === p.id} onClick={() => pinPost(p)}>
+                    📌 Pin
+                  </button>
+                )}
+              </td>
               </tr>
             ))}
           </tbody>
@@ -789,6 +848,63 @@ function PostsTab() {
       <Notice kind="error">{error}</Notice>
       <Notice kind="success">{notice}</Notice>
     </>
+  );
+}
+
+// ── Pinned Posts Modal ──────────────────────────────────────
+function PinnedPostsModal({ pinnedData, onClose, post }) {
+  const categories = Object.keys(pinnedData.pinned || {});
+
+  async function unpin(postId) {
+    const ok = window.confirm('Unpin this post?');
+    if (!ok) return;
+    try {
+      await pinModerationPost(postId, null);
+      onClose();
+      window.location.reload();
+    } catch (err) {
+      alert('Failed to unpin: ' + err.message);
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3 className="modal-title">📌 Pinned Posts</h3>
+          <button className="btn btn-ghost" type="button" onClick={onClose}>Close</button>
+        </div>
+
+        {categories.length === 0 ? (
+          <div className="card card-pad">
+            <p className="text-muted">No posts are currently pinned.</p>
+          </div>
+        ) : (
+          <div className="modal-body">
+            {categories.map((cat) => (
+              <div key={cat} className="pinned-category-section">
+                <h4 className="pinned-category-title">{cat} ({pinnedData.pinned[cat].length})</h4>
+                <div className="pinned-posts-list">
+                  {pinnedData.pinned[cat].map((p) => (
+                    <div key={p.id} className="pinned-post-item">
+                      <div className="pinned-post-info">
+                        <div className="cell-strong" style={{ fontSize: 'var(--fs-sm)' }}>{p.title}</div>
+                        <div className="text-muted" style={{ fontSize: 'var(--fs-xs)' }}>
+                          By @{p.author?.username} · {formatDate(p.createdAt)}
+                        </div>
+                      </div>
+                      <button className="btn btn-outline btn-xs" type="button" onClick={() => unpin(p.id)}>
+                        Unpin
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

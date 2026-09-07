@@ -61,6 +61,9 @@ const postSchema = new mongoose.Schema({
   // but is hidden from normal community users.
   removed: { type: Boolean, default: false },
   removedAt: { type: Date, default: null },
+  // Admin-pinned post — pinned posts appear at the top of their topic.
+  // null = not pinned; { category, reason? } = pinned in a specific topic.
+  pinned: { type: Object, default: null },
   // ── Poll payload (only relevant when type === 'poll') ──
   poll: {
     options: { type: [pollOptionSchema], default: [] },
@@ -75,5 +78,6 @@ postSchema.index({ score: -1, createdAt: -1 });
 // Feed queries filter out removed content; index removed alongside the sort keys.
 postSchema.index({ removed: 1, score: -1, createdAt: -1 });
 postSchema.index({ removed: 1, createdAt: -1 });
+postSchema.index({ removed: 1, pinned: 1, createdAt: -1 });
 
 export default mongoose.model('Post', postSchema);

@@ -187,12 +187,12 @@ function validateExternalUrl(raw) {
 // Serialize a post for the frontend (never exposes internals). Poll payload
 // is attached separately via postJSONWithPoll so the viewer's own vote can be
 // included without leaking it in public listing contexts.
-function postJSON(post) {
+function postJSON(post, isAdmin = false) {
   const authorDoc = post.authorId && typeof post.authorId === 'object' && post.authorId.username !== undefined
     ? post.authorId
     : null;
 
-  return {
+  const json = {
     id: post._id,
     type: post.type,
     title: post.title,
@@ -217,6 +217,17 @@ function postJSON(post) {
         }
       : null,
   };
+
+  // Admin-only fields — hidden from regular users
+  if (isAdmin) {
+    json.pinned = post.pinned || null;
+    json.authorId = post.authorId ? String(post.authorId._id || post.authorId) : null;
+    json.imagePublicId = post.imagePublicId || '';
+    json._internalCreatedAt = post.createdAt;
+    json._internalUpdatedAt = post.updatedAt;
+  }
+
+  return json;
 }
 
 // Build the poll response for a viewer. `myVote` is the viewer's chosen
@@ -242,8 +253,8 @@ function pollPayload(post, myVote) {
   };
 }
 
-async function postJSONWithPoll(post, viewerId) {
-  const json = postJSON(post);
+async function postJSONWithPoll(post, viewerId, isAdmin = false) {
+  const json = postJSON(post, isAdmin);
   if (post.type === 'poll') {
     let myVote = null;
     if (viewerId) {
@@ -260,7 +271,7 @@ async function postJSONWithPoll(post, viewerId) {
 // Serialize a list of posts for the feed (never exposes internals) and attach
 // viewer-specific poll payloads so poll cards render interactively instead of
 // as bare text. Batches the poll vote lookups into a single query per viewer.
-async function attachPollPayloads(posts, viewerId) {
+async function attachPollPayloads(posts, viewerId, isAdmin = false) {
   const pollPosts = posts.filter((p) => p.type === 'poll');
 
   const myVotes = new Map();
@@ -426,7 +437,8 @@ router.get('/', optionalUser, async (req, res) => {
           } : null,
         };
       });
-      const json = await attachPollPayloads(posts, req.user?.id || null);
+      const isAdmin = req.user?.role === 'admin';
+      const json = await attachPollPayloads(posts, req.user?.id || null, isAdmin);
       return res.json({
         posts: json,
         page,
@@ -438,6 +450,20 @@ router.get('/', optionalUser, async (req, res) => {
 
     // New + Popular share the same fetch strategy (just different sort keys),
     // both of which run against indexed fields — no full-table sort in JS.
+    // Pinned posts (by admins) appear at the very top of topic views.
+    // For category-filtered views, pinned posts in that category lead the feed.
+    const isCategoryView = category && POST_CATEGORIES.includes(category);
+    let pinnedPosts = [];
+    if (isCategoryView) {
+      const pinned = await Post.find({
+        removed: { $ne: true },
+        'pinned.category': category,
+      }).sort({ createdAt: -1 }).limit(2);
+      pinnedPosts = pinned.map((p) => p._id);
+      // Exclude pinned posts from the regular feed to avoid duplicates.
+      filter._id = { $nin: pinnedPosts };
+    }
+
     const [posts, total] = await Promise.all([
       Post.find(filter)
         .sort(sort)
@@ -447,13 +473,32 @@ router.get('/', optionalUser, async (req, res) => {
       Post.countDocuments(filter),
     ]);
 
-    const json = await attachPollPayloads(posts, req.user?.id || null);
+    // Load full pinned post documents with author info
+    let pinnedFull = [];
+    if (pinnedPosts.length > 0) {
+      const pinnedDocs = await Post.find({ _id: { $in: pinnedPosts } })
+        .populate('authorId', 'username name profileImageUrl verification')
+        .lean();
+      pinnedFull = await attachPollPayloads(pinnedDocs, req.user?.id || null, isAdmin);
+
+      // Add pinned metadata
+      const pinnedWithMeta = pinnedFull.map((p) => ({
+        ...p,
+        isPinned: true,
+        pinnedCategory: p.pinned?.category,
+      }));
+
+      // Combine: pinned posts first, then regular feed
+      posts = [...pinnedWithMeta, ...posts];
+    }
+
+    const json = await attachPollPayloads(posts, req.user?.id || null, isAdmin);
 
     res.json({
       posts: json,
       page,
       limit,
-      total,
+      total: pinnedPosts.length + total,
       hasMore: page * limit < total,
     });
   } catch (err) {
@@ -530,7 +575,8 @@ router.get('/saved', requireUser, async (req, res) => {
     ]);
 
     const posts = saved.map((s) => s.postId).filter(Boolean);
-    const json = await attachPollPayloads(posts, req.user.id);
+    const isAdmin = req.user?.role === 'admin';
+    const json = await attachPollPayloads(posts, req.user.id, isAdmin);
     res.json({ posts: json, page, limit, total, hasMore: page * limit < total });
   } catch (err) {
     console.error('Saved posts error:', err);
@@ -614,7 +660,17 @@ router.get('/:id', optionalUser, async (req, res) => {
       if (!isAdmin) return res.status(404).json({ error: 'Post not found.' });
     }
 
-    const json = await postJSONWithPoll(post, req.user?.id || null);
+    // Also check if user is admin via token for showing admin-only fields
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+        if (decoded.role === 'admin') isAdmin = true;
+      } catch {
+        // Not an admin
+      }
+    }
+
+    const json = await postJSONWithPoll(post, req.user?.id || null, isAdmin);
     res.json({ post: json });
   } catch {
     res.status(404).json({ error: 'Post not found.' });
@@ -709,7 +765,8 @@ router.post('/', createLimiter, requireUser, uploadImagesField, async (req, res)
     await notifyMentions({ text: `${titleResult.title} ${body}`, actorId: req.user.id, postId: post._id });
 
     const fresh = await Post.findById(post._id).populate('authorId', 'username name profileImageUrl verification');
-    const json = await postJSONWithPoll(fresh, req.user.id);
+    const isAdmin = req.user?.role === 'admin';
+    const json = await postJSONWithPoll(fresh, req.user.id, isAdmin);
     res.status(201).json({ post: json });
   } catch (err) {
     console.error('Create post error:', err);
@@ -788,7 +845,8 @@ router.put('/:id', requireUser, uploadImagesField, async (req, res) => {
     await post.save();
 
     const fresh = await Post.findById(post._id).populate('authorId', 'username name profileImageUrl verification');
-    const json = await postJSONWithPoll(fresh, req.user.id);
+    const isAdmin = req.user?.role === 'admin';
+    const json = await postJSONWithPoll(fresh, req.user.id, isAdmin);
     res.json({ post: json });
   } catch (err) {
     console.error('Edit post error:', err);

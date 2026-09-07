@@ -634,9 +634,82 @@ router.get('/comments', requireAdminDb, async (req, res) => {
   }
 });
 
+// ── Pin/unpin post (admin only) ──
+// POST /api/moderation/posts/:id/pin — pin a post to the top of a topic.
+// Body: { category: 'Training' | 'Competition' | ..., reason?: string }
+// Pass { category: null } to unpin.
+router.post('/posts/:id/pin', requireAdminDb, async (req, res) => {
+  try {
+    const postId = req.params.id;
+    if (!isValidObjectId(postId)) return res.status(400).json({ error: 'Invalid post id.' });
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ error: 'Post not found.' });
+
+    // Only unpinned (live) posts can be pinned; removed posts cannot be pinned.
+    if (post.removed) return res.status(400).json({ error: 'Cannot pin a removed post.' });
+
+    const { category, reason } = req.body || {};
+    const PINNED_CATEGORIES = POST_CATEGORIES;
+
+    // Unpin if category is null/undefined/empty
+    if (!category || !PINNED_CATEGORIES.includes(category)) {
+      if (post.pinned) {
+        post.pinned = null;
+        await post.save();
+        await logAction(req.user.id, 'post:unpin', 'post', postId, 'Manually unpinned');
+        return res.json({ message: 'Post unpinned.', pinned: null });
+      }
+      return res.json({ message: 'Post is not pinned.', pinned: null });
+    }
+
+    // Pin the post to the specified category
+    post.pinned = { category, reason: reason ? String(reason).slice(0, 500) : '' };
+    await post.save();
+    await logAction(req.user.id, 'post:pin', 'post', postId, `Pinned in ${category}`);
+    res.json({ message: `Post pinned to ${category}.`, pinned: post.pinned });
+  } catch (err) {
+    console.error('Pin post error:', err);
+    res.status(500).json({ error: 'Could not pin post.' });
+  }
+});
+
 // ── Permanent post delete (admin only) ──
 // POST /api/moderation/posts/:id/delete — removes the post, its comments,
 // votes, poll votes, and clears report references. Irreversible.
+// GET /api/moderation/pinned-posts — list all currently pinned posts (admin only).
+// Returns pinned posts grouped by category.
+router.get('/pinned-posts', requireAdminDb, async (req, res) => {
+  try {
+    const pinned = await Post.find({
+      removed: { $ne: true },
+      pinned: { $ne: null },
+    }).sort({ 'pinned.category': 1, createdAt: -1 });
+
+    // Group by category
+    const grouped = {};
+    for (const p of pinned) {
+      if (p.pinned && p.pinned.category) {
+        if (!grouped[p.pinned.category]) grouped[p.pinned.category] = [];
+        grouped[p.pinned.category].push({
+          id: p._id,
+          title: p.title,
+          body: p.body,
+          type: p.type,
+          category: p.category,
+          createdAt: p.createdAt,
+          pinnedAt: p.pinned,
+          author: p.authorId ? { username: p.authorId.username, name: p.authorId.name } : null,
+        });
+      }
+    }
+
+    res.json({ pinned: grouped, total: pinned.length });
+  } catch (err) {
+    console.error('Pinned posts error:', err);
+    res.status(500).json({ error: 'Could not load pinned posts.' });
+  }
+});
+
 router.post('/posts/:id/delete', requireAdminDb, async (req, res) => {
   try {
     const postId = req.params.id;
