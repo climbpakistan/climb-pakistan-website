@@ -63,7 +63,7 @@ function RightRail() {
 
   useEffect(() => {
     let active = true;
-    getSuggestedAccounts(token, 5)
+    getSuggestedAccounts(token, 7)
       .then(async (data) => {
         if (!active) return;
         const list = data.users || [];
