@@ -534,8 +534,21 @@ router.get('/', optionalUser, async (req, res) => {
       hasMore: page * limit < total,
     });
   } catch (err) {
-    console.error('Error loading posts feed:', err);
-    res.status(500).json({ error: 'Could not load posts.', details: process.env.NODE_ENV === 'development' ? err.message : undefined });
+    console.error('🚨 ERROR loading posts feed:', err);
+    console.error('Stack:', err.stack);
+    console.error('Filter:', JSON.stringify(filter, null, 2));
+    console.error('Sort:', JSON.stringify(sort, null, 2));
+    console.error('Query params:', JSON.stringify(req.query, null, 2));
+    res.status(500).json({ 
+      error: 'Could not load posts.', 
+      details: process.env.NODE_ENV === 'development' ? {
+        message: err.message,
+        stack: err.stack,
+        filter,
+        sort,
+        query: req.query
+      } : undefined 
+    });
   }
 });
 
