@@ -480,9 +480,9 @@ router.get('/u/:username', async (req, res) => {
 });
 
 // GET /api/auth/u/:username/similar — Instagram-style "similar accounts" for
-// a profile. Scores other active members by shared city, community role,
-// experience level, overlapping disciplines and verification status, then
-// returns the closest matches (falling back to popular members). Public.
+// a profile. Leads with the featured accounts (@climbpakistan, @abuzarfaiz),
+// then the newest accounts first — the same ordering used by the feed's
+// suggested accounts. Public.
 router.get('/u/:username/similar', async (req, res) => {
   try {
     const username = String(req.params.username || '').trim().toLowerCase().replace(/^@/, '');
@@ -492,11 +492,9 @@ router.get('/u/:username/similar', async (req, res) => {
 
     if (!profile) return res.status(404).json({ error: 'User not found.' });
 
-    const sameCity = { $cond: [{ $and: [{ $ne: [profile.city, ''] }, { $eq: ['$city', profile.city] }] }, 2, 0] };
-    const sameRole = { $cond: [{ $and: [{ $ne: [profile.communityRole, ''] }, { $eq: ['$communityRole', profile.communityRole] }] }, 2, 0] };
-    const sameLevel = { $cond: [{ $and: [{ $ne: [profile.experienceLevel, ''] }, { $eq: ['$experienceLevel', profile.experienceLevel] }] }, 1, 0] };
-    const verified = { $cond: [{ $ne: ['$verification', 'none'] }, 1, 0] };
-    const sharedDisciplines = { $size: { $setIntersection: ['$disciplines', profile.disciplines] } };
+    // Featured accounts pinned at the top, then remaining accounts sorted
+    // newest-first (newest registrations appear first).
+    const PINNED_USERNAMES = ['climbpakistan', 'abuzarfaiz'];
 
     const similar = await User.aggregate([
       {
@@ -506,8 +504,17 @@ router.get('/u/:username/similar', async (req, res) => {
           _id: { $ne: profile._id },
         },
       },
-      { $addFields: { score: { $add: [sameCity, sameRole, sameLevel, verified, sharedDisciplines] } } },
-      { $sort: { score: -1, followerCount: -1, communityPoints: -1 } },
+      {
+        $addFields: {
+          pinnedRank: {
+            $indexOfArray: [PINNED_USERNAMES, '$username'],
+          },
+        },
+      },
+      // $indexOfArray returns -1 for unpinned accounts; bump them so they sort
+      // after the two featured accounts instead of before them.
+      { $addFields: { pinnedRank: { $cond: [{ $lt: ['$pinnedRank', 0] }, PINNED_USERNAMES.length, '$pinnedRank'] } } },
+      { $sort: { pinnedRank: 1, createdAt: -1, _id: -1 } },
       { $limit: 6 },
       {
         $project: {
@@ -588,6 +595,10 @@ router.get('/suggested', optionalUser, async (req, res) => {
       }
     }
 
+    // Featured accounts pinned at the top, then remaining accounts sorted
+    // newest-first (newest registrations appear first).
+    const PINNED_USERNAMES = ['climbpakistan', 'abuzarfaiz'];
+
     const users = await User.aggregate([
       {
         $match: {
@@ -596,8 +607,17 @@ router.get('/suggested', optionalUser, async (req, res) => {
           ...(excludeIds.length ? { _id: { $nin: excludeIds } } : {}),
         },
       },
-      { $addFields: { priority: { $cond: [{ $ne: ['$verification', 'none'] }, 1, 0] } } },
-      { $sort: { priority: -1, followerCount: -1, communityPoints: -1 } },
+      {
+        $addFields: {
+          pinnedRank: {
+            $indexOfArray: [PINNED_USERNAMES, '$username'],
+          },
+        },
+      },
+      // $indexOfArray returns -1 for unpinned accounts; bump them so they sort
+      // after the two featured accounts instead of before them.
+      { $addFields: { pinnedRank: { $cond: [{ $lt: ['$pinnedRank', 0] }, PINNED_USERNAMES.length, '$pinnedRank'] } } },
+      { $sort: { pinnedRank: 1, createdAt: -1, _id: -1 } },
       { $limit: limit },
       {
         $project: {
