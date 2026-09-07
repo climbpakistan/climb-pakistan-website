@@ -380,31 +380,61 @@ function SimilarAccounts({ users, follows, busy, onToggleFollow, onDismiss }) {
   );
 }
 
-function FollowList({ list, busy, denormalized }) {
+function FollowList({ list, busy, denormalized, type }) {
   // `list` is the denormalized avatar/name list saved on CachedUser (backend
   // provides { username, name, profileImageUrl } entries) OR a full profile list.
   const items = Array.isArray(denormalized) && denormalized.length
     ? denormalized
     : (Array.isArray(list) ? list : []);
+  
+  const title = type === 'followers' ? 'Followers' : 'Following';
+  const subtitle = type === 'followers' 
+    ? 'People who follow this account'
+    : 'Accounts this person follows';
+  
   return (
-    <div className="profile-follow-list">
+    <div className="profile-follow-list-container">
+      <div className="profile-follow-list-header">
+        <h3 className="profile-follow-list-title">{title}</h3>
+        <p className="profile-follow-list-subtitle">{subtitle}</p>
+      </div>
+      
       {items.length === 0 ? (
-        <EmptyTab title={busy ? 'Loading…' : 'Nothing here yet'} text="No members to show." />
+        <EmptyTab 
+          title={busy ? 'Loading…' : 'Nothing here yet'} 
+          text={type === 'followers' ? 'No one is following this account yet.' : 'This account isn\'t following anyone yet.'}
+        />
       ) : (
-        items.map((m) => (
-          <a key={m.username} href={`/community/u/${m.username}`} className="profile-follow-row">
-            <span className="community-avatar-fallback">
-              {(m.username || m.name || '?')[0].toUpperCase()}
-            </span>
-            <span className="profile-follow-row-meta">
-              <span className="profile-follow-row-name">
-                {m.name || `@${m.username}`}
-                <VerificationBadge verification={m.verification} size={12} />
-              </span>
-              {m.name ? <span className="profile-follow-row-bio">@{m.username}</span> : null}
-            </span>
-          </a>
-        ))
+        <div className="profile-follow-grid">
+          {items.map((m) => (
+            <a 
+              key={m.username} 
+              href={`/community/u/${m.username}`} 
+              className="profile-follow-card"
+            >
+              <div className="profile-follow-avatar-wrapper">
+                {m.profileImageUrl ? (
+                  <img 
+                    src={m.profileImageUrl} 
+                    alt={m.name || m.username} 
+                    className="profile-follow-avatar"
+                  />
+                ) : (
+                  <span className="profile-follow-avatar profile-follow-avatar--fallback">
+                    {(m.username || m.name || '?')[0].toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="profile-follow-info">
+                <span className="profile-follow-name">
+                  {m.name || `@${m.username}`}
+                  <VerificationBadge verification={m.verification} size={12} />
+                </span>
+                <span className="profile-follow-username">@{m.username}</span>
+              </div>
+            </a>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -693,10 +723,10 @@ function Page() {
       );
     }
     if (tab === 'followers') {
-      return <FollowList busy={followListBusy} denormalized={followers} />;
+      return <FollowList busy={followListBusy} denormalized={followers} type="followers" />;
     }
     if (tab === 'following') {
-      return <FollowList busy={followListBusy} denormalized={following} />;
+      return <FollowList busy={followListBusy} denormalized={following} type="following" />;
     }
     // posts (default)
     if (postsBusy) return <EmptyTab title="Loading…" text="Fetching latest posts." />;
