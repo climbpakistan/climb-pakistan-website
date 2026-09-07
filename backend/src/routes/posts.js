@@ -344,6 +344,14 @@ router.get('/', optionalUser, async (req, res) => {
     // Only ever return content that hasn't been removed by moderators.
     const filter = { removed: { $ne: true } };
 
+    // Optional author filter for profile pages.
+    let authorFilter = null;
+    if (req.query.author) {
+      const author = await UserModel.findOne({ username: String(req.query.author).trim().toLowerCase().replace(/^@/, '') });
+      if (author) authorFilter = author._id;
+      else return res.json({ posts: [], page, limit, total: 0, hasMore: false });
+    }
+
     // Hide posts by users the viewer blocked, muted, or who blocked them.
     // Only apply this if there's no specific author filter (profile view)
     if (req.user && !authorFilter) {
@@ -363,14 +371,6 @@ router.get('/', optionalUser, async (req, res) => {
     const category = String(req.query.category || '').trim();
     if (category && POST_CATEGORIES.includes(category)) {
       filter.category = category;
-    }
-
-    // Optional author filter for profile pages.
-    let authorFilter = null;
-    if (req.query.author) {
-      const author = await UserModel.findOne({ username: String(req.query.author).trim().toLowerCase().replace(/^@/, '') });
-      if (author) authorFilter = author._id;
-      else return res.json({ posts: [], page, limit, total: 0, hasMore: false });
     }
 
     // Check if user is admin (for showing admin-only fields and pinned posts)
