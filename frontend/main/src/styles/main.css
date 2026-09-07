@@ -3182,13 +3182,12 @@ input, textarea, select { font: inherit; color: inherit; }
   max-width: 1100px;
   margin: 0 auto;
 }
-/* Desktop: sit the feed a little left of center so post cards don't crowd
-   the middle of the screen. Clamped so narrow desktop widths keep padding.
-   Three columns on desktop: topics | posts | about-community card. */
+/* Desktop: three aligned columns — topics | posts | about-community card —
+   centered as one group so no card hugs the screen edge. */
 @media (min-width: 1101px) {
   .community-feed-layout {
     max-width: 1240px;
-    margin-left: max(var(--sp-6), calc((100% - 1240px) / 2 - 40px));
+    margin-left: auto;
     margin-right: auto;
   }
   /* About card aligns with the top of the posts area and follows scroll. */
