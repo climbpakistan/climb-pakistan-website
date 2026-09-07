@@ -214,7 +214,9 @@ export default function PostCard({ post }) {
             }}
           >
             <PostGallery
-              images={post.images || [post.imageUrl]}
+              images={post.images && post.images.length > 0 
+                ? post.images.map(img => img.url || img) 
+                : [post.imageUrl]}
               alt={post.title}
               onImageClick={(i) => {
                 setLightboxIndex(i);
