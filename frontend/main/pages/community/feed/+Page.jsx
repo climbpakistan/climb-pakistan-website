@@ -55,7 +55,10 @@ function AboutSidebar() {
     <aside className="community-about-sidebar">
       <h2 className="community-about-title">About this community</h2>
       <p className="community-about-text">
-        A space for Pakistan&rsquo;s sport climbing community to connect, discuss, share and learn.
+        The Climb Pakistan Community is where the country&rsquo;s sport climbers
+        come together. From beginners to national team athletes. Ask questions
+        about training or technique, share beta, swap gear advice and follow the
+        climbers and organizations shaping the sport in Pakistan.
       </p>
       <a href="/community/about" className="community-about-link">
         About the Community <span className="community-about-link-arrow" aria-hidden="true">→</span>

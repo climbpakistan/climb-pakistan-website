@@ -4672,8 +4672,8 @@ input, textarea, select { font: inherit; color: inherit; }
   text-transform: uppercase;
   color: #fff;
   text-decoration: none;
-  background: linear-gradient(135deg, var(--cp-accent) 0%, var(--cp-accent-2) 100%);
-  box-shadow: 0 2px 8px rgba(63, 191, 106, 0.3);
+  background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.35);
   transition: filter 0.15s ease, transform 0.15s ease;
 }
 a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-1px); }

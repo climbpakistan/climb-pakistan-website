@@ -45,10 +45,9 @@ function Page() {
             </p>
             <p className="community-about-body">
               The Climb Pakistan Community is where the country&rsquo;s sport climbers
-              come together — from first-time gym visitors to national team athletes.
-              Ask questions about training or technique, share beta from the crags
-              you&rsquo;ve explored, post competition results, swap gear advice, and
-              follow the climbers and organizations shaping the sport in Pakistan.
+              come together. From beginners to national team athletes. Ask questions
+              about training or technique, share beta, swap gear advice and follow the
+              climbers and organizations shaping the sport in Pakistan.
             </p>
             <p className="community-about-body">
               Every post is organized by topic, so whether you&rsquo;re chasing your
