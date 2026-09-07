@@ -472,18 +472,34 @@ export async function vote(token, { target, targetId, voteType }) {
 /**
  * Batch-fetch the current user's votes for highlighting.
  * `posts` / `comments` are arrays of ids. Returns { posts: {id: type}, comments: {...} }.
+ * Returns empty object if not logged in or on error.
  */
 export async function getMyVotes(token, { posts = [], comments = [] } = {}) {
+  // Return empty result if no token or no ids to check
+  if (!token || (posts.length === 0 && comments.length === 0)) {
+    return { posts: {}, comments: {} };
+  }
+  
   const params = new URLSearchParams();
   if (posts.length > 0) params.set('posts', posts.join(','));
   if (comments.length > 0) params.set('comments', comments.join(','));
   const qs = params.toString();
-  const res = await fetch(`${BASE_URL}/votes/mine${qs ? `?${qs}` : ''}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Could not load your votes.');
-  return data;
+  try {
+    const res = await fetch(`${BASE_URL}/votes/mine${qs ? `?${qs}` : ''}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      // If not authenticated, return empty result instead of throwing
+      if (res.status === 401) return { posts: {}, comments: {} };
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Could not load your votes.');
+    }
+    const data = await res.json().catch(() => ({}));
+    return data;
+  } catch (err) {
+    console.error('Error in getMyVotes:', err);
+    return { posts: {}, comments: {} };
+  }
 }
 
 // ── Community Polls ──
@@ -645,7 +661,12 @@ export async function getSuggestedAccounts(token, limit = 8) {
 export async function getUserPosts(username, { page = 1, limit = 20 } = {}) {
   const params = new URLSearchParams({ view: 'new', page: String(page), limit: String(limit) });
   params.set('author', username);
-  return fetchJSON(`${BASE_URL}/posts?${params.toString()}`);
+  try {
+    return await fetchJSON(`${BASE_URL}/posts?${params.toString()}`);
+  } catch (err) {
+    console.error('Error in getUserPosts:', err);
+    return { posts: [], page, limit, total: 0, hasMore: false };
+  }
 }
 
 /** A public user's comments (newest first, removed excluded). */

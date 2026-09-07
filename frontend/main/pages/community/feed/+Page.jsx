@@ -196,7 +196,7 @@ function Page() {
   // Merge the current user's votes into a list of posts so vote buttons
   // highlight correctly (batched — one request for the whole page).
   const withMyVotes = useCallback(async (list) => {
-    if (isGuest || list.length === 0) return list;
+    if (isGuest || list.length === 0 || !token) return list;
     try {
       const ids = list.map((p) => p.id);
       const [voteData, savedData] = await Promise.all([
@@ -210,7 +210,8 @@ function Page() {
         myVote: mine[p.id] || null,
         saved: !!saved[p.id],
       }));
-    } catch {
+    } catch (err) {
+      console.error('Error loading user votes/saved:', err);
       return list; // highlighting is best-effort
     }
   }, [token, isGuest]);
