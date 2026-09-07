@@ -3176,19 +3176,23 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Feed layout */
 .community-feed-layout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr) 280px;
   gap: var(--sp-8);
   align-items: start;
   max-width: 1100px;
   margin: 0 auto;
 }
 /* Desktop: sit the feed a little left of center so post cards don't crowd
-   the middle of the screen. Clamped so narrow desktop widths keep padding. */
+   the middle of the screen. Clamped so narrow desktop widths keep padding.
+   Three columns on desktop: topics | posts | about-community card. */
 @media (min-width: 1101px) {
   .community-feed-layout {
-    margin-left: max(var(--sp-6), calc((100% - 1100px) / 2 - 40px));
+    max-width: 1240px;
+    margin-left: max(var(--sp-6), calc((100% - 1240px) / 2 - 40px));
     margin-right: auto;
   }
+  /* About card aligns with the top of the posts area and follows scroll. */
+  .community-about-sidebar { position: sticky; top: 100px; }
 }
 .community-feed-headrow {
   display: flex;
@@ -3397,7 +3401,7 @@ input, textarea, select { font: inherit; color: inherit; }
 /* Feed layout */
 .community-feed-layout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr) 280px;
   gap: var(--sp-6);
   align-items: start;
 }
@@ -4405,9 +4409,100 @@ input, textarea, select { font: inherit; color: inherit; }
   font-weight: 600;
 }
 
+/* About community sidebar (right column, desktop) */
+.community-about-sidebar {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+}
+.community-about-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--cp-text-muted);
+  margin-bottom: var(--sp-2);
+}
+.community-about-text {
+  font-size: var(--fs-sm);
+  color: var(--cp-text-dim);
+  line-height: 1.6;
+}
+.community-about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--sp-3);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--cp-accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.community-about-link:hover { color: var(--cp-accent-strong); text-decoration: underline; }
+.community-about-link-arrow { transition: transform 0.15s ease; }
+.community-about-link:hover .community-about-link-arrow { transform: translateX(3px); }
+
+/* About the Community page (/community/about) */
+.community-about-page { max-width: 760px; }
+.community-about-card-page {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  padding: var(--sp-6);
+}
+.community-about-lead {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--cp-text);
+  margin-bottom: var(--sp-3);
+}
+.community-about-body {
+  font-size: var(--fs-sm);
+  color: var(--cp-text-dim);
+  line-height: 1.6;
+}
+.community-about-subtitle {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--cp-text-muted);
+  margin: var(--sp-5) 0 var(--sp-2);
+}
+.community-about-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.community-about-topic {
+  display: inline-flex;
+  padding: var(--sp-1) var(--sp-3);
+  background: var(--cp-bg-alt);
+  border: 1px solid var(--cp-border);
+  border-radius: 999px;
+  font-size: var(--fs-sm);
+  color: var(--cp-text);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.community-about-topic:hover { background: var(--cp-bg); color: var(--cp-primary); }
+.community-about-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
+
 /* Community responsive */
 @media (max-width: 1100px) {
   .community-feed-layout { grid-template-columns: minmax(0, 1fr); }
+
+  /* About card stacks below the feed on tablet/mobile — full width within
+     the container padding, so it never causes horizontal scroll. */
+  .community-about-sidebar { position: static; margin-top: var(--sp-4); }
 
   /* Topics: instead of hiding the sidebar on narrow screens, turn it into a
      horizontally scrollable chip row above the posts. */

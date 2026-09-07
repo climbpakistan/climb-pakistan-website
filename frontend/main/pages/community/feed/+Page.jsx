@@ -48,6 +48,22 @@ function TopicsSidebar({ activeCategory, counts }) {
   );
 }
 
+// Right sidebar: compact "About this community" card (desktop). On narrow
+// screens it stacks below the feed via the existing single-column layout.
+function AboutSidebar() {
+  return (
+    <aside className="community-about-sidebar">
+      <h2 className="community-about-title">About this community</h2>
+      <p className="community-about-text">
+        A space for Pakistan&rsquo;s sport climbing community to connect, discuss, share and learn.
+      </p>
+      <a href="/community/about" className="community-about-link">
+        About the Community <span className="community-about-link-arrow" aria-hidden="true">→</span>
+      </a>
+    </aside>
+  );
+}
+
 function PostSkeleton() {
   return (
     <div className="community-post-card" aria-hidden="true">
@@ -651,7 +667,7 @@ function Page() {
             )}
           </div>
 
-
+          <AboutSidebar />
         </FeedShell>
       </section>
     </>
