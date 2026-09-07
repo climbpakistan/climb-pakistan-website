@@ -686,8 +686,9 @@ function Page() {
     );
   }
 
-  // `saved` is only shown on the owner's own profile.
-  const ownerTabs = isOwner ? ['posts', 'comments', 'followers', 'following', 'saved'] : ['posts', 'comments', 'followers', 'following'];
+  // `saved` and `comments` are only shown on the owner's own profile.
+  // `comments` shows posts the user has commented on.
+  const ownerTabs = isOwner ? ['posts', 'comments', 'followers', 'following', 'saved'] : ['posts', 'followers', 'following'];
 
   function renderTab() {
     if (tab === 'saved') {
