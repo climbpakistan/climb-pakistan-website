@@ -439,8 +439,15 @@ function Page() {
               )}
 
               {/* Autocomplete dropdown */}
+              {/* Prevent the input from blurring when clicking a suggestion, so
+                  the dropdown stays mounted and the click can navigate to it. */}
               {suggestionsOpen && (suggestions.posts.length > 0 || suggestions.users.length > 0) && (
-                <div className="community-search-suggestions" id="community-search-suggestions" role="listbox">
+                <div
+                  className="community-search-suggestions"
+                  id="community-search-suggestions"
+                  role="listbox"
+                  onMouseDown={(e) => e.preventDefault()}
+                >
                   <div className="community-search-suggestions-body">
                     {suggestions.posts.length > 0 && (
                       <div className="community-search-suggestions-section">
