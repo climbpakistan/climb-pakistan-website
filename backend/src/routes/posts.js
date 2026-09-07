@@ -491,8 +491,11 @@ router.get('/', optionalUser, async (req, res) => {
       Post.countDocuments(filter),
     ]);
 
+    // Serialize the regular feed once (author, id, image URLs, poll payloads).
+    const serializedRegular = await attachPollPayloads(regularPosts, req.user?.id || null, isAdmin);
+
     // Initialize posts variable (will be modified if there are pinned posts)
-    let posts = regularPosts;
+    let posts = serializedRegular;
 
     // Load full pinned post documents with author info
     if (pinnedPostIds.length > 0) {
@@ -510,23 +513,15 @@ router.get('/', optionalUser, async (req, res) => {
         }));
 
         // Combine: pinned posts first, then regular feed
-        posts = [...pinnedWithMeta, ...regularPosts];
+        posts = [...pinnedWithMeta, ...serializedRegular];
       } catch (pinErr) {
         console.error('Error loading pinned posts:', pinErr);
         // Keep using regular posts only
       }
     }
 
-    // Only attach poll payloads once (not twice)
-    const json = posts.map((p) => {
-      // If already processed by attachPollPayloads, use as-is
-      if (p.poll !== undefined || p.type !== 'poll') return p;
-      // Otherwise add empty poll placeholder
-      return p;
-    });
-
     res.json({
-      posts: json,
+      posts,
       page,
       limit,
       total: pinnedPostIds.length + total,
