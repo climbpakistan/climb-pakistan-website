@@ -491,14 +491,16 @@ router.get('/', optionalUser, async (req, res) => {
       Post.countDocuments(filter),
     ]);
 
+    // Initialize posts variable (will be modified if there are pinned posts)
+    let posts = regularPosts;
+
     // Load full pinned post documents with author info
-    let pinnedPostsData = [];
     if (pinnedPostIds.length > 0) {
       try {
         const pinnedDocs = await Post.find({ _id: { $in: pinnedPostIds } })
           .populate('authorId', 'username name profileImageUrl verification')
           .lean();
-        pinnedPostsData = await attachPollPayloads(pinnedDocs, req.user?.id || null, isAdmin);
+        const pinnedPostsData = await attachPollPayloads(pinnedDocs, req.user?.id || null, isAdmin);
 
         // Add pinned metadata
         const pinnedWithMeta = pinnedPostsData.map((p) => ({
@@ -511,11 +513,8 @@ router.get('/', optionalUser, async (req, res) => {
         posts = [...pinnedWithMeta, ...regularPosts];
       } catch (pinErr) {
         console.error('Error loading pinned posts:', pinErr);
-        // Fall back to regular posts only
-        posts = regularPosts;
+        // Keep using regular posts only
       }
-    } else {
-      posts = regularPosts;
     }
 
     // Only attach poll payloads once (not twice)
