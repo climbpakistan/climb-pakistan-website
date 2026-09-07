@@ -194,37 +194,35 @@ export default function PostCard({ post }) {
             {expanded ? 'See less' : 'See more'}
           </button>
         )}
-      </div>
-
-      {(post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl)) && (
-        <div
-          className="community-post-image-link"
-          role="button"
-          tabIndex={0}
-          aria-label="View image full screen"
-          onClick={(e) => {
-            if (e.target !== e.currentTarget) return;
-            setLightboxIndex(0);
-            setLightboxOpen(true);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
+      </div>        {(post.type === 'image' && ((post.images && post.images.length > 0) || post.imageUrl)) && (
+          <div
+            className="community-post-image-link"
+            role="button"
+            tabIndex={0}
+            aria-label="View image full screen"
+            onClick={(e) => {
+              if (e.target !== e.currentTarget) return;
               setLightboxIndex(0);
               setLightboxOpen(true);
-            }
-          }}
-        >
-          <PostGallery
-            images={post.images && post.images.length > 0 ? post.images : post.imageUrl}
-            alt={post.title}
-            onImageClick={(i) => {
-              setLightboxIndex(i);
-              setLightboxOpen(true);
             }}
-          />
-        </div>
-      )}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setLightboxIndex(0);
+                setLightboxOpen(true);
+              }
+            }}
+          >
+            <PostGallery
+              images={post.images && post.images.length > 0 ? post.images : [post.imageUrl]}
+              alt={post.title}
+              onImageClick={(i) => {
+                setLightboxIndex(i);
+                setLightboxOpen(true);
+              }}
+            />
+          </div>
+        )}
 
       {lightboxOpen && (
         <PostLightbox
