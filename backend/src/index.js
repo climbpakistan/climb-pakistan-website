@@ -38,7 +38,11 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ── Security Middleware ──
-app.use(helmet());
+// Configure helmet to allow CORS while maintaining security
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: { policy: 'same-origin' },
+}));
 
 // CORS — restrict to specific origins in production
 // Always allow the main domains; CORS_ORIGIN env var can add more if needed
