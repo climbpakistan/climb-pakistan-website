@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePageContext } from 'vike-react/usePageContext';
 import { navigate } from 'vike/client/router';
 import { navLinks } from '../data/siteData';
-import useFetch from '../hooks/useFetch';
 import { getAthletes, getNews, getNotifications, getUnreadNotificationCount, markNotificationsRead } from '../api';
 import { useTheme } from '../hooks/ThemeContext';
 import { useCommunity } from '../hooks/CommunityContext';
@@ -44,8 +43,7 @@ export default function Header() {
   const { user, token, initializing, signOut } = useCommunity();
   const pageContext = usePageContext();
   const currentPath = pageContext?.urlPathname || '';
-  const { data: athletes } = useFetch(getAthletes, []);
-  const { data: newsArticles } = useFetch(getNews, []);
+  const [searchData, setSearchData] = useState(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -135,6 +133,20 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
+  // Lazy-fetch athletes + news the first time the user types in search.
+  // The data is cached in `searchData` so subsequent searches don't re-fetch.
+  useEffect(() => {
+    if (!searchOpen || !query.trim() || searchData) return;
+    let cancelled = false;
+    Promise.all([
+      getAthletes().catch(() => []),
+      getNews().catch(() => []),
+    ]).then(([athletes, news]) => {
+      if (!cancelled) setSearchData({ athletes, news });
+    });
+    return () => { cancelled = true; };
+  }, [searchOpen, query, searchData]);
+
   // Close dropdown on outside click.
   useEffect(() => {
     function onClick(e) {
@@ -166,12 +178,12 @@ export default function Header() {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q || !athletes || !newsArticles) return { athletes: [], news: [] };
+    if (!q || !searchData) return { athletes: [], news: [] };
     return {
-      athletes: athletes.filter((a) => a.name.toLowerCase().includes(q)).slice(0, 4),
-      news: newsArticles.filter((n) => n.title.toLowerCase().includes(q)).slice(0, 4),
+      athletes: searchData.athletes.filter((a) => a.name.toLowerCase().includes(q)).slice(0, 4),
+      news: searchData.news.filter((n) => n.title.toLowerCase().includes(q)).slice(0, 4),
     };
-  }, [query, athletes, newsArticles]);
+  }, [query, searchData]);
 
   const hasResults = results.athletes.length > 0 || results.news.length > 0;
 
