@@ -66,6 +66,21 @@ const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 console.log('🌐 CORS allowed origins:', allowedOrigins);
 
+// CORS header guarantee: attach CORS headers to every response (including 404s
+// and unhandled errors) for allowed origins, so a bare error page never blocks
+// the browser with a missing Access-Control-Allow-Origin header.
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
+    res.setHeader('Vary', 'Origin');
+  }
+  next();
+});
+
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (server-to-server, curl, Postman, etc.)
