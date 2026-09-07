@@ -41,28 +41,48 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet());
 
 // CORS — restrict to specific origins in production
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
-  : [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:3001',
-      // Custom domain & Vercel previews
-      'https://climbpakistan.com',
-      'https://www.climbpakistan.com',
-      'https://climb-pakistan.vercel.app',
-      'https://climb-pakistan-admin.vercel.app',
-    ];
+// Always allow the main domains; CORS_ORIGIN env var can add more if needed
+const envOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim()).filter(Boolean)
+  : [];
+
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3001',
+  // Custom domain & Vercel previews
+  'https://climbpakistan.com',
+  'https://www.climbpakistan.com',
+  'https://climb-pakistan.vercel.app',
+  'https://climb-pakistan-admin.vercel.app',
+];
+
+// Combine env origins with defaults, remove duplicates
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
+
+console.log('🌐 CORS allowed origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (server-to-server, curl, Postman, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (!origin) {
+      console.log('CORS: Allowing request with no origin');
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
+      console.log('CORS: Allowing origin:', origin);
+      return callback(null, true);
+    }
+    console.log('CORS: Blocking origin:', origin);
     return callback(null, false);
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+
+// Handle preflight OPTIONS requests explicitly
+app.options('*', cors());
 
 // Rate limiters
 const contactLimiter = rateLimit({
