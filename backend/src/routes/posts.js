@@ -371,6 +371,9 @@ router.get('/', optionalUser, async (req, res) => {
       else return res.json({ posts: [], page, limit, total: 0, hasMore: false });
     }
 
+    // Check if user is admin (for showing admin-only fields and pinned posts)
+    const isAdmin = req.user?.role === 'admin';
+
     let sort = { createdAt: -1 };
 
     if (view === 'popular') {
@@ -453,18 +456,18 @@ router.get('/', optionalUser, async (req, res) => {
     // Pinned posts (by admins) appear at the very top of topic views.
     // For category-filtered views, pinned posts in that category lead the feed.
     const isCategoryView = category && POST_CATEGORIES.includes(category);
-    let pinnedPosts = [];
+    let pinnedPostIds = [];
     if (isCategoryView) {
       const pinned = await Post.find({
         removed: { $ne: true },
         'pinned.category': category,
       }).sort({ createdAt: -1 }).limit(2);
-      pinnedPosts = pinned.map((p) => p._id);
+      pinnedPostIds = pinned.map((p) => p._id);
       // Exclude pinned posts from the regular feed to avoid duplicates.
-      filter._id = { $nin: pinnedPosts };
+      filter._id = { $nin: pinnedPostIds };
     }
 
-    const [posts, total] = await Promise.all([
+    const [regularPosts, total] = await Promise.all([
       Post.find(filter)
         .sort(sort)
         .skip((page - 1) * limit)
@@ -474,22 +477,24 @@ router.get('/', optionalUser, async (req, res) => {
     ]);
 
     // Load full pinned post documents with author info
-    let pinnedFull = [];
-    if (pinnedPosts.length > 0) {
-      const pinnedDocs = await Post.find({ _id: { $in: pinnedPosts } })
+    let pinnedPosts = [];
+    if (pinnedPostIds.length > 0) {
+      const pinnedDocs = await Post.find({ _id: { $in: pinnedPostIds } })
         .populate('authorId', 'username name profileImageUrl verification')
         .lean();
-      pinnedFull = await attachPollPayloads(pinnedDocs, req.user?.id || null, isAdmin);
+      pinnedPosts = await attachPollPayloads(pinnedDocs, req.user?.id || null, isAdmin);
 
       // Add pinned metadata
-      const pinnedWithMeta = pinnedFull.map((p) => ({
+      const pinnedWithMeta = pinnedPosts.map((p) => ({
         ...p,
         isPinned: true,
         pinnedCategory: p.pinned?.category,
       }));
 
       // Combine: pinned posts first, then regular feed
-      posts = [...pinnedWithMeta, ...posts];
+      posts = [...pinnedWithMeta, ...regularPosts];
+    } else {
+      posts = regularPosts;
     }
 
     const json = await attachPollPayloads(posts, req.user?.id || null, isAdmin);
@@ -498,7 +503,7 @@ router.get('/', optionalUser, async (req, res) => {
       posts: json,
       page,
       limit,
-      total: pinnedPosts.length + total,
+      total: pinnedPostIds.length + total,
       hasMore: page * limit < total,
     });
   } catch (err) {
