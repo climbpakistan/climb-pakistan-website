@@ -118,10 +118,7 @@ function RightRail() {
     <aside className="community-feed-sidebar">
       <section className="community-about-sidebar">
         <span className="community-about-banner" aria-hidden="true"></span>
-        <div className="community-about-head">
-          <span className="community-about-emblem" aria-hidden="true">PK</span>
-          <h2 className="community-about-title">About this community</h2>
-        </div>
+        <h2 className="community-about-title">About this community</h2>
         <p className="community-about-text">
           The Climb Pakistan Community is where the country&rsquo;s sport climbers
           come together. From beginners to national team athletes. Ask questions
