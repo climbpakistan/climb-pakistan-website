@@ -785,6 +785,9 @@ function Page() {
                   className="btn btn-primary community-empty-btn"
                   onClick={handleCreatePost}
                 >
+                  <svg viewBox="0 0 24 24" className="community-btn-plus" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
                   Create Post
                 </button>
               </div>
@@ -792,8 +795,19 @@ function Page() {
 
             {status === 'ready' && posts.length > 0 && (
               <>
-                <div className="community-feed-actions">
-                  <button type="button" className="btn btn-primary" onClick={handleCreatePost}>
+                <div className="community-feed-compose">
+                  <div className="community-feed-compose-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9"></path>
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                  </div>
+                  <span className="community-feed-compose-hint">
+                    {activeCategory
+                      ? `Start a discussion in ${activeCategory}`
+                      : 'Start a discussion in the community'}
+                  </span>
+                  <button type="button" className="btn btn-primary community-feed-compose-btn" onClick={handleCreatePost}>
                     Create Post
                   </button>
                 </div>
