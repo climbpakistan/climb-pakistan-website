@@ -26,6 +26,7 @@ const OUTPUT_PATH = 'public/sitemap.xml';
 import fs from 'fs';
 import path from 'path';
 import { normalizeSlug } from '../src/utils/slug.js';
+import { isPostIndexable } from '../src/utils/communitySeo.js';
 
 // ---- helpers -------------------------------------------------------
 
@@ -139,8 +140,9 @@ async function main() {
     { loc: '/results', priority: '0.8', changefreq: 'weekly' },
     { loc: '/competitions', priority: '0.8', changefreq: 'weekly' },
     { loc: '/learn', priority: '0.7', changefreq: 'monthly' },
+    // /community/feed is intentionally absent — the page is hard-coded
+    // noindex, and noindex pages must not be listed in the sitemap.
     { loc: '/community', priority: '0.7', changefreq: 'weekly' },
-    { loc: '/community/feed', priority: '0.7', changefreq: 'weekly' },
     { loc: '/about', priority: '0.6', changefreq: 'monthly' },
     { loc: '/contact', priority: '0.5', changefreq: 'monthly' },
   ];
@@ -238,6 +240,37 @@ async function main() {
         }
       }
     }
+  }
+
+  // ── Community discussions ──
+  // Individual public community posts. Only visible, non-removed posts with
+  // meaningful content are eligible (the feed API already excludes removed
+  // content; isPostIndexable applies the same visibility + meaningful-content
+  // rules as the post page). Capped so the sitemap never grows unboundedly.
+  try {
+    const MAX_COMMUNITY_URLS = 200;
+    const pageSize = 50;
+    let added = 0;
+    let page = 1;
+    let done = false;
+    while (!done && added < MAX_COMMUNITY_URLS) {
+      const data = await fetchJSON(`/posts?view=new&page=${page}&limit=${pageSize}`);
+      const posts = Array.isArray(data.posts) ? data.posts : [];
+      for (const post of posts) {
+        if (!isPostIndexable(post)) continue;
+        urls.push(urlElement(`${SITE_URL}/community/post/${post.id}`, {
+          lastmod: w3cDate(post.updatedAt || post.createdAt),
+          changefreq: 'weekly',
+          priority: '0.6',
+        }));
+        added += 1;
+        if (added >= MAX_COMMUNITY_URLS) break;
+      }
+      if (posts.length < pageSize) done = true;
+      page += 1;
+    }
+  } catch (err) {
+    console.warn('[sitemap] could not load community posts:', err.message);
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -8,12 +8,17 @@ import CommentItem from './CommentItem';
  * CommentSection — loads and renders the comment thread for a post, with a
  * top-level composer. Guests can read everything but are shown the existing
  * Sign Up / Log In prompt when they try to comment.
+ *
+ * `initialComments` (from SSR) seeds the thread so the initial HTML already
+ * contains the public discussion; the mount fetch still refreshes the list and
+ * attaches the viewer's vote highlights.
  */
-export default function CommentSection({ postId, onCountChange }) {
+export default function CommentSection({ postId, onCountChange, initialComments }) {
   const { token, isGuest, openAuthPrompt } = useCommunity();
 
-  const [flat, setFlat] = useState([]); // all comments, oldest first
-  const [status, setStatus] = useState('loading'); // loading | ready | error
+  const hasInitial = Array.isArray(initialComments) && initialComments.length > 0;
+  const [flat, setFlat] = useState(hasInitial ? initialComments : []); // all comments, oldest first
+  const [status, setStatus] = useState(hasInitial ? 'ready' : 'loading'); // loading | ready | error
   const [errorMsg, setErrorMsg] = useState('');
 
   const [body, setBody] = useState('');
@@ -41,18 +46,22 @@ export default function CommentSection({ postId, onCountChange }) {
   }
 
   const load = useCallback(async () => {
-    setStatus('loading');
+    // With server-rendered comments already on screen, refresh quietly instead
+    // of flashing a loading state; keep existing comments if the refresh fails.
+    if (!hasInitial) setStatus('loading');
     try {
       const data = await getComments(postId);
       setFlat(data.comments || []);
       setStatus('ready');
       return data.comments || [];
     } catch (err) {
-      setErrorMsg(err.message || 'Could not load comments.');
-      setStatus('error');
+      if (!hasInitial) {
+        setErrorMsg(err.message || 'Could not load comments.');
+        setStatus('error');
+      }
       return [];
     }
-  }, [postId]);
+  }, [postId, hasInitial]);
 
   useEffect(() => {
     load();

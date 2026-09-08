@@ -5075,6 +5075,27 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
 
 /* Full post page */
 .community-post-page { max-width: 720px; margin-inline: auto; }
+
+/* Breadcrumb on individual discussion pages — links back to /community and
+   the post's topic, without cluttering the card itself. */
+.community-post-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+  font-size: var(--fs-sm);
+}
+.community-post-breadcrumb a {
+  color: var(--cp-accent);
+  text-decoration: none;
+}
+.community-post-breadcrumb a:hover {
+  text-decoration: underline;
+}
+.community-post-breadcrumb span[aria-hidden="true"] {
+  color: var(--cp-text-muted);
+}
 .community-post-card--full {
   width: auto;
   aspect-ratio: auto;
@@ -6332,6 +6353,58 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
 .community-landing-guest a:hover {
   color: var(--cp-accent);
   text-decoration: underline;
+}
+
+/* Recent discussions on the landing page (server-rendered public content) */
+.community-landing-recent {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--sp-2) var(--sp-8) var(--sp-10);
+}
+.community-landing-recent-title {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--sp-4);
+}
+.community-landing-recent-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+}
+.community-landing-recent-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 10px;
+}
+.community-landing-recent-link {
+  color: var(--cp-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+.community-landing-recent-link:hover {
+  color: var(--cp-accent);
+}
+.community-landing-recent-meta {
+  color: var(--cp-text-muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .community-landing-recent {
+    padding: var(--sp-2) var(--sp-6) var(--sp-8);
+  }
+  .community-landing-recent-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
 }
 
 /* Loading state */

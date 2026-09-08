@@ -482,6 +482,94 @@ export function recordsSchema(records, gender = 'Men', settings = {}) {
 }
 
 /**
+ * DiscussionForumPosting schema — for individual public community discussions.
+ *
+ * Follows Google's current discussion-forum structured-data guidance: the
+ * post is the main entity of the page, and comments (including reply threads)
+ * are nested under it. Only content that is actually visible on the page is
+ * included — removed content never reaches this builder.
+ *
+ * @param {Object} post - Serialized post from GET /api/posts/:id
+ * @param {Array} comments - Flat comment list from GET /api/comments/:postId
+ * @returns {Object|null} JSON-LD DiscussionForumPosting schema
+ */
+export function discussionSchema(post, comments = []) {
+  if (!post || !post.id) return null;
+
+  const postUrl = `${BASE_URL}/community/post/${post.id}`;
+  const authorUrl = post.author?.username
+    ? `${BASE_URL}/community/u/${encodeURIComponent(post.author.username)}`
+    : undefined;
+
+  // Build a reply tree from the flat comment list (linked by parentCommentId).
+  const byId = new Map(comments.map((c) => [c.id, { ...c, children: [] }]));
+  const roots = [];
+  for (const c of comments) {
+    const node = byId.get(c.id);
+    if (c.parentCommentId && byId.has(c.parentCommentId)) {
+      byId.get(c.parentCommentId).children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  function commentNode(node) {
+    const out = {
+      '@type': 'Comment',
+      text: cleanText(node.body).slice(0, 2000) || undefined,
+      author: node.author?.username
+        ? {
+            '@type': 'Person',
+            name: node.author.username,
+            url: `${BASE_URL}/community/u/${encodeURIComponent(node.author.username)}`,
+          }
+        : undefined,
+      datePublished: isoDate(node.createdAt),
+    };
+    if (node.children.length > 0) {
+      out.comment = node.children.map(commentNode);
+    }
+    Object.keys(out).forEach((key) => {
+      if (out[key] === undefined) delete out[key];
+    });
+    return out;
+  }
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'DiscussionForumPosting',
+    '@id': postUrl,
+    mainEntityOfPage: postUrl,
+    headline: post.title,
+    text: cleanText(post.body) || undefined,
+    url: postUrl,
+    author: authorUrl
+      ? { '@type': 'Person', name: post.author.username, url: authorUrl }
+      : undefined,
+    datePublished: isoDate(post.createdAt),
+    dateModified: isoDate(post.updatedAt),
+  };
+  if (post.imageUrl) schema.image = post.imageUrl;
+  if (Number(post.upvoteCount) > 0) {
+    schema.interactionStatistic = {
+      '@type': 'InteractionCounter',
+      interactionType: 'https://schema.org/LikeAction',
+      userInteractionCount: Number(post.upvoteCount),
+    };
+  }
+  if (roots.length > 0) {
+    schema.comment = roots.map(commentNode);
+  }
+
+  // Clean undefined values so output stays compact and valid.
+  Object.keys(schema).forEach((key) => {
+    if (schema[key] === undefined) delete schema[key];
+  });
+
+  return schema;
+}
+
+/**
  * Person schema — for athlete profiles.
  * Includes sameAs links to Instagram and IFSC World Climbing for
  * enhanced Google rich results (Knowledge Panel-style).

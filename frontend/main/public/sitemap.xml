@@ -50,11 +50,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.climbpakistan.com/community/feed</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://www.climbpakistan.com/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -184,7 +179,7 @@
   </url>
   <url>
     <loc>https://www.climbpakistan.com/news/9th-national-sport-climbing-championship</loc>
-    <lastmod>2026-08-23T11:28:14+00:00</lastmod>
+    <lastmod>2026-09-08T08:47:39+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
@@ -269,5 +264,11 @@
     <lastmod>2025-12-31T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.climbpakistan.com/community/post/6a9c23a533f8879587af54c2</loc>
+    <lastmod>2026-09-08T06:04:16+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
