@@ -1,3 +1,5 @@
+import { render } from 'vike/abort';
+
 const API_BASE = import.meta.env.VITE_API_URL
   || 'https://climb-pakistan-backend.onrender.com/api';
 
@@ -11,6 +13,7 @@ async function data(pageContext) {
     fetch(`${API_BASE}/athletes`),
     fetch(`${API_BASE}/results/by-competition/${slug}`).catch(() => null),
   ]);
+  if (!compRes.ok) throw render(404);
   const [competition, allNews, allAthletes] = await Promise.all([
     compRes.json().catch(() => null),
     newsRes.json().catch(() => []),

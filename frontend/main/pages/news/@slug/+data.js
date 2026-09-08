@@ -1,3 +1,5 @@
+import { render } from 'vike/abort';
+
 const API_BASE = import.meta.env.VITE_API_URL
   || 'https://climb-pakistan-backend.onrender.com/api';
 
@@ -9,6 +11,7 @@ async function data(pageContext) {
     fetch(`${API_BASE}/news/${slug}`),
     fetch(`${API_BASE}/news?status=Published`),
   ]);
+  if (!articleRes.ok) throw render(404);
   const article = await articleRes.json().catch(() => null);
   const allArticles = await allArticlesRes.json().catch(() => []);
   return { article, allArticles, slug };

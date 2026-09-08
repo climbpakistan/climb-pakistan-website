@@ -71,6 +71,34 @@ function Page() {
     return years.sort((a, b) => Number(b) - Number(a));
   }, [teamRankings]);
 
+  const playerRankingLinks = useMemo(() => {
+    if (!rankings) return [];
+    const links = [];
+    for (const cat of CATEGORIES) {
+      for (const disc of DISCIPLINES) {
+        const byYear = rankings[cat]?.[disc];
+        if (!byYear) continue;
+        for (const [y, entries] of Object.entries(byYear)) {
+          if (Array.isArray(entries) && entries.length > 0) {
+            links.push({
+              label: `Senior ${cat} ${disc} ${y}`,
+              href: `/rankings/${cat.toLowerCase()}/${disc.toLowerCase()}/${y}`,
+            });
+          }
+        }
+      }
+    }
+    return links.sort((a, b) => a.href.localeCompare(b.href));
+  }, [rankings]);
+
+  const teamRankingLinks = useMemo(() => {
+    if (!teamRankings) return [];
+    return Object.keys(teamRankings)
+      .filter((y) => Array.isArray(teamRankings[y]) && teamRankings[y].length > 0)
+      .map((y) => ({ label: `Teams ${y}`, href: `/rankings/teams/${y}` }))
+      .sort((a, b) => a.href.localeCompare(b.href));
+  }, [teamRankings]);
+
   useEffect(() => {
     if (rankingYears.length > 0) {
       setYear((prev) => {
@@ -178,6 +206,15 @@ function Page() {
               </select>
             </div>
           </div>
+
+          {(playerRankingLinks.length > 0 || teamRankingLinks.length > 0) && (
+            <div className="rankings-quicklinks" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--sp-2) var(--sp-3)', padding: 'var(--sp-3) 0' }}>
+              <span style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--fs-sm)', fontWeight: 600 }}>All yearly rankings:</span>
+              {[...playerRankingLinks, ...teamRankingLinks].map((link) => (
+                <a key={link.href} className="filter-chip" href={link.href}>{link.label}</a>
+              ))}
+            </div>
+          )}
 
           {hasNoDataAtAll ? (
             <div style={{ textAlign: 'center', padding: 'var(--sp-16) var(--sp-6)' }}>
