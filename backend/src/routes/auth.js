@@ -5,7 +5,6 @@ import rateLimit from 'express-rate-limit';
 import { Types } from 'mongoose';
 import { Resend } from 'resend';
 import User, { RESERVED_USERNAMES, COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS } from '../models/User.js';
-import Follow from '../models/Follow.js';
 import { requireUser, optionalUser } from '../middleware/auth.js';
 import cloudinary from '../cloudinary.js';
 
@@ -579,9 +578,10 @@ router.get('/search', async (req, res) => {
 });
 
 // GET /api/auth/suggested — Instagram-style "Suggested for you" rail for the
-// community feed sidebar. Returns active verified/popular accounts that the
-// viewer does not already follow; guests get popular accounts. Optional auth:
-// when logged in, the viewer and everyone they follow are excluded.
+// community feed sidebar. Returns active accounts, newest-first with the
+// featured accounts pinned at the top. Optional auth: when logged in, the
+// viewer is excluded so they never see themselves (followed accounts are kept
+// so the rail never runs empty on a small community).
 router.get('/suggested', optionalUser, async (req, res) => {
   try {
     const limit = Math.min(20, Math.max(1, Number.parseInt(req.query.limit, 10) || 8));
@@ -589,10 +589,6 @@ router.get('/suggested', optionalUser, async (req, res) => {
     const excludeIds = [];
     if (req.user?.id) {
       try { excludeIds.push(new Types.ObjectId(String(req.user.id))); } catch { /* ignore bad id */ }
-      const followed = await Follow.find({ followerId: String(req.user.id) }).select('followingId').lean();
-      for (const f of followed) {
-        if (Types.ObjectId.isValid(f.followingId)) excludeIds.push(f.followingId);
-      }
     }
 
     // Featured accounts pinned at the top, then remaining accounts sorted
