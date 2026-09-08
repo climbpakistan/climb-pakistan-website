@@ -3,7 +3,7 @@ import VerificationBadge from './VerificationBadge';
 import VoteControls from './VoteControls';
 import ReportMenu from './ReportMenu';
 import { useCommunity } from '../../hooks/CommunityContext';
-import { createComment, updateComment, deleteComment } from '../../api';
+import { createComment, deleteComment } from '../../api';
 import { formatPostDate, MAX_COMMENT_LENGTH } from '../../utils/communityPosts';
 import RichText from './RichText';
 
@@ -22,11 +22,6 @@ export default function CommentItem({ comment, replies = [], onCommentChanged, i
   const [replyImage, setReplyImage] = useState(null);
   const [replyImagePreview, setReplyImagePreview] = useState('');
   const replyImageInputRef = useRef(null);
-
-  const [editing, setEditing] = useState(false);
-  const [editBody, setEditBody] = useState(comment.body);
-  const [editError, setEditError] = useState('');
-  const [editBusy, setEditBusy] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -86,25 +81,6 @@ export default function CommentItem({ comment, replies = [], onCommentChanged, i
     setReplyImagePreview(URL.createObjectURL(file));
   }
 
-  async function submitEdit(e) {
-    e.preventDefault();
-    const body = editBody.trim();
-    if (!body) return setEditError('Comments cannot be empty.');
-    if (body.length > MAX_COMMENT_LENGTH) return setEditError(`Comments must be ${MAX_COMMENT_LENGTH} characters or fewer.`);
-
-    setEditBusy(true);
-    setEditError('');
-    try {
-      const { comment: updated } = await updateComment(token, comment.id, body);
-      setEditing(false);
-      onCommentChanged({ type: 'updated', comment: updated });
-    } catch (err) {
-      setEditError(err.message || 'Could not update your comment.');
-    } finally {
-      setEditBusy(false);
-    }
-  }
-
   async function handleDelete() {
     setDeleting(true);
     try {
@@ -143,34 +119,11 @@ export default function CommentItem({ comment, replies = [], onCommentChanged, i
         </time>
       </div>
 
-      {editing ? (
-        <form className="community-comment-form" onSubmit={submitEdit}>
-          <textarea
-            rows={3}
-            value={editBody}
-            maxLength={MAX_COMMENT_LENGTH}
-            onChange={(e) => setEditBody(e.target.value)}
-            autoFocus
-          />
-          {editError && <p className="form-error" role="alert">{editError}</p>}
-          <div className="community-form-actions">
-            <button type="submit" className="btn btn-primary" disabled={editBusy}>
-              {editBusy ? 'Saving…' : 'Save'}
-            </button>
-            <button type="button" className="btn btn-outline" onClick={() => { setEditing(false); setEditBody(comment.body); }} disabled={editBusy}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      ) : (
-        <>
-          <p className="community-comment-body"><RichText text={comment.body} /></p>
-          {comment.imageUrl && (
-            <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer" className="community-comment-image-link">
-              <img src={comment.imageUrl} alt="" loading="lazy" decoding="async" className="community-comment-image" />
-            </a>
-          )}
-        </>
+      <p className="community-comment-body"><RichText text={comment.body} /></p>
+      {comment.imageUrl && (
+        <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer" className="community-comment-image-link">
+          <img src={comment.imageUrl} alt="" loading="lazy" decoding="async" className="community-comment-image" />
+        </a>
       )}
 
       <div className="community-comment-actions">

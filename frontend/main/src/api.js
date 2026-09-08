@@ -284,25 +284,6 @@ export async function createPost(token, { type, title, body, category, externalU
   return data;
 }
 
-/** Edit a post (owner only, multipart). Pass images=[] to replace the gallery. */
-export async function updatePost(token, id, { title, body, category, externalUrl, images = [] }) {
-  const formData = new FormData();
-  if (title !== undefined) formData.append('title', title);
-  if (body !== undefined) formData.append('body', body);
-  if (category !== undefined) formData.append('category', category);
-  if (externalUrl !== undefined) formData.append('externalUrl', externalUrl);
-  for (const img of images) formData.append('images', img);
-
-  const res = await fetch(`${BASE_URL}/posts/${id}`, {
-    method: 'PUT',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: formData,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Could not update your post.');
-  return data;
-}
-
 /** Delete a post (owner only). */
 export async function deletePost(token, id) {
   const res = await fetch(`${BASE_URL}/posts/${id}`, {
@@ -342,21 +323,6 @@ export async function createComment(token, postId, { body, parentCommentId, imag
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Could not add your comment.');
-  return data;
-}
-
-/** Edit a comment (owner only). */
-export async function updateComment(token, id, body) {
-  const res = await fetch(`${BASE_URL}/comments/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ body }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Could not update your comment.');
   return data;
 }
 

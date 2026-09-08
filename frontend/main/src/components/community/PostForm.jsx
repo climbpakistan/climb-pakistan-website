@@ -8,8 +8,7 @@ import {
 } from '../../utils/communityPosts';
 
 /**
- * PostForm — shared composer used by /community/create (new posts) and
- * /community/post/:id/edit (editing an existing post).
+ * PostForm — shared composer used by /community/create.
  *
  * Supports Text, Image, Link, and Poll post types. Video uploads are NOT
  * supported by design.

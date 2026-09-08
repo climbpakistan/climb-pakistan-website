@@ -292,40 +292,8 @@ router.post('/', commentLimiter, requireUser, uploadCommentImageField, async (re
 });
 
 
-// PUT /api/comments/:id — edit a comment (owner only).
-router.put('/:id', requireUser, async (req, res) => {
-  try {
-    if (!isValidObjectId(req.params.id)) {
-      return res.status(400).json({ error: 'Invalid comment id.' });
-    }
-    const { restriction } = await loadUserAndRestriction(req.user.id);
-    if (restriction) return res.status(403).json({ error: restrictionError(restriction) });
-
-    const comment = await Comment.findById(req.params.id);
-    if (!comment) return res.status(404).json({ error: 'Comment not found.' });
-    if (comment.removed) {
-      return res.status(403).json({ error: 'This comment has been removed and cannot be edited.' });
-    }
-
-    // Only the comment owner may edit.
-    if (String(comment.authorId) !== String(req.user.id)) {
-      return res.status(403).json({ error: 'You can only edit your own comments.' });
-    }
-
-    const bodyResult = validateBody(req.body.body);
-    if (!bodyResult.ok) return res.status(400).json({ error: bodyResult.error });
-    comment.body = bodyResult.body;
-
-    // timestamps: true bumps updatedAt automatically on save.
-    await comment.save();
-
-    const fresh = await Comment.findById(comment._id).populate('authorId', AUTHOR_POPULATE);
-    res.json({ comment: commentJSON(fresh) });
-  } catch (err) {
-    console.error('Edit comment error:', err);
-    res.status(500).json({ error: 'Could not update your comment.' });
-  }
-});
+// PUT /api/comments/:id — removed: editing comments is disabled by design.
+// (Route intentionally not registered; only create/delete remain.)
 
 // DELETE /api/comments/:id — delete a comment and all of its replies
 // (owner only). The post's commentCount is decremented by the total removed.

@@ -163,15 +163,10 @@ function Page() {
     }
   }
 
-  function closeMenu() {
-    setMenuOpen(false);
-  }
-
   return (
     <>
       <Seo
         title={post ? postSeoTitle(post) || post.title : 'Community Post'}
-        description={post ? postSeoDescription(post) : 'A post in the Climb Pakistan Community.'}
         keywords={post ? `${post.category}, ${post.category.toLowerCase()} discussion, Climb Pakistan community` : 'Climb Pakistan community post'}
         ogImage={post?.imageUrl}
         ogImageAlt={post?.title}
@@ -354,14 +349,6 @@ function Page() {
                       </button>
                       {menuOpen && (
                         <div className="community-post-menu-dropdown" role="menu">
-                          <a
-                            role="menuitem"
-                            href={`/community/post/${post.id}/edit`}
-                            className="community-post-menu-item"
-                            onClick={closeMenu}
-                          >
-                            Edit
-                          </a>
                           {!confirmDelete ? (
                             <button
                               role="menuitem"
