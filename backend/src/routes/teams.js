@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import Team from '../models/Team.js';
 import { triggerVercelRebuild } from '../utils/rebuild.js';
+import { parseLimit } from '../utils/query.js';
 
 const router = Router();
 
 // GET all teams
 router.get('/', async (req, res) => {
   try {
-    const teams = await Team.find().sort({ name: 1 });
+    const teams = await Team.find().sort({ name: 1 }).limit(parseLimit(req));
     res.json(teams);
   } catch (err) {
     res.status(500).json({ error: err.message });

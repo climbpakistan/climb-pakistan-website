@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import cloudinary from '../cloudinary.js';
 import Photo from '../models/Photo.js';
+import { parseLimit } from '../utils/query.js';
 
 const router = Router();
 
@@ -10,7 +11,7 @@ router.get('/', async (req, res) => {
     if (req.query.category && req.query.category !== 'all') {
       filter.category = req.query.category;
     }
-    const photos = await Photo.find(filter).sort({ createdAt: -1 });
+    const photos = await Photo.find(filter).sort({ createdAt: -1 }).limit(parseLimit(req));
     res.json(photos);
   } catch (err) {
     res.status(500).json({ error: err.message });

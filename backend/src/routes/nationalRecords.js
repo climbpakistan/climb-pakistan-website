@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import NationalRecord from '../models/NationalRecord.js';
 import { triggerVercelRebuild } from '../utils/rebuild.js';
+import { parseLimit } from '../utils/query.js';
 
 const router = Router();
 
@@ -11,7 +12,7 @@ const router = Router();
 router.get('/', async (req, res) => {
   try {
     // Fetch all, then sort numerically by recordTime so "10.0" > "6.36"
-    let records = await NationalRecord.find();
+    let records = await NationalRecord.find().limit(parseLimit(req));
     records.sort((a, b) => parseFloat(a.recordTime) - parseFloat(b.recordTime));
 
     // Group into Men/Women → current/previous

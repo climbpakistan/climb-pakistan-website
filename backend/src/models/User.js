@@ -60,6 +60,7 @@ const userSchema = new mongoose.Schema({
   // ── Password reset ──
   resetCode: { type: String, default: null },
   resetCodeExpires: { type: Date, default: null },
+  resetCodeAttempts: { type: Number, default: 0 },
   // ── Account status / moderation ──
   // active = fully functional; suspended = cannot participate but can log in
   // and see an explanation; banned = cannot access/participate in the community.

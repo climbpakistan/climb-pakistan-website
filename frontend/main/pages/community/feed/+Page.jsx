@@ -191,7 +191,7 @@ function PostSkeleton() {
 
 function Page() {
   const pageContext = usePageContext();
-  const { token, isGuest, openAuthPrompt } = useCommunity();
+  const { token, isGuest, openAuthPrompt, initializing } = useCommunity();
 
   // Merge the current user's votes into a list of posts so vote buttons
   // highlight correctly (batched — one request for the whole page).
@@ -240,6 +240,10 @@ function Page() {
   const [suggestions, setSuggestions] = useState({ posts: [], users: [] });
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
+
+  // Monotonic sequence counter so stale search/suggestion responses (arriving
+  // after the user typed or searched something newer) are discarded.
+  const searchSeq = useRef(0);
 
   // Follow state for the user suggestions in the dropdown — seeded from the
   // server so accounts already followed show "Following" instead of "Follow".
@@ -295,12 +299,14 @@ function Page() {
       setSuggestionsOpen(false);
       return;
     }
+    const seq = ++searchSeq.current;
     const t = setTimeout(async () => {
       try {
         const [postData, userData] = await Promise.all([
           getPostSuggestions(q),
           searchCommunityUsers(q),
         ]);
+        if (seq !== searchSeq.current) return;
         const next = {
           posts: (postData.suggestions || []).slice(0, 5),
           users: (userData.users || []).slice(0, 5),
@@ -309,6 +315,7 @@ function Page() {
         setActiveSuggestion(-1);
         setSuggestionsOpen(next.posts.length > 0 || next.users.length > 0);
       } catch {
+        if (seq !== searchSeq.current) return;
         setSuggestions({ posts: [], users: [] });
         setSuggestionsOpen(false);
       }
@@ -370,6 +377,9 @@ function Page() {
   }, []);
 
   useEffect(() => {
+    // Wait until the stored session has been re-validated so we don't fetch
+    // the feed twice (once as guest, once with the resolved token).
+    if (initializing) return;
     let active = true;
     setStatus('loading');
     getPosts(token, { view: activeView, page: 1, limit: FEED_PAGE_SIZE, category: activeCategory })
@@ -386,7 +396,7 @@ function Page() {
         setStatus('error');
       });
     return () => { active = false; };
-  }, [activeView, activeCategory, token, isGuest, withMyVotes]);
+  }, [activeView, activeCategory, token, isGuest, withMyVotes, initializing]);
 
   async function loadMore() {
     setLoadingMore(true);
@@ -421,20 +431,24 @@ function Page() {
       setSearchResults({ posts: [], users: [] });
       return;
     }
+    const seq = ++searchSeq.current;
     setSearching(true);
     setHasSearched(true);
     try {
       if (filter === 'posts') {
         const data = await getPosts(token, { view: 'new', page: 1, limit: 20, search: q, category: activeCategory });
+        if (seq !== searchSeq.current) return;
         setSearchResults({ posts: data.posts || [], users: [] });
       } else {
         const data = await searchCommunityUsers(q);
+        if (seq !== searchSeq.current) return;
         setSearchResults({ posts: [], users: data.users || [] });
       }
     } catch {
+      if (seq !== searchSeq.current) return;
       setSearchResults({ posts: [], users: [] });
     } finally {
-      setSearching(false);
+      if (seq === searchSeq.current) setSearching(false);
     }
   }
 
@@ -657,7 +671,13 @@ function Page() {
                   </button>
                 </div>
 
-                {searchFilter === 'users' && (
+                {searching && (
+                  <div className="community-post-list">
+                    <PostSkeleton /><PostSkeleton /><PostSkeleton />
+                  </div>
+                )}
+
+                {searchFilter === 'users' && !searching && (
                   <>
                     {searchResults.users.length === 0 ? (
                       <div className="community-empty-state">
@@ -685,7 +705,7 @@ function Page() {
                   </>
                 )}
 
-                {searchFilter === 'posts' && (
+                {searchFilter === 'posts' && !searching && (
                   <>
                     {searchResults.posts.length === 0 ? (
                       <div className="community-empty-state">

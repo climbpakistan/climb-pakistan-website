@@ -23,14 +23,29 @@ export default function Layout({ children }) {
   const pageContext = usePageContext();
   const currentPath = pageContext?.urlPathname || '/';
 
-  // Track page views on mount and on route change
+  // Track page views on mount and on route change. sessionStorage keys by
+  // normalized path so the same page is only recorded once per browser
+  // session; the backend rate-limits as a second layer (client-side dedup can
+  // be bypassed by bots).
   useEffect(() => {
+    const storageKey = `pageview:${String(currentPath).split('?')[0] || '/'}`;
+    try {
+      if (sessionStorage.getItem(storageKey)) return;
+    } catch {
+      // sessionStorage unavailable (e.g. private mode) — still track the view.
+    }
     fetch(`${API_URL}/page-views`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: currentPath }),
       keepalive: true,
-    }).catch(() => {});
+    })
+      .then((res) => {
+        if (res.ok) {
+          try { sessionStorage.setItem(storageKey, '1'); } catch { /* best effort */ }
+        }
+      })
+      .catch(() => {});
   }, [currentPath]);
 
   return (

@@ -3,6 +3,7 @@ import multer from 'multer';
 import XLSX from 'xlsx';
 import Athlete from '../models/Athlete.js';
 import { triggerVercelRebuild } from '../utils/rebuild.js';
+import { parseLimit } from '../utils/query.js';
 import {
   SHEETS, ATHLETE_COLUMNS, MEDAL_COLUMNS,
   parseAthleteRow, parseMedalRow,
@@ -16,7 +17,7 @@ const router = Router();
 // GET all athletes (sorted by rank)
 router.get('/', async (req, res) => {
   try {
-    const athletes = await Athlete.find().sort({ rank: 1 });
+    const athletes = await Athlete.find().sort({ rank: 1 }).limit(parseLimit(req));
     res.json(athletes);
   } catch (err) {
     res.status(500).json({ error: err.message });

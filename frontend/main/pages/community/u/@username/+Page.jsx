@@ -715,6 +715,9 @@ function Page() {
           {comments.map((c) => (
             <li key={c.id} className="profile-comment-item">
               <p className="profile-comment-body">{c.body}</p>
+              {c.imageUrl && (
+                <img src={c.imageUrl} alt="" loading="lazy" className="profile-comment-image" />
+              )}
               <a className="profile-comment-context" href={`/community/post/${c.postId}`}>
                 Comment on &ldquo;{(c.post && (c.post.title || 'a post')) || 'a post'}&rdquo; · {formatPostDate(c.createdAt)}
               </a>

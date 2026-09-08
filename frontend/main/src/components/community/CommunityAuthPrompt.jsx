@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import { communityCopy } from '../../data/communityData';
 import { useCommunity } from '../../hooks/CommunityContext';
+import FocusTrap from './FocusTrap';
 
 /**
  * CommunityAuthPrompt — global modal shown (via CommunityContext) when a
@@ -8,17 +10,20 @@ import { useCommunity } from '../../hooks/CommunityContext';
  */
 export default function CommunityAuthPrompt() {
   const { authPrompt, closeAuthPrompt } = useCommunity();
+  const dialogRef = useRef(null);
 
   if (!authPrompt.open) return null;
 
   return (
-    <div
-      className="community-modal-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="community-auth-prompt-title"
-      onClick={closeAuthPrompt}
-    >
+    <FocusTrap containerRef={dialogRef}>
+      <div
+        ref={dialogRef}
+        className="community-modal-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="community-auth-prompt-title"
+        onClick={closeAuthPrompt}
+      >
       <div
         className="community-modal"
         onClick={(e) => e.stopPropagation()}
@@ -58,5 +63,6 @@ export default function CommunityAuthPrompt() {
         </button>
       </div>
     </div>
+    </FocusTrap>
   );
 }

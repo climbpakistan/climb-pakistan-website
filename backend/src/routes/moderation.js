@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import Report, { REPORT_STATUSES } from '../models/Report.js';
 import Post, { POST_CATEGORIES, POST_TYPES } from '../models/Post.js';
@@ -9,35 +8,12 @@ import ModerationLog from '../models/ModerationLog.js';
 import Vote from '../models/Vote.js';
 import PollVote from '../models/PollVote.js';
 import { refreshPostScore } from './posts.js';
+import { requireAdminDb } from '../middleware/auth.js';
 
 const router = Router();
 
 function isValidObjectId(value) {
   return typeof value === 'string' && Types.ObjectId.isValid(value);
-}
-
-// Admin-only middleware that verifies the JWT AND confirms the role in the
-// database (so a stale/forged token can't grant moderation powers).
-async function requireAdminDb(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Authentication required. Please log in.' });
-  }
-  let decoded;
-  try {
-    decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
-  } catch {
-    return res.status(401).json({ error: 'Invalid or expired token. Please log in again.' });
-  }
-  const user = await User.findById(decoded.id);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'You do not have permission to access this page.' });
-  }
-  if (user.accountStatus !== 'active') {
-    return res.status(403).json({ error: 'Your admin account is not active.' });
-  }
-  req.user = { id: user._id.toString(), role: user.role };
-  next();
 }
 
 export { requireAdminDb, isValidObjectId };

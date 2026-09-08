@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import ContactSetting from '../models/ContactSetting.js';
-import requireAdmin from '../middleware/auth.js';
+import { requireAdminDb } from '../middleware/auth.js';
 
 const router = Router();
 
 // ── Admin-protected: GET / PUT contact settings (notification email) ──
-router.get('/settings', requireAdmin, async (req, res) => {
+router.get('/settings', requireAdminDb, async (req, res) => {
   try {
     let setting = await ContactSetting.findOne();
     if (!setting) {
@@ -17,7 +17,7 @@ router.get('/settings', requireAdmin, async (req, res) => {
   }
 });
 
-router.put('/settings', requireAdmin, async (req, res) => {
+router.put('/settings', requireAdminDb, async (req, res) => {
   try {
     const { notificationEmail } = req.body;
 

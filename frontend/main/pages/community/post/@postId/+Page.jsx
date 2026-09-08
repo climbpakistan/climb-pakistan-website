@@ -10,7 +10,7 @@ import RichText from '../../../../src/components/community/RichText';
 import PostGallery from '../../../../src/components/community/PostGallery';
 import PostLightbox from '../../../../src/components/community/PostLightbox';
 import { useCommunity } from '../../../../src/hooks/CommunityContext';
-import { getPost, deletePost, getMyVotes } from '../../../../src/api';
+import { getPost, deletePost, getMyVotes, getMySaved, savePost, unsavePost } from '../../../../src/api';
 import {
   formatPostDateTime,
   formatPostDate,
@@ -32,6 +32,8 @@ function Page() {
   const [copied, setCopied] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [postMyVote, setPostMyVote] = useState(null);
+  const [saved, setSaved] = useState(false);
+  const [saveBusy, setSaveBusy] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -63,7 +65,7 @@ function Page() {
   // Only the post owner sees edit/delete — the backend enforces it too.
   const isOwner = !!(post && user && post.author?.username === user.username);
 
-  // Sync counters + fetch the user's existing vote for highlighting.
+  // Sync counters + fetch the user's existing vote/saved state for UI feedback.
   useEffect(() => {
     if (!post) return;
     setCommentCount(post.commentCount ?? 0);
@@ -72,11 +74,34 @@ function Page() {
     getMyVotes(token, { posts: [post.id] })
       .then((data) => { if (active) setPostMyVote(data.posts?.[post.id] ?? null); })
       .catch(() => {});
+    getMySaved(token, [post.id])
+      .then((data) => { if (active) setSaved(!!data.saved?.[post.id]); })
+      .catch(() => {});
     return () => { active = false; };
   }, [post, token, isGuest]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSave() {
-    if (isGuest) openAuthPrompt('Log in to save posts to your list.');
+    if (isGuest) {
+      openAuthPrompt('Log in to save posts to your list.');
+      return;
+    }
+    if (saveBusy) return;
+    setSaveBusy(true);
+    (async () => {
+      try {
+        if (saved) {
+          await unsavePost(token, post.id);
+          setSaved(false);
+        } else {
+          await savePost(token, post.id);
+          setSaved(true);
+        }
+      } catch {
+        // leave state unchanged; user can retry
+      } finally {
+        setSaveBusy(false);
+      }
+    })();
   }
 
   async function handleShare() {
@@ -236,11 +261,11 @@ function Page() {
 
               <div className="community-post-footer">
                 <div className="community-post-actions">
-                  <button type="button" className="community-post-action" onClick={handleSave} aria-label="Save post">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <button type="button" className={`community-post-action${saved ? ' is-saved' : ''}`} onClick={handleSave} aria-label={saved ? 'Remove from saved' : 'Save post'} aria-pressed={saved} disabled={saveBusy}>
+                    <svg viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                     </svg>
-                    Save
+                    {saved ? 'Saved' : 'Save'}
                   </button>
                   <button type="button" className="community-post-action" onClick={handleShare} aria-label="Share post">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

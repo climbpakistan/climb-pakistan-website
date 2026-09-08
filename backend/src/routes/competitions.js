@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import Competition from '../models/Competition.js';
 import { triggerVercelRebuild } from '../utils/rebuild.js';
+import { parseLimit } from '../utils/query.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
   try {
-    const competitions = await Competition.find().sort({ startDate: -1 });
+    const competitions = await Competition.find().sort({ startDate: -1 }).limit(parseLimit(req));
     res.json(competitions);
   } catch (err) {
     res.status(500).json({ error: err.message });

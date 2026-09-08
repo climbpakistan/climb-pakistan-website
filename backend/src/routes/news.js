@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import News from '../models/News.js';
 import { triggerVercelRebuild } from '../utils/rebuild.js';
+import { parseLimit } from '../utils/query.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
   try {
     const filter = req.query.status ? { status: req.query.status } : {};
-    const articles = await News.find(filter).sort({ date: -1 });
+    const articles = await News.find(filter).sort({ date: -1 }).limit(parseLimit(req));
     res.json(articles);
   } catch (err) {
     res.status(500).json({ error: err.message });

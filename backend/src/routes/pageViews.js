@@ -1,15 +1,25 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import PageView from '../models/PageView.js';
-import requireAdmin from '../middleware/auth.js';
+import { requireAdminDb } from '../middleware/auth.js';
 
 const router = Router();
+
+// Second layer against duplicate/abusive page-view submissions. The frontend
+// dedupes per session (sessionStorage), but this still guards against bots.
+const pageViewLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /**
  * POST /api/page-views
  * Public — record a page view.
  * The frontend calls this on every route change.
  */
-router.post('/', async (req, res) => {
+router.post('/', pageViewLimiter, async (req, res) => {
   try {
     const { path } = req.body;
     if (!path || typeof path !== 'string') {
@@ -31,9 +41,9 @@ router.post('/', async (req, res) => {
 
 /**
  * GET /api/page-views/stats
- * Admin-protected (via auth middleware). Returns detailed analytics data.
+ * Admin-protected (DB-verified role + account status). Returns analytics.
  */
-router.get('/stats', requireAdmin, async (req, res) => {
+router.get('/stats', requireAdminDb, async (req, res) => {
   try {
     const now = new Date();
     const todayStart = new Date(now);

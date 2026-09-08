@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import FocusTrap from './FocusTrap';
 
 /**
  * PostLightbox — fullscreen image preview with a close (✕) button.
@@ -8,6 +9,7 @@ import { useEffect } from 'react';
 export default function PostLightbox({ images, index = 0, alt = '', onClose, onIndexChange }) {
   const list = (Array.isArray(images) ? images : [images]).filter(Boolean);
   const count = list.length;
+  const dialogRef = useRef(null);
 
   useEffect(() => {
     if (count === 0) return;
@@ -28,13 +30,15 @@ export default function PostLightbox({ images, index = 0, alt = '', onClose, onI
   if (count === 0) return null;
 
   return (
-    <div
-      className="community-lightbox"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Image preview"
-      onClick={onClose}
-    >
+    <FocusTrap containerRef={dialogRef}>
+      <div
+        ref={dialogRef}
+        className="community-lightbox"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Image preview"
+        onClick={onClose}
+      >
       <button
         type="button"
         className="community-lightbox-close"
@@ -71,6 +75,7 @@ export default function PostLightbox({ images, index = 0, alt = '', onClose, onI
           {index + 1} / {count}
         </span>
       )}
-    </div>
+      </div>
+    </FocusTrap>
   );
 }

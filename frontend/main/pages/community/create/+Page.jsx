@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { navigate } from 'vike/client/router';
 import Seo from '../../../src/components/Seo';
 import PostForm from '../../../src/components/community/PostForm';
@@ -9,10 +10,13 @@ export { Page };
 function Page() {
   const { user, token, isGuest, initializing, openAuthPrompt } = useCommunity();
 
-  // Guests are sent to the existing login/signup prompt.
-  if (!initializing && isGuest) {
-    openAuthPrompt('You need an account to create a post.');
-  }
+  // Guests are sent to the existing login/signup prompt once session state
+  // has settled (running this during render would setState while rendering).
+  useEffect(() => {
+    if (!initializing && isGuest) {
+      openAuthPrompt('You need an account to create a post.');
+    }
+  }, [initializing, isGuest, openAuthPrompt]);
 
   async function handleSubmit(fields) {
     const { post } = await createPost(token, fields);

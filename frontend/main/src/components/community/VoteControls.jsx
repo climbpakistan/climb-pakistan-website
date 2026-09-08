@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCommunity } from '../../hooks/CommunityContext';
 import { vote } from '../../api';
 
@@ -20,6 +20,12 @@ export default function VoteControls({ target, targetId, upvoteCount = 0, downvo
   const [counts, setCounts] = useState({ up: upvoteCount, down: downvoteCount });
   const [current, setCurrent] = useState(myVote);
   const [busy, setBusy] = useState(false);
+
+  // Parent pages fetch the viewer's existing vote asynchronously after mount,
+  // so sync the highlighted state whenever the authoritative `myVote` arrives.
+  useEffect(() => {
+    setCurrent(myVote);
+  }, [myVote]);
 
   async function handleClick(nextType) {
     if (isGuest) {

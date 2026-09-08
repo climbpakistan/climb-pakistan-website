@@ -199,6 +199,37 @@ const forgotPasswordLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const verifyResetCodeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,                  // 10 attempts per window
+  message: { error: 'Too many attempts. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const resetPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,                  // 10 attempts per window
+  message: { error: 'Too many attempts. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const MAX_RESET_ATTEMPTS = 5;
+
+// Increments the per-code attempt counter; after 5 wrong guesses the code is
+// invalidated so a brute-forcer can never iterate the full 6-digit space.
+async function registerResetAttempt(user) {
+  user.resetCodeAttempts = user.resetCodeAttempts || 0;
+  user.resetCodeAttempts += 1;
+  if (user.resetCodeAttempts >= MAX_RESET_ATTEMPTS) {
+    user.resetCode = null;
+    user.resetCodeExpires = null;
+    user.resetCodeAttempts = 0;
+  }
+  await user.save();
+}
+
 function generateResetCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
@@ -688,7 +719,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
 });
 
 // POST /api/auth/verify-reset-code — verify the 6-digit code.
-router.post('/verify-reset-code', async (req, res) => {
+router.post('/verify-reset-code', verifyResetCodeLimiter, async (req, res) => {
   try {
     const { email, code } = req.body;
     const cleanEmail = String(email || '').trim().toLowerCase();
@@ -706,13 +737,21 @@ router.post('/verify-reset-code', async (req, res) => {
     if (user.resetCodeExpires < new Date()) {
       user.resetCode = null;
       user.resetCodeExpires = null;
+      user.resetCodeAttempts = 0;
       await user.save();
       return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
     }
 
     if (user.resetCode !== cleanCode) {
+      await registerResetAttempt(user);
+      if (!user.resetCode) {
+        return res.status(429).json({ error: 'Too many incorrect attempts. Please request a new code.' });
+      }
       return res.status(400).json({ error: 'Incorrect reset code. Please try again.' });
     }
+
+    user.resetCodeAttempts = 0;
+    await user.save();
 
     res.json({ message: 'Code verified successfully. You can now set a new password.' });
   } catch (err) {
@@ -722,7 +761,7 @@ router.post('/verify-reset-code', async (req, res) => {
 });
 
 // POST /api/auth/reset-password — set a new password after code verification.
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
     const cleanEmail = String(email || '').trim().toLowerCase();
@@ -744,17 +783,23 @@ router.post('/reset-password', async (req, res) => {
     if (user.resetCodeExpires < new Date()) {
       user.resetCode = null;
       user.resetCodeExpires = null;
+      user.resetCodeAttempts = 0;
       await user.save();
       return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
     }
 
     if (user.resetCode !== cleanCode) {
+      await registerResetAttempt(user);
+      if (!user.resetCode) {
+        return res.status(429).json({ error: 'Too many incorrect attempts. Please request a new code.' });
+      }
       return res.status(400).json({ error: 'Incorrect reset code.' });
     }
 
     user.password = cleanPassword;
     user.resetCode = null;
     user.resetCodeExpires = null;
+    user.resetCodeAttempts = 0;
     await user.save();
 
     res.json({ message: 'Password has been reset successfully. You can now log in.' });

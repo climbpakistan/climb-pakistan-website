@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import LearnSection from '../models/LearnSection.js';
 import { triggerVercelRebuild } from '../utils/rebuild.js';
+import { parseLimit } from '../utils/query.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
   try {
     const filter = req.query.status ? { status: req.query.status } : {};
-    const sections = await LearnSection.find(filter).sort({ createdAt: 1 });
+    const sections = await LearnSection.find(filter).sort({ createdAt: 1 }).limit(parseLimit(req));
     res.json(sections);
   } catch (err) {
     res.status(500).json({ error: err.message });

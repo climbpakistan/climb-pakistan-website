@@ -3400,13 +3400,9 @@ input, textarea, select { font: inherit; color: inherit; }
   font-size: var(--fs-sm);
 }
 
-/* Feed layout */
-.community-feed-layout {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 280px;
-  gap: var(--sp-5);
-  align-items: start;
-}
+/* Feed layout — canonical .community-feed-layout declaration lives above at
+   the Social Media Style Community section (with page max-width). */
+
 .community-feed-headrow {
   display: flex;
   align-items: flex-end;
@@ -4692,7 +4688,7 @@ input, textarea, select { font: inherit; color: inherit; }
   .community-sort-tab { flex: 1; text-align: center; }
   .community-empty-state { padding: var(--sp-8); }
   .community-form { padding: var(--sp-5); border-radius: 16px; }
-  .community-post-card { width: 100%; max-width: 520px; padding: 12px; border-radius: 12px; }
+  .community-post-card { width: 100%; max-width: 100%; padding: 12px; border-radius: 12px; }
   .community-comment { padding: var(--sp-3); border-radius: 12px; }
   .community-search-bar { flex-wrap: wrap; border-radius: 12px; }
   .community-search-filters { border-right: none; border-bottom: 1px solid var(--cp-border); border-radius: 11px 11px 0 0; width: 100%; }
@@ -6006,6 +6002,7 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
 .profile-comment-list { display: flex; flex-direction: column; gap: var(--sp-3); }
 .profile-comment-item { border-left: 2px solid var(--cp-border); padding-left: var(--sp-3); }
 .profile-comment-body { font-size: var(--fs-sm); color: var(--cp-text-dim); }
+.profile-comment-image { display: block; margin-top: var(--sp-2); max-width: 280px; border-radius: 8px; }
 .profile-comment-context { font-size: var(--fs-xs); color: var(--cp-text-muted); text-decoration: none; }
 .profile-comment-context:hover { color: var(--cp-accent); }
 

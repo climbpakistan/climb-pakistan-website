@@ -133,6 +133,14 @@ export default function PostCard({ post }) {
               </button>
               {menuOpen && (
                 <div className="community-post-menu-dropdown" role="menu">
+                  <a
+                    role="menuitem"
+                    href={`/community/post/${post.id}/edit`}
+                    className="community-post-menu-item"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Edit
+                  </a>
                   <button
                     role="menuitem"
                     type="button"
