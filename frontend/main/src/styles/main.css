@@ -4436,14 +4436,6 @@ input, textarea, select { font: inherit; color: inherit; }
   border-color: var(--cp-border-strong);
   box-shadow: 0 6px 20px var(--cp-accent-soft), 0 2px 6px rgba(0, 0, 0, 0.08);
 }
-.community-about-banner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(135deg, var(--cp-accent), var(--cp-accent-2));
-}
 .community-about-title {
   font-size: var(--fs-md);
   font-weight: 600;
@@ -4466,13 +4458,12 @@ input, textarea, select { font: inherit; color: inherit; }
   border-radius: 8px;
   font-size: var(--fs-sm);
   font-weight: 600;
-  color: #fff;
+  color: var(--cp-on-accent);
   text-decoration: none;
-  background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
-  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.35);
-  transition: filter 0.15s ease, transform 0.15s ease;
+  background: var(--cp-accent);
+  transition: background 0.15s ease;
 }
-.community-about-link:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.community-about-link:hover { background: var(--cp-accent-strong); }
 .community-about-link-arrow { transition: transform 0.15s ease; }
 .community-about-link:hover .community-about-link-arrow { transform: translateX(3px); }
 
