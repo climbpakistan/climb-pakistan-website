@@ -1,3 +1,5 @@
+import { normalizeSlug } from '../../../src/utils/slug';
+
 const API_BASE = import.meta.env.VITE_API_URL
   || 'https://climb-pakistan-backend.onrender.com/api';
 
@@ -8,7 +10,9 @@ async function onBeforePrerenderStart() {
   const articles = await res.json().catch(() => []);
   // Deduplicate slugs
   const urls = articles
-    .map((article) => `/news/${article.slug}`)
+    .map((article) => normalizeSlug(article.slug))
+    .filter(Boolean)
+    .map((slug) => `/news/${slug}`)
     .filter((url, i, arr) => arr.indexOf(url) === i);
   return urls;
 }

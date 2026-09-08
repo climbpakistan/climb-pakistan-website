@@ -13,7 +13,14 @@ async function data(pageContext) {
     fetch(`${API_BASE}/athletes`),
     fetch(`${API_BASE}/results/by-competition/${slug}`).catch(() => null),
   ]);
-  if (!compRes.ok) throw render(404);
+  if (!compRes.ok) {
+    if (!pageContext.isPrerendering) throw render(404);
+    const [allNews, allAthletes] = await Promise.all([
+      newsRes.json().catch(() => []),
+      athletesRes.json().catch(() => []),
+    ]);
+    return { competition: null, slug, allNews, allAthletes, championshipResults: null };
+  }
   const [competition, allNews, allAthletes] = await Promise.all([
     compRes.json().catch(() => null),
     newsRes.json().catch(() => []),

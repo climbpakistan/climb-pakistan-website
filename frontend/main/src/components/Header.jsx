@@ -5,6 +5,7 @@ import { navLinks } from '../data/siteData';
 import { getAthletes, getNews, getNotifications, getUnreadNotificationCount, markNotificationsRead } from '../api';
 import { useTheme } from '../hooks/ThemeContext';
 import { useCommunity } from '../hooks/CommunityContext';
+import { normalizeSlug } from '../utils/slug';
 
 // Compact relative time for the notification list.
 function timeAgo(value) {
@@ -426,7 +427,7 @@ export default function Header() {
                     <div className="search-group">
                       <span className="search-group-label">News</span>
                       {results.news.map((n) => (
-                        <button key={n.slug} className="search-result" onClick={() => goTo(`/news/${n.slug}`)}>
+                        <button key={n.slug} className="search-result" onClick={() => goTo(`/news/${normalizeSlug(n.slug)}`)}>
                           {n.title}
                         </button>
                       ))}

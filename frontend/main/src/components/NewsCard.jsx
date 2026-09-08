@@ -1,5 +1,7 @@
 // Using <a> tags for navigation — Vike intercepts them for client-side routing
 
+import { normalizeSlug } from '../utils/slug';
+
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
@@ -16,9 +18,10 @@ function renderFormattedText(text) {
 }
 
 export default function NewsCard({ article }) {
+  const slug = normalizeSlug(article.slug);
   return (
     <article className="news-card">
-      <a href={`/news/${article.slug}`} className="news-card-media placeholder-photo" aria-hidden="true">
+      <a href={`/news/${slug}`} className="news-card-media placeholder-photo" aria-hidden="true">
         {article.imageUrl ? (
           <img src={article.imageUrl} alt={article.title} style={{
             width: '100%',
@@ -34,7 +37,7 @@ export default function NewsCard({ article }) {
       </a>
       <div className="news-card-body">
         <span className="tag">{article.tag}</span>
-        <h3><a href={`/news/${article.slug}`}>{article.title}</a>        </h3>
+        <h3><a href={`/news/${slug}`}>{article.title}</a>        </h3>
         <p>{renderFormattedText(article.excerpt)}</p>
         <span className="news-card-date">
           <time dateTime={article.date || article.createdAt}>

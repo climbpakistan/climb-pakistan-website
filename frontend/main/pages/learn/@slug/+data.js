@@ -8,7 +8,10 @@ export { data };
 async function data(pageContext) {
   const { slug } = pageContext.routeParams;
   const res = await fetch(`${API_BASE}/learn/${slug}`);
-  if (!res.ok) throw render(404);
+  if (!res.ok) {
+    if (!pageContext.isPrerendering) throw render(404);
+    return { section: null, slug };
+  }
   const section = await res.json().catch(() => null);
   return { section, slug };
 }

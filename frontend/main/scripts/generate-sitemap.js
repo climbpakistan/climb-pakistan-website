@@ -25,6 +25,7 @@ const OUTPUT_PATH = 'public/sitemap.xml';
 
 import fs from 'fs';
 import path from 'path';
+import { normalizeSlug } from '../src/utils/slug.js';
 
 // ---- helpers -------------------------------------------------------
 
@@ -161,7 +162,9 @@ async function main() {
   }
   try {
     for (const article of articles) {
-      urls.push(urlElement(`${SITE_URL}/news/${encodeURIComponent(article.slug)}`, {
+      const slug = normalizeSlug(article.slug);
+      if (!slug) continue;
+      urls.push(urlElement(`${SITE_URL}/news/${encodeURIComponent(slug)}`, {
         lastmod: w3cDate(article.updatedAt || article.date),
         changefreq: 'weekly',
         priority: '0.8',

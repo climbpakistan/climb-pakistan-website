@@ -11,7 +11,11 @@ async function data(pageContext) {
     fetch(`${API_BASE}/news/${slug}`),
     fetch(`${API_BASE}/news?status=Published`),
   ]);
-  if (!articleRes.ok) throw render(404);
+  if (!articleRes.ok) {
+    if (!pageContext.isPrerendering) throw render(404);
+    const allArticles = await allArticlesRes.json().catch(() => []);
+    return { article: null, allArticles, slug };
+  }
   const article = await articleRes.json().catch(() => null);
   const allArticles = await allArticlesRes.json().catch(() => []);
   return { article, allArticles, slug };
