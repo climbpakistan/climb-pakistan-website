@@ -202,15 +202,16 @@ export default function CommentItem({ comment, replies = [], onCommentChanged, i
             </button>
             {menuOpen && (
               <div className="community-post-menu-dropdown" role="menu">
-                <button
-                  role="menuitem"
-                  type="button"
-                  className="community-post-menu-item community-post-menu-item--danger"
-                  onClick={() => setConfirmDelete(true)}
-                >
-                  Delete comment
-                </button>
-                {confirmDelete && (
+                {!confirmDelete ? (
+                  <button
+                    role="menuitem"
+                    type="button"
+                    className="community-post-menu-item community-post-menu-item--danger"
+                    onClick={() => setConfirmDelete(true)}
+                  >
+                    Delete comment
+                  </button>
+                ) : (
                   <span className="community-post-menu-confirm">
                     Delete this comment?
                     <button

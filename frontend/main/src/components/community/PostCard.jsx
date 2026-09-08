@@ -141,15 +141,16 @@ export default function PostCard({ post }) {
                   >
                     Edit
                   </a>
-                  <button
-                    role="menuitem"
-                    type="button"
-                    className="community-post-menu-item community-post-menu-item--danger"
-                    onClick={() => setConfirmDelete(true)}
-                  >
-                    Delete post
-                  </button>
-                  {confirmDelete && (
+                  {!confirmDelete ? (
+                    <button
+                      role="menuitem"
+                      type="button"
+                      className="community-post-menu-item community-post-menu-item--danger"
+                      onClick={() => setConfirmDelete(true)}
+                    >
+                      Delete post
+                    </button>
+                  ) : (
                     <span className="community-post-menu-confirm">
                       Delete this post?
                       <button
