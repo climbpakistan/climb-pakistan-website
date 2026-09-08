@@ -4860,13 +4860,13 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
 }
 
 .community-post-card .community-post-title {
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * 1.3);
   margin-bottom: 0;
-  line-height: 1.35;
+  line-height: 1.4;
   flex-shrink: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 .community-post-card--full .community-post-title {
   font-size: var(--fs-xl);
