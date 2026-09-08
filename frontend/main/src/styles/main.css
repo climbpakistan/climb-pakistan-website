@@ -6538,5 +6538,10 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
     max-width: calc(100vw - var(--sp-8));
     box-sizing: border-box;
   }
+
+  /* Feed sort tabs (Popular / New / Following) are desktop-only — hiding them
+     on mobile keeps the feed header simple for phone users. The active feed
+     view is unaffected (the URL ?view= still applies). */
+  .community-feed-sort { display: none; }
 }
 
