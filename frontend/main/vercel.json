@@ -1,3 +1,3 @@
 {
-  "buildCommand": "node scripts/generate-sitemap.js && vike build && node scripts/fix-vercel-404.js"
+  "buildCommand": "node scripts/generate-sitemap.js && vike build && node scripts/copy-ssr-server.js && node scripts/fix-vercel-404.js"
 }
