@@ -218,9 +218,6 @@ function Page() {
 
   // Active sort tab from the URL (?view=...).
   const searchView = pageContext?.urlParsed?.search?.view;
-  const activeView = feedSortTabs.some((t) => t.value === searchView)
-    ? searchView
-    : 'popular';
 
   // Top view time filters were replaced by the Following feed — the URL may
   // still carry ?time= from old links, but the backend ignores it now.
@@ -228,6 +225,16 @@ function Page() {
   // Active category filter from the URL (?category=...).
   const searchCategory = pageContext?.urlParsed?.search?.category;
   const activeCategory = searchCategory || '';
+
+  // Topic (category) views default to newest-first so the newest post leads
+  // the topic; the all-topics feed keeps Popular as its default. The sort
+  // tabs let users switch to another view explicitly.
+  const hasExplicitView = feedSortTabs.some((t) => t.value === searchView);
+  const activeView = hasExplicitView
+    ? searchView
+    : activeCategory
+      ? 'new'
+      : 'popular';
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
