@@ -5169,6 +5169,13 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
 }
 .community-post-menu-btn.community-report-btn svg { color: var(--cp-text-muted); }
 .community-post-menu-btn.community-report-btn:hover svg { color: var(--cp-danger, #e5484d); }
+/* Feed card header: the ⋯ dropdown hangs above the button by default, but the
+   card clips anything extending past its top edge. Open downward here, like
+   the mobile behavior; post-page and comment menus still open upward. */
+.community-post-card-head .community-post-menu-dropdown {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
 .community-post-menu-dropdown {
   position: absolute;
   right: 0;
