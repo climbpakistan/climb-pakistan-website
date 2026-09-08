@@ -420,7 +420,9 @@ function Page() {
       openAuthPrompt('You need an account to create a post.');
       return;
     }
-    window.location.href = '/community/create';
+    window.location.href = activeCategory
+      ? `/community/create?category=${encodeURIComponent(activeCategory)}`
+      : '/community/create';
   }
 
   async function runSearch(rawQuery, filter = searchFilter) {
@@ -790,6 +792,12 @@ function Page() {
 
             {status === 'ready' && posts.length > 0 && (
               <>
+                <div className="community-feed-actions">
+                  <button type="button" className="btn btn-primary" onClick={handleCreatePost}>
+                    Create Post
+                  </button>
+                </div>
+
                 <div className="community-post-list">
                   {posts.map((post) => (
                     <PostCard key={post.id} post={post} />

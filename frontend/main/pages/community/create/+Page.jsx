@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { navigate } from 'vike/client/router';
+import { usePageContext } from 'vike-react/usePageContext';
 import Seo from '../../../src/components/Seo';
 import PostForm from '../../../src/components/community/PostForm';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
@@ -9,6 +10,10 @@ export { Page };
 
 function Page() {
   const { user, token, isGuest, initializing, openAuthPrompt } = useCommunity();
+  const pageContext = usePageContext();
+  // Pre-select the topic when arriving from a feed topic view
+  // (e.g. /community/create?category=News).
+  const initialCategory = pageContext?.urlParsed?.search?.category || '';
 
   // Guests are sent to the existing login/signup prompt once session state
   // has settled (running this during render would setState while rendering).
@@ -61,6 +66,7 @@ function Page() {
             <>
               <p className="community-create-greeting">Posting as <strong>@{user.username}</strong></p>
               <PostForm
+                initial={initialCategory ? { category: initialCategory } : {}}
                 onSubmit={handleSubmit}
                 onCancel={() => navigate('/community/feed')}
                 submitLabel="Publish"
