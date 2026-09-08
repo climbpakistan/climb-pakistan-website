@@ -6454,11 +6454,9 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
     box-sizing: border-box;
   }
 
-  /* Search bar: stay above the sticky header and span the page */
-  .community-search-section {
-    position: relative;
-    z-index: 101;
-  }
+  /* Search bar: the absolutely-positioned suggestions dropdown (z-index 150)
+     stays layered above the sticky header on its own; the bar itself stays
+     under the header when scrolling so it never covers the main menu. */
   .community-search-bar { align-items: stretch; }
   .community-search-filters { flex: 0 0 100%; width: 100%; }
   .community-search-input-wrap { flex: 1 0 100%; width: 100%; }
