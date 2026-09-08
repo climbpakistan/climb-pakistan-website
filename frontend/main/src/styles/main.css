@@ -3237,13 +3237,16 @@ input, textarea, select { font: inherit; color: inherit; }
 .community-empty-state { display: flex; flex-direction: column; gap: var(--sp-4); }
 
 /* Compose bar above a populated feed so logged-in users can always create
-   a post, even when a topic already has posts. Spans the feed column width
-   so it aligns with the post cards beneath. */
+   a post, even when a topic already has posts. Matches the post-card width
+   (520px desktop / full-width mobile) and floats with space above (away from
+   the search bar) and below (away from the posts). */
 .community-feed-compose {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  width: 100%;
+  width: 520px;
+  max-width: 100%;
+  margin: var(--sp-4) auto;
   padding: var(--sp-3) var(--sp-4);
   background: var(--cp-surface);
   border: 1px solid var(--cp-border);
@@ -4730,7 +4733,7 @@ input, textarea, select { font: inherit; color: inherit; }
 @media (max-width: 640px) {
   .community-choice-grid { grid-template-columns: 1fr; }
   .community-action-card { padding: var(--sp-6); }
-  .community-feed-compose { padding: var(--sp-2) var(--sp-3); }
+  .community-feed-compose { width: 100%; padding: var(--sp-2) var(--sp-3); }
   .community-feed-compose-hint { display: none; }
   .community-feed-headrow { flex-direction: column; align-items: flex-start; }
   .community-feed-sort { width: 100%; }
