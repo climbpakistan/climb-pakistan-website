@@ -94,12 +94,22 @@ export default function Header() {
       setNotifOpen(true);
       setNotifBusy(true);
       try {
-        const [list] = await Promise.all([
-          getNotifications(token, { limit: 20 }),
-          markNotificationsRead(token),
-        ]);
-        setNotifications(list.notifications || []);
-        setUnreadCount(0);
+        // Fetch → display → then mark read, in that order. The ids we send are
+        // exactly the ones we showed, so a notification that lands while we are
+        // fetching is not silently marked read without ever being seen.
+        const list = await getNotifications(token, { limit: 20 });
+        const items = list.notifications || [];
+        setNotifications(items);
+
+        const unreadIds = items.filter((n) => !n.read).map((n) => n.id);
+        if (unreadIds.length > 0) {
+          await markNotificationsRead(token, unreadIds);
+        }
+
+        // Re-read the badge instead of assuming zero: anything that arrived
+        // after our fetch is still unread and must stay visible.
+        const fresh = await getUnreadNotificationCount(token).catch(() => null);
+        setUnreadCount(fresh ? (fresh.count ?? 0) : 0);
       } catch {
         // leave as-is; user can retry by reopening
       } finally {

@@ -12,6 +12,7 @@ import Post, {
   POLL_DURATIONS,
 } from '../models/Post.js';
 import Follow from '../models/Follow.js';
+import Notification from '../models/Notification.js';
 import PollVote from '../models/PollVote.js';
 import SavedPost from '../models/SavedPost.js';
 import UserModel from '../models/User.js';
@@ -844,6 +845,15 @@ router.delete('/:id', requireUser, async (req, res) => {
     await Promise.all(imagePublicIds.map((pid) => deletePostImage(pid)));
     await Vote.deleteMany({ postId: post._id });
     await PollVote.deleteMany({ postId: post._id });
+    // Notifications about this post (and about its comments — those store the
+    // parent postId too) are meaningless once the post is gone. Drop them so
+    // the bell can never link to a deleted post. Best-effort: a cleanup failure
+    // must not leave the post half-deleted.
+    try {
+      await Notification.deleteMany({ postId: post._id });
+    } catch (notifErr) {
+      console.warn('Post notification cleanup failed:', notifErr.message);
+    }
     // Best-effort cleanup of hashtag/mention links — never block the delete.
     try {
       await removeSocialLinks({ postId: post._id });

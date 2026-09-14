@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import Comment, { MAX_COMMENT_LENGTH } from '../models/Comment.js';
+import Notification from '../models/Notification.js';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
 import Vote from '../models/Vote.js';
@@ -338,6 +339,14 @@ router.delete('/:id', requireUser, async (req, res) => {
 
     await Comment.deleteMany({ _id: { $in: toDelete } });
     await Vote.deleteMany({ commentId: { $in: toDelete } });
+    // Same for notifications: comment likes, replies and mentions all store the
+    // commentId they point at (replies and their descendants are in `toDelete`
+    // too), so none of them can outlive the comment. Best-effort.
+    try {
+      await Notification.deleteMany({ commentId: { $in: toDelete } });
+    } catch (notifErr) {
+      console.warn('Comment notification cleanup failed:', notifErr.message);
+    }
     // Best-effort cleanup of hashtag/mention links — never block the delete.
     try {
       await Promise.all(toDelete.map((id) => removeSocialLinks({ commentId: id })));

@@ -202,27 +202,6 @@ export async function communityUpdateProfile(token, { bio, avatar, city, instagr
   return data;
 }
 
-// ── Badge Applications ──
-export async function submitBadgeApplication(token, { badgeType, message }) {
-  const res = await fetch(`${BASE_URL}/auth/badge-applications`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ badgeType, message }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Could not submit application.');
-  return data;
-}
-
-export async function getMyBadgeApplications(token) {
-  const res = await fetch(`${BASE_URL}/auth/badge-applications/my`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Could not load applications.');
-  return data;
-}
-
 // ── Community Posts ──
 /** Paginated feed. view: new | popular | top; time applies to top. token is optional (enables poll/vote personalization). */
 export async function getPosts(token, { view = 'new', time = 'all', page = 1, limit = 20, category = '', search = '' } = {}) {
@@ -405,11 +384,18 @@ export async function getUnreadNotificationCount(token) {
   return data;
 }
 
-/** Mark all notifications as read. */
-export async function markNotificationsRead(token) {
+/**
+ * Mark notifications as read. Pass the ids that were actually displayed so a
+ * notification arriving mid-fetch stays unread; omit them to mark all.
+ */
+export async function markNotificationsRead(token, ids = null) {
   const res = await fetch(`${BASE_URL}/notifications/read`, {
     method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(ids ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: ids ? JSON.stringify({ ids }) : undefined,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Could not update notifications.');

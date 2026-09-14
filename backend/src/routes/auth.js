@@ -171,7 +171,20 @@ async function uploadAvatar(buffer) {
     );
     stream.end(buffer);
   });
-  return result.secure_url;
+  // Return the public id too so callers can clean up an orphaned upload when
+  // the surrounding operation fails after the image was already stored.
+  return { url: result.secure_url, publicId: result.public_id };
+}
+
+// Best-effort removal of an uploaded avatar (used when account creation fails
+// after the image was stored, so we never leave orphaned Cloudinary assets).
+async function deleteAvatar(publicId) {
+  if (!publicId) return;
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (err) {
+    console.warn('Could not delete avatar from storage:', err.message);
+  }
 }
 
 // ── Rate limiters ──
@@ -262,13 +275,8 @@ router.post('/register', registerLimiter, uploadAvatarField, async (req, res) =>
       return res.status(409).json({ error: 'Username is already taken.' });
     }
 
-    // Upload the optional profile image before creating the account.
-    let profileImageUrl = '';
-    if (req.file) {
-      profileImageUrl = await uploadAvatar(req.file.buffer);
-    }
-
-    // Validate new registration fields
+    // Validate every registration field BEFORE uploading anything, so an
+    // invalid request never stores an avatar in Cloudinary.
     const name = String(req.body.name || '').trim();
     if (!name) {
       return res.status(400).json({ error: 'Name is required.' });
@@ -310,19 +318,36 @@ router.post('/register', registerLimiter, uploadAvatarField, async (req, res) =>
       return res.status(400).json({ error: 'You must agree to the Community Guidelines and Terms.' });
     }
 
-    const user = await User.create({
-      email,
-      password,
-      username,
-      name,
-      profileImageUrl,
-      communityRole,
-      disciplines,
-      experienceLevel,
-      agreedToCommunityTerms: true,
-      communityTermsAgreedAt: new Date(),
-      role: 'member',
-    });
+    // Upload the optional profile image only once the request is known-good.
+    let profileImageUrl = '';
+    let uploadedAvatarPublicId = '';
+    if (req.file) {
+      const uploaded = await uploadAvatar(req.file.buffer);
+      profileImageUrl = uploaded.url;
+      uploadedAvatarPublicId = uploaded.publicId;
+    }
+
+    let user;
+    try {
+      user = await User.create({
+        email,
+        password,
+        username,
+        name,
+        profileImageUrl,
+        communityRole,
+        disciplines,
+        experienceLevel,
+        agreedToCommunityTerms: true,
+        communityTermsAgreedAt: new Date(),
+        role: 'member',
+      });
+    } catch (createErr) {
+      // Account creation failed after the avatar was stored — remove the
+      // orphaned image so nothing is left behind in Cloudinary.
+      await deleteAvatar(uploadedAvatarPublicId);
+      throw createErr;
+    }
 
     const token = signToken(user);
     res.status(201).json({ user: publicUser(user), token });
@@ -468,7 +493,8 @@ router.put('/me', requireUser, uploadAvatarField, async (req, res) => {
     }
 
     if (req.file) {
-      user.profileImageUrl = await uploadAvatar(req.file.buffer);
+      const uploaded = await uploadAvatar(req.file.buffer);
+      user.profileImageUrl = uploaded.url;
     }
 
     await user.save();

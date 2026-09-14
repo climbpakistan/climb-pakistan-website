@@ -21,4 +21,23 @@ const notificationSchema = new mongoose.Schema({
 notificationSchema.index({ userId: 1, read: 1, createdAt: -1 });
 notificationSchema.index({ userId: 1, createdAt: -1 });
 
+// Notification identity: one document per (recipient, type, actor, target).
+// Unique so two concurrent requests can never insert the same notification
+// twice — createNotificationOnce() treats a duplicate-key error as "already
+// exists" rather than as a failure.
+//
+// The index is partial on postId being an ObjectId because a full unique index
+// would treat every `follow` notification (postId/commentId both null) as the
+// same row, silently suppressing the legitimate re-notification you get after
+// unfollow → follow. Everything with a target — likes, comments, replies and
+// mentions on either a post or a comment — is covered.
+notificationSchema.index(
+  { userId: 1, type: 1, actorId: 1, postId: 1, commentId: 1 },
+  {
+    unique: true,
+    name: 'notification_identity',
+    partialFilterExpression: { postId: { $type: 'objectId' } },
+  },
+);
+
 export default mongoose.model('Notification', notificationSchema);

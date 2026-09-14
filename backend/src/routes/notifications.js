@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { Types } from 'mongoose';
 import Notification from '../models/Notification.js';
 import { requireUser } from '../middleware/auth.js';
 
@@ -73,11 +74,24 @@ router.get('/unread-count', requireUser, async (req, res) => {
   }
 });
 
-// POST /api/notifications/read — mark everything as read (opening the list).
+// POST /api/notifications/read — mark notifications as read (when the bell is
+// opened). Body is optional:
+//   { ids: [...] } → only those notifications are marked, so anything that
+//                    arrived after the list was fetched stays unread.
+//   no body        → everything the viewer owns is marked (kept for backward
+//                    compatibility with older clients).
 router.post('/read', requireUser, async (req, res) => {
   try {
-    await Notification.updateMany({ userId: req.user.id, read: false }, { $set: { read: true } });
-    res.json({ ok: true });
+    const filter = { userId: req.user.id, read: false };
+
+    if (Array.isArray(req.body?.ids)) {
+      const ids = req.body.ids.filter((id) => typeof id === 'string' && Types.ObjectId.isValid(id));
+      if (ids.length === 0) return res.json({ ok: true, updated: 0 });
+      filter._id = { $in: ids };
+    }
+
+    const result = await Notification.updateMany(filter, { $set: { read: true } });
+    res.json({ ok: true, updated: result.modifiedCount ?? 0 });
   } catch (err) {
     console.error('Mark read error:', err);
     res.status(500).json({ error: 'Could not update notifications.' });

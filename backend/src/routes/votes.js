@@ -5,7 +5,7 @@ import Post from '../models/Post.js';
 import Comment from '../models/Comment.js';
 import { requireUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
-import { createNotification } from '../utils/notifications.js';
+import { createNotificationOnce } from '../utils/notifications.js';
 import { refreshPostScore } from './posts.js';
 
 const router = Router();
@@ -56,6 +56,10 @@ router.post('/', voteLimiter, requireUser, async (req, res) => {
       ? { userId: req.user.id, postId: targetId }
       : { userId: req.user.id, commentId: targetId };
     const existing = await Vote.findOne(filter);
+    // Snapshot the previous vote type BEFORE any mutation below — the
+    // notification decision depends on what the user's vote was, not on the
+    // state after we've already changed it.
+    const previousVoteType = existing ? existing.voteType : null;
 
     // Work out the state transition and the count deltas it implies.
     const inc = {};
@@ -80,16 +84,25 @@ router.post('/', voteLimiter, requireUser, async (req, res) => {
       await (target === 'post' ? Post : Comment).updateOne({ _id: targetId }, { $inc: inc });
     }
 
-    // Notify the target's author when the vote results in an upvote that was
-    // not already in place (new upvote or a down→up switch).
-    if (voteType === 'upvote' && !(existing && existing.voteType === 'upvote')) {
+    // Notify the target's author when the vote RESULTS in an upvote that was
+    // not already in place (a brand-new upvote or a down→up switch). The
+    // previous vote type is captured before the mutation above.
+    if (voteType === 'upvote' && previousVoteType !== 'upvote') {
       const targetAuthorId = targetDoc.authorId;
       if (targetAuthorId) {
-        await createNotification({
+        // Comments live on a post — store the parent postId so clicking the
+        // notification opens the discussion instead of the liker's profile.
+        const notificationPostId = target === 'post'
+          ? targetId
+          : (targetDoc.postId || null);
+        // createNotificationOnce de-dupes the upvote → remove → upvote cycle so
+        // the author gets exactly one "liked" notification per liker, while
+        // different users still each produce their own.
+        await createNotificationOnce({
           userId: targetAuthorId,
           type: 'like',
           actorId: req.user.id,
-          postId: target === 'post' ? targetId : null,
+          postId: notificationPostId,
           commentId: target === 'comment' ? targetId : null,
         });
       }

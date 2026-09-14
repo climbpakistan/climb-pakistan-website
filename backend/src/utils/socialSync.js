@@ -13,7 +13,7 @@ import CommentHashtag from '../models/CommentHashtag.js';
 import PostMention from '../models/PostMention.js';
 import CommentMention from '../models/CommentMention.js';
 import User from '../models/User.js';
-import { createNotification } from './notifications.js';
+import { createNotificationOnce } from './notifications.js';
 import { extractHashtags, extractMentions } from './socialText.js';
 
 /**
@@ -168,10 +168,12 @@ export async function syncMentions({
 
   if (!notify) return;
 
-  // Notify only the newly mentioned, active accounts. createNotification drops
-  // self-mentions, so a user is never told about their own post/comment.
+  // Notify only the newly mentioned, active accounts. createNotificationOnce
+  // drops self-mentions, so a user is never told about their own post/comment,
+  // and its identity de-dupe is a second safeguard on top of the link diff
+  // above (e.g. a mention removed and re-added while editing).
   const toNotify = users.filter((u) => toAdd.includes(String(u._id)) && u.accountStatus === 'active');
-  await Promise.all(toNotify.map((u) => createNotification({
+  await Promise.all(toNotify.map((u) => createNotificationOnce({
     userId: u._id,
     type,
     actorId,
