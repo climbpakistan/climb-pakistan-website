@@ -6604,3 +6604,103 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
   .community-feed-sort { display: none; }
 }
 
+/* ── Composer autocomplete (@mentions / #hashtags) ── */
+.mention-field {
+  position: relative;
+}
+.mention-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-1, 4px);
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border-strong);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  animation: community-suggest-in 0.14s ease-out;
+}
+.mention-option {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2, 8px);
+  width: 100%;
+  padding: var(--sp-2, 8px) var(--sp-3, 12px);
+  border: none;
+  background: none;
+  border-radius: 10px;
+  text-align: left;
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  color: var(--cp-text);
+  cursor: pointer;
+}
+.mention-option:hover,
+.mention-option.is-active {
+  background: var(--cp-accent-soft);
+}
+.mention-option-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+.mention-option-avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  font-weight: 700;
+}
+.mention-option-hash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--cp-bg-alt);
+  color: var(--cp-accent);
+  font-weight: 700;
+  flex: none;
+}
+.mention-option-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mention-option-primary {
+  font-weight: 600;
+}
+.mention-option-secondary {
+  font-size: var(--fs-xs);
+  color: var(--cp-text-muted);
+}
+
+/* ── Hashtag results page ── */
+.community-hashtag-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.community-hashtag-count {
+  margin: var(--sp-2) 0 0;
+  color: var(--cp-text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* Anchor comments so mention notifications can deep-link to them. */
+.community-comment[id] {
+  scroll-margin-top: 90px;
+}
+.community-comment[id]:target {
+  background: var(--cp-accent-soft);
+  border-radius: 12px;
+}
+

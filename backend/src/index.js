@@ -26,6 +26,7 @@ import nationalRecordRoutes from './routes/nationalRecords.js';
 import recordsPageRoutes from './routes/recordsPage.js';
 import resultsRoutes from './routes/results.js';
 import postsRoutes from './routes/posts.js';
+import hashtagRoutes from './routes/hashtags.js';
 import commentsRoutes from './routes/comments.js';
 import votesRoutes from './routes/votes.js';
 import notificationsRoutes from './routes/notifications.js';
@@ -127,6 +128,11 @@ app.use('/api/auth', authRoutes);
 // GET feed / single post are public; create / edit / delete require a JWT and
 // are enforced inside the route (owner checks included).
 app.use('/api/posts', postsRoutes);
+
+// ── Community hashtags ──
+// Public hashtag discovery: top hashtags, prefix suggestions, and the posts
+// that use a given hashtag.
+app.use('/api/hashtags', hashtagRoutes);
 
 // ── Community comments ──
 // GET is public; create / edit / delete require a JWT and owner checks are

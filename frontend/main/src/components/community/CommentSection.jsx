@@ -3,6 +3,7 @@ import { useCommunity } from '../../hooks/CommunityContext';
 import { getComments, createComment, getMyVotes } from '../../api';
 import { MAX_COMMENT_LENGTH } from '../../utils/communityPosts';
 import CommentItem from './CommentItem';
+import MentionTextarea from './MentionTextarea';
 
 /**
  * CommentSection — loads and renders the comment thread for a post, with a
@@ -167,12 +168,12 @@ export default function CommentSection({ postId, onCountChange, initialComments 
         </button>
       ) : (
         <form className="community-comment-form" onSubmit={submitComment}>
-          <textarea
+          <MentionTextarea
             rows={3}
             value={body}
             maxLength={MAX_COMMENT_LENGTH}
-            placeholder="Add a comment…"
-            onChange={(e) => setBody(e.target.value)}
+            placeholder="Add a comment… Use @ to mention or # for a hashtag"
+            onChange={setBody}
           />
           {commentImagePreview && (
             <div className="community-comment-image-preview">

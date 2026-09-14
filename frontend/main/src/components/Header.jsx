@@ -295,8 +295,10 @@ export default function Header() {
                       <p className="nav-notif-empty">No notifications yet.</p>
                     ) : (
                       notifications.map((n) => {
+                        // Deep-link straight to the comment that mentioned you
+                        // (CommentItem renders an id="comment-<id>" anchor).
                         const href = n.postId
-                          ? `/community/post/${n.postId}`
+                          ? `/community/post/${n.postId}${n.commentId ? `#comment-${n.commentId}` : ''}`
                           : (n.actor ? `/community/u/${n.actor.username}` : '#');
                         return (
                           <a

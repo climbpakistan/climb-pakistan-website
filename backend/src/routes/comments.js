@@ -11,7 +11,8 @@ import cloudinary from '../cloudinary.js';
 import { requireUser, optionalUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
 import { loadHiddenUserIds } from '../utils/userBlocks.js';
-import { createNotification, notifyMentions } from '../utils/notifications.js';
+import { createNotification } from '../utils/notifications.js';
+import { syncHashtags, syncMentions, removeSocialLinks } from '../utils/socialSync.js';
 import { refreshPostScore } from './posts.js';
 
 const router = Router();
@@ -263,7 +264,8 @@ router.post('/', commentLimiter, requireUser, uploadCommentImageField, async (re
     await refreshPostScore(postId);
 
     // Notify: a reply alerts the parent comment's author; a top-level comment
-    // alerts the post author. Mentioned users are notified either way.
+    // alerts the post author. Mentioned users are also notified (newly added
+    // ones only) and hashtags are linked for both posts and comments.
     if (parent) {
       await createNotification({
         userId: parent.authorId,
@@ -281,7 +283,16 @@ router.post('/', commentLimiter, requireUser, uploadCommentImageField, async (re
         commentId: comment._id,
       });
     }
-    await notifyMentions({ text: bodyResult.body, actorId: req.user.id, postId, commentId: comment._id });
+    // Best-effort: the comment already exists, so a hashtag/mention failure
+    // must not surface as a failed comment (which would invite a duplicate).
+    try {
+      await Promise.all([
+        syncHashtags({ text: bodyResult.body, commentId: comment._id }),
+        syncMentions({ text: bodyResult.body, actorId: req.user.id, postId, commentId: comment._id }),
+      ]);
+    } catch (socialErr) {
+      console.warn('Comment social sync failed (hashtags/mentions):', socialErr.message);
+    }
 
     const fresh = await Comment.findById(comment._id).populate('authorId', AUTHOR_POPULATE);
     res.status(201).json({ comment: commentJSON(fresh) });
@@ -327,6 +338,12 @@ router.delete('/:id', requireUser, async (req, res) => {
 
     await Comment.deleteMany({ _id: { $in: toDelete } });
     await Vote.deleteMany({ commentId: { $in: toDelete } });
+    // Best-effort cleanup of hashtag/mention links — never block the delete.
+    try {
+      await Promise.all(toDelete.map((id) => removeSocialLinks({ commentId: id })));
+    } catch (socialErr) {
+      console.warn('Comment social cleanup failed:', socialErr.message);
+    }
     await Post.updateOne(
       { _id: comment.postId },
       { $inc: { commentCount: -toDelete.length } },

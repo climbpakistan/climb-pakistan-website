@@ -6,6 +6,7 @@ import { useCommunity } from '../../hooks/CommunityContext';
 import { createComment, deleteComment } from '../../api';
 import { formatPostDate, MAX_COMMENT_LENGTH } from '../../utils/communityPosts';
 import RichText from './RichText';
+import MentionTextarea from './MentionTextarea';
 
 /**
  * CommentItem — a single comment (or reply) with nested replies. Renders
@@ -96,7 +97,7 @@ export default function CommentItem({ comment, replies = [], onCommentChanged, i
   }
 
   return (
-    <div className="community-comment">
+    <div className="community-comment" id={`comment-${comment.id}`}>
       <div className="community-comment-head">
         <a href={`/community/u/${encodeURIComponent(author.username || '')}`} className="community-post-author">
           {author.profileImageUrl ? (
@@ -194,12 +195,12 @@ export default function CommentItem({ comment, replies = [], onCommentChanged, i
 
       {replyOpen && (
         <form className="community-comment-form" onSubmit={submitReply}>
-          <textarea
+          <MentionTextarea
             rows={3}
             value={replyBody}
             maxLength={MAX_COMMENT_LENGTH}
             placeholder={`Reply to @${author.username || 'unknown'}…`}
-            onChange={(e) => setReplyBody(e.target.value)}
+            onChange={setReplyBody}
             autoFocus
           />
           {replyImagePreview && (

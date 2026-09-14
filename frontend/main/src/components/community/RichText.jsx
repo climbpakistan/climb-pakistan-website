@@ -1,17 +1,15 @@
+import { TOKEN_RE, normalizeHashtag } from '../../utils/socialText';
+
 /**
  * RichText — renders plain-text bodies/comments with social formatting:
  *   **bold**   → <strong>
  *   @username  → the user's community profile
- *   #hashtag   → the feed search for that term
+ *   #hashtag   → the hashtag results page
  *   https://…  → the external URL (new tab)
  *
  * The text is never injected as HTML — React escapes every fragment, so this
  * stays safe even though the source is user-generated plain text.
  */
-
-// Bold is matched first so its ** delimiters aren't consumed by the URL rule.
-const TOKEN_RE = /(\*\*[^*]+\*\*|@[a-zA-Z][a-zA-Z0-9_]{2,19}|#[a-zA-Z0-9_]{2,40}|https?:\/\/[^\s<>"']+)/g;
-
 export default function RichText({ text }) {
   if (!text) return null;
 
@@ -39,17 +37,22 @@ export default function RichText({ text }) {
         </a>
       );
     } else if (token.startsWith('#')) {
-      const tag = token.slice(1);
-      nodes.push(
-        <a
-          key={`${match.index}-${token}`}
-          href={`/community/feed?search=${encodeURIComponent(tag)}`}
-          className="rich-hashtag"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {token}
-        </a>
-      );
+      const name = normalizeHashtag(token);
+      if (!name) {
+        nodes.push(token);
+      } else {
+        nodes.push(
+          <a
+            key={`${match.index}-${token}`}
+            href={`/community/hashtag/${encodeURIComponent(name)}`}
+            className="rich-hashtag"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Keep the user's original capitalization for display. */}
+            {token}
+          </a>
+        );
+      }
     } else {
       nodes.push(
         <a

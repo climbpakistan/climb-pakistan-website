@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { postCategories, postTypes, pollDurations, MIN_POLL_OPTIONS, MAX_POLL_OPTIONS } from '../../data/communityData';
+import MentionTextarea from './MentionTextarea';
 import {
   MAX_POST_TITLE_LENGTH,
   MAX_POST_BODY_LENGTH,
@@ -211,13 +212,13 @@ export default function PostForm({ initial, onSubmit, onCancel, submitLabel = 'P
 
       <div className="form-row">
         <label htmlFor="post-body">Description <span className="community-char-count">{body.length}/{MAX_POST_BODY_LENGTH}</span></label>
-        <textarea
+        <MentionTextarea
           id="post-body"
           rows={6}
           value={body}
           maxLength={MAX_POST_BODY_LENGTH}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="Share the details… (optional)"
+          onChange={setBody}
+          placeholder="Share the details… Use @ to mention someone or # for a hashtag (optional)"
         />
       </div>
 

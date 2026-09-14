@@ -603,6 +603,25 @@ export function getSimilarUsers(username) {
   return fetchJSON(`${BASE_URL}/auth/u/${encodeURIComponent(clean)}/similar`);
 }
 
+// ── Community Hashtags ──
+/** Posts + metadata for a hashtag (case-insensitive; the name is normalized server-side). */
+export async function getHashtag(name, { page = 1, limit = 20 } = {}) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  return fetchJSON(`${BASE_URL}/hashtags/${encodeURIComponent(String(name || '').replace(/^#/, ''))}?${params.toString()}`);
+}
+
+/** Prefix autocomplete for the composer's # dropdown. */
+export function getHashtagSuggestions(q) {
+  const params = new URLSearchParams({ q: String(q || '').replace(/^#/, '') });
+  return fetchJSON(`${BASE_URL}/hashtags/suggest?${params.toString()}`);
+}
+
+/** Most-used hashtags (shown when the user types a bare # in the composer). */
+export function getTopHashtags(limit = 8) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  return fetchJSON(`${BASE_URL}/hashtags?${params.toString()}`);
+}
+
 // ── Community Search ──
 export async function searchCommunityUsers(query) {
   if (!query || query.length < 2) return { users: [] };

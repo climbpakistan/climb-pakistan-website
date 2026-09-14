@@ -19,7 +19,7 @@ import Vote from '../models/Vote.js';
 import { requireUser, optionalUser } from '../middleware/auth.js';
 import { loadUserAndRestriction, restrictionError } from '../utils/userStatus.js';
 import { loadHiddenUserIds } from '../utils/userBlocks.js';
-import { notifyMentions } from '../utils/notifications.js';
+import { syncHashtags, syncMentions, removeSocialLinks } from '../utils/socialSync.js';
 import cloudinary from '../cloudinary.js';
 
 const router = Router();
@@ -186,8 +186,9 @@ function validateExternalUrl(raw) {
 
 // Serialize a post for the frontend (never exposes internals). Poll payload
 // is attached separately via postJSONWithPoll so the viewer's own vote can be
-// included without leaking it in public listing contexts.
-function postJSON(post, isAdmin = false) {
+// included without leaking it in public listing contexts. Exported so the
+// hashtag routes can reuse the exact same serialization.
+export function postJSON(post, isAdmin = false) {
   const authorDoc = post.authorId && typeof post.authorId === 'object' && post.authorId.username !== undefined
     ? post.authorId
     : null;
@@ -271,7 +272,7 @@ async function postJSONWithPoll(post, viewerId, isAdmin = false) {
 // Serialize a list of posts for the feed (never exposes internals) and attach
 // viewer-specific poll payloads so poll cards render interactively instead of
 // as bare text. Batches the poll vote lookups into a single query per viewer.
-async function attachPollPayloads(posts, viewerId, isAdmin = false) {
+export async function attachPollPayloads(posts, viewerId, isAdmin = false) {
   const pollPosts = posts.filter((p) => p.type === 'poll');
 
   const myVotes = new Map();
@@ -801,8 +802,19 @@ router.post('/', createLimiter, requireUser, uploadImagesField, async (req, res)
       // upvoteCount / downvoteCount / commentCount default to 0
     });
 
-    // Notify users mentioned in the title or body.
-    await notifyMentions({ text: `${titleResult.title} ${body}`, actorId: req.user.id, postId: post._id });
+    // Parse + persist hashtags and mentions. Mentions create notifications for
+    // newly mentioned users (the actor is never notified about themselves).
+    // Best-effort: a failure here must never fail the post that was already
+    // created (the user would see an error and retry, publishing a duplicate).
+    const socialText = `${titleResult.title} ${body}`;
+    try {
+      await Promise.all([
+        syncHashtags({ text: socialText, postId: post._id }),
+        syncMentions({ text: socialText, actorId: req.user.id, postId: post._id }),
+      ]);
+    } catch (socialErr) {
+      console.warn('Post social sync failed (hashtags/mentions):', socialErr.message);
+    }
 
     const fresh = await Post.findById(post._id).populate('authorId', 'username name profileImageUrl verification');
     const isAdmin = req.user?.role === 'admin';
@@ -832,6 +844,12 @@ router.delete('/:id', requireUser, async (req, res) => {
     await Promise.all(imagePublicIds.map((pid) => deletePostImage(pid)));
     await Vote.deleteMany({ postId: post._id });
     await PollVote.deleteMany({ postId: post._id });
+    // Best-effort cleanup of hashtag/mention links — never block the delete.
+    try {
+      await removeSocialLinks({ postId: post._id });
+    } catch (socialErr) {
+      console.warn('Post social cleanup failed:', socialErr.message);
+    }
     await post.deleteOne();
 
     res.json({ message: 'Post deleted.' });

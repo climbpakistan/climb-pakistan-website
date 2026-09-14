@@ -105,6 +105,7 @@ async function main() {
     fetchJSON('/learn?status=Published'),
     fetchJSON('/team-rankings'),
     fetchJSON('/rankings'),
+    fetchJSON('/hashtags?limit=200'),
   ]);
   const athletes = results[0].status === 'fulfilled' ? results[0].value : [];
   const articles = results[1].status === 'fulfilled' ? results[1].value : [];
@@ -112,6 +113,7 @@ async function main() {
   const learnSections = results[3].status === 'fulfilled' ? results[3].value : [];
   const teamRankings = results[4].status === 'fulfilled' ? results[4].value : [];
   const rankings = results[5].status === 'fulfilled' ? results[5].value : [];
+  const hashtags = results[6].status === 'fulfilled' ? results[6].value?.hashtags || [] : [];
 
   const urls = [];
 
@@ -240,6 +242,21 @@ async function main() {
         }
       }
     }
+  }
+
+  // ── Hashtag results pages ──
+  // Only hashtags that actually have posts are listed (empty hashtag pages are
+  // noindex on the frontend, so they must not appear here).
+  try {
+    for (const tag of hashtags) {
+      if (!tag?.name || !tag?.postCount) continue;
+      urls.push(urlElement(`${SITE_URL}/community/hashtag/${encodeURIComponent(tag.name)}`, {
+        changefreq: 'weekly',
+        priority: '0.4',
+      }));
+    }
+  } catch {
+    // skip hashtags
   }
 
   // ── Community discussions ──
