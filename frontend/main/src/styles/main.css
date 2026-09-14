@@ -3784,8 +3784,8 @@ input, textarea, select { font: inherit; color: inherit; }
   height: 17px;
   padding: 0 4px;
   border-radius: 100px;
-  background: var(--cp-accent);
-  color: var(--cp-on-accent, #fff);
+  background: var(--cp-danger);
+  color: #fff;
   font-size: 10px;
   font-weight: 700;
   line-height: 17px;

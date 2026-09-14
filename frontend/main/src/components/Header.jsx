@@ -75,7 +75,9 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', onClick);
   }, [notifOpen]);
 
-  // Poll the unread badge while logged in (every 30s).
+  // Poll the unread badge while logged in (every 30s). Also refresh
+  // immediately when the tab/window regains focus so the count is fresh the
+  // moment the user comes back to the app.
   useEffect(() => {
     if (!user || !token) { setUnreadCount(0); return undefined; }
     let active = true;
@@ -86,7 +88,14 @@ export default function Header() {
     };
     fetchCount();
     const timer = setInterval(fetchCount, 30000);
-    return () => { active = false; clearInterval(timer); };
+    document.addEventListener('visibilitychange', fetchCount);
+    window.addEventListener('focus', fetchCount);
+    return () => {
+      active = false;
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', fetchCount);
+      window.removeEventListener('focus', fetchCount);
+    };
   }, [user, token]);
 
   async function toggleNotif() {
@@ -290,7 +299,7 @@ export default function Header() {
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                 </svg>
                 {unreadCount > 0 && (
-                  <span className="nav-notif-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+                  <span className="nav-notif-badge" aria-hidden="true">{unreadCount > 99 ? '99+' : unreadCount}</span>
                 )}
               </button>
               {notifOpen && (

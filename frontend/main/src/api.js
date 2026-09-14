@@ -395,7 +395,7 @@ export async function markNotificationsRead(token, ids = null) {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(ids ? { 'Content-Type': 'application/json' } : {}),
     },
-    body: ids ? JSON.stringify({ ids }) : undefined,
+    body: ids ? JSON.stringify({ notificationIds: ids }) : undefined,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Could not update notifications.');

@@ -76,16 +76,21 @@ router.get('/unread-count', requireUser, async (req, res) => {
 
 // POST /api/notifications/read — mark notifications as read (when the bell is
 // opened). Body is optional:
-//   { ids: [...] } → only those notifications are marked, so anything that
-//                    arrived after the list was fetched stays unread.
-//   no body        → everything the viewer owns is marked (kept for backward
-//                    compatibility with older clients).
+//   { notificationIds: [...] } → only those notifications are marked, so
+//                                anything that arrived after the list was
+//                                fetched stays unread.
+//   { ids: [...] } (alias)     → accepted for backward compatibility.
+//   no body                    → everything the viewer owns is marked (kept for
+//                                backward compatibility with older clients).
 router.post('/read', requireUser, async (req, res) => {
   try {
     const filter = { userId: req.user.id, read: false };
 
-    if (Array.isArray(req.body?.ids)) {
-      const ids = req.body.ids.filter((id) => typeof id === 'string' && Types.ObjectId.isValid(id));
+    const requestedIds = Array.isArray(req.body?.notificationIds)
+      ? req.body.notificationIds
+      : (Array.isArray(req.body?.ids) ? req.body.ids : null);
+    if (requestedIds) {
+      const ids = requestedIds.filter((id) => typeof id === 'string' && Types.ObjectId.isValid(id));
       if (ids.length === 0) return res.json({ ok: true, updated: 0 });
       filter._id = { $in: ids };
     }
