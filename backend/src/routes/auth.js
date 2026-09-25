@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { Types } from 'mongoose';
 import { Resend } from 'resend';
 import User, { RESERVED_USERNAMES, COMMUNITY_ROLES, DISCIPLINES, EXPERIENCE_LEVELS } from '../models/User.js';
+import Follow from '../models/Follow.js';
 import { requireUser, optionalUser } from '../middleware/auth.js';
 import cloudinary from '../cloudinary.js';
 
@@ -635,10 +636,12 @@ router.get('/search', async (req, res) => {
 });
 
 // GET /api/auth/suggested — Instagram-style "Suggested for you" rail for the
-// community feed sidebar. Returns active accounts, newest-first with the
-// featured accounts pinned at the top. Optional auth: when logged in, the
-// viewer is excluded so they never see themselves (followed accounts are kept
-// so the rail never runs empty on a small community).
+// community feed sidebar. Returns active accounts the viewer does not follow
+// yet, newest-first (newest registrations first), with the featured accounts
+// pinned at the top while they are still unfollowed. Optional auth: when
+// logged in, the viewer and every account they follow are excluded. Once the
+// viewer follows everyone the list comes back empty and the frontend hides
+// the card.
 router.get('/suggested', optionalUser, async (req, res) => {
   try {
     const limit = Math.min(20, Math.max(1, Number.parseInt(req.query.limit, 10) || 8));
@@ -646,6 +649,15 @@ router.get('/suggested', optionalUser, async (req, res) => {
     const excludeIds = [];
     if (req.user?.id) {
       try { excludeIds.push(new Types.ObjectId(String(req.user.id))); } catch { /* ignore bad id */ }
+
+      // Hide every account the viewer already follows.
+      try {
+        const viewerId = excludeIds[0];
+        if (viewerId) {
+          const follows = await Follow.find({ followerId: viewerId }).select('followingId').lean();
+          for (const f of follows) excludeIds.push(f.followingId);
+        }
+      } catch { /* follow lookup is best-effort; fall back to unfiltered */ }
     }
 
     // Featured accounts pinned at the top, then remaining accounts sorted
@@ -681,9 +693,15 @@ router.get('/suggested', optionalUser, async (req, res) => {
           communityRole: 1,
           city: 1,
           followerCount: 1,
+          createdAt: 1,
         },
       },
     ]);
+
+    // "New" flag for recently joined accounts (registered within the last
+    // 30 days) — drives the "New" pill in the suggestions rail.
+    const NEW_ACCOUNT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+    const newCutoff = Date.now() - NEW_ACCOUNT_WINDOW_MS;
 
     res.json({
       users: users.map((u) => ({
@@ -695,6 +713,7 @@ router.get('/suggested', optionalUser, async (req, res) => {
         communityRole: u.communityRole || '',
         city: u.city || '',
         followerCount: u.followerCount ?? 0,
+        isNew: u.createdAt ? new Date(u.createdAt).getTime() >= newCutoff : false,
       })),
     });
   } catch (err) {

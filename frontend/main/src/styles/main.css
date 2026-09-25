@@ -4576,6 +4576,22 @@ input, textarea, select { font: inherit; color: inherit; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Instagram-style "New" pill for recently joined suggested accounts. */
+.community-suggest-new {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+  font-size: 0.625rem; // 10px — smaller than the username text
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+}
 .community-suggest-name {
   max-width: 100%;
   font-size: var(--fs-xs);

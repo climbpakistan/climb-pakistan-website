@@ -6,7 +6,7 @@ import PostCard from '../../../src/components/community/PostCard';
 import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers, getSuggestedAccounts, followUser, unfollowUser, getFollowStatusBatch } from '../../../src/api';
+import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers, getSuggestedAccounts, followUser, unfollowUser } from '../../../src/api';
 
 export { Page };
 
@@ -63,22 +63,13 @@ function RightRail() {
 
   useEffect(() => {
     let active = true;
+    // The backend already excludes accounts the viewer follows (guests see
+    // everyone), so every button here starts as "Follow".
     getSuggestedAccounts(token, 7)
-      .then(async (data) => {
+      .then((data) => {
         if (!active) return;
-        const list = data.users || [];
-        setSuggested(list);
+        setSuggested(data.users || []);
         setSuggestLoaded(true);
-        // Seed follow buttons with the viewer's real follow state so accounts
-        // already followed show "Following" instead of "Follow".
-        if (!isGuest && list.length > 0) {
-          try {
-            const status = await getFollowStatusBatch(token, list.map((u) => u.id));
-            if (active) setSuggFollows(status.following || {});
-          } catch {
-            // best-effort; buttons default to Follow
-          }
-        }
       })
       .catch(() => {
         if (!active) return;
@@ -146,6 +137,7 @@ function RightRail() {
                   <span className="community-suggest-meta">
                     <span className="community-suggest-username">
                       @{u.username} <VerificationBadge verification={u.verification} size={12} />
+                      {u.isNew && <span className="community-suggest-new">New</span>}
                     </span>
                     {u.name && <span className="community-suggest-name">{u.name}</span>}
                   </span>
