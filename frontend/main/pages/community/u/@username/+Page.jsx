@@ -335,7 +335,7 @@ function EditProfile({ profile, onCancel, onSaved }) {
   );
 }
 
-function SimilarAccounts({ users, follows, busy, onToggleFollow, onDismiss }) {
+function SimilarAccounts({ users, busy, onToggleFollow, onDismiss }) {
   return (
     <div className="profile-similar">
       <h2 className="profile-similar-title">Similar accounts</h2>
@@ -367,11 +367,11 @@ function SimilarAccounts({ users, follows, busy, onToggleFollow, onDismiss }) {
             </a>
             <button
               type="button"
-              className={`profile-similar-follow${follows[u.id] ? ' is-following' : ''}`}
+              className="profile-similar-follow"
               onClick={() => onToggleFollow(u)}
               disabled={busy[u.id]}
             >
-              {busy[u.id] ? '…' : follows[u.id] ? 'Following' : 'Follow'}
+              {busy[u.id] ? '…' : 'Follow'}
             </button>
           </div>
         ))}
@@ -473,31 +473,30 @@ function Page() {
 
   // ── Similar accounts (Instagram-style) ──
   const [similar, setSimilar] = useState([]);
-  const [similarFollows, setSimilarFollows] = useState({});
   const [similarBusy, setSimilarBusy] = useState({});
 
   useEffect(() => {
     let active = true;
     if (!profile) return () => { active = false; };
     getSimilarUsers(profile.username)
-      .then((data) => {
+      .then(async (data) => {
         if (!active) return;
-        const users = (data.users || []).filter(
+        let users = (data.users || []).filter(
           (u) => u.username !== profile.username && u.username !== user?.username
         );
-        setSimilar(users);
-        // Seed the follow buttons with the viewer's real follow state so
-        // accounts already followed show "Following" instead of "Follow".
+        // Suggestions only show accounts the viewer does not follow yet. If
+        // the follow check fails, hide the card rather than risk suggesting
+        // already-followed accounts.
         if (!isGuest && users.length > 0) {
-          getFollowStatusBatch(token, users.map((u) => u.id))
-            .then((status) => {
-              if (!active) return;
-              setSimilarFollows(status.following || {});
-            })
-            .catch(() => {});
-        } else {
-          setSimilarFollows({});
+          try {
+            const status = await getFollowStatusBatch(token, users.map((u) => u.id));
+            if (!active) return;
+            users = users.filter((u) => !status.following?.[u.id]);
+          } catch {
+            users = [];
+          }
         }
+        setSimilar(users);
       })
       .catch(() => {});
     return () => { active = false; };
@@ -511,13 +510,9 @@ function Page() {
     if (similarBusy[u.id]) return;
     setSimilarBusy((m) => ({ ...m, [u.id]: true }));
     try {
-      if (similarFollows[u.id]) {
-        await unfollowUser(token, u.id);
-        setSimilarFollows((m) => ({ ...m, [u.id]: false }));
-      } else {
-        await followUser(token, u.id);
-        setSimilarFollows((m) => ({ ...m, [u.id]: true }));
-      }
+      await followUser(token, u.id);
+      // Followed accounts leave the suggestions card entirely.
+      setSimilar((prev) => prev.filter((s) => s.id !== u.id));
     } catch {
       // leave state unchanged; user can retry
     } finally {
@@ -783,7 +778,6 @@ function Page() {
           {!editing && tab === 'posts' && similar.length > 0 && (
             <SimilarAccounts
               users={similar}
-              follows={similarFollows}
               busy={similarBusy}
               onToggleFollow={handleSimilarFollow}
               onDismiss={dismissSimilar}

@@ -646,18 +646,19 @@ router.get('/suggested', optionalUser, async (req, res) => {
   try {
     const limit = Math.min(20, Math.max(1, Number.parseInt(req.query.limit, 10) || 8));
 
+    // Personalized endpoint — never cache it. A cached copy could still
+    // contain accounts the viewer has followed since.
+    res.set('Cache-Control', 'no-store');
+
+    // Exclude the viewer and every account they already follow. This lookup
+    // is mandatory: on failure the request fails (500) instead of falling
+    // back to an unfiltered list that would leak followed accounts.
     const excludeIds = [];
     if (req.user?.id) {
-      try { excludeIds.push(new Types.ObjectId(String(req.user.id))); } catch { /* ignore bad id */ }
-
-      // Hide every account the viewer already follows.
-      try {
-        const viewerId = excludeIds[0];
-        if (viewerId) {
-          const follows = await Follow.find({ followerId: viewerId }).select('followingId').lean();
-          for (const f of follows) excludeIds.push(f.followingId);
-        }
-      } catch { /* follow lookup is best-effort; fall back to unfiltered */ }
+      const viewerId = new Types.ObjectId(String(req.user.id));
+      excludeIds.push(viewerId);
+      const follows = await Follow.find({ followerId: viewerId }).select('followingId').lean();
+      for (const f of follows) excludeIds.push(f.followingId);
     }
 
     // Featured accounts pinned at the top, then remaining accounts sorted
@@ -669,7 +670,8 @@ router.get('/suggested', optionalUser, async (req, res) => {
         $match: {
           username: { $exists: true, $ne: null },
           accountStatus: 'active',
-          ...(excludeIds.length ? { _id: { $nin: excludeIds } } : {}),
+          // $nin: [] matches everything, so this is safe for guests too.
+          _id: { $nin: excludeIds },
         },
       },
       {

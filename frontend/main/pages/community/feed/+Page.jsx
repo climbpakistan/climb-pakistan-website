@@ -6,7 +6,7 @@ import PostCard from '../../../src/components/community/PostCard';
 import VerificationBadge from '../../../src/components/community/VerificationBadge';
 import { useCommunity } from '../../../src/hooks/CommunityContext';
 import { communityTopics, feedSortTabs, FEED_PAGE_SIZE } from '../../../src/data/communityData';
-import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers, getSuggestedAccounts, followUser, unfollowUser } from '../../../src/api';
+import { getPosts, getMyVotes, getMySaved, getPostSuggestions, getTopicCounts, searchCommunityUsers, getSuggestedAccounts, getFollowStatusBatch, followUser, unfollowUser } from '../../../src/api';
 
 export { Page };
 
@@ -58,17 +58,30 @@ function RightRail() {
   // ── Suggested accounts ──
   const [suggested, setSuggested] = useState([]);
   const [suggestLoaded, setSuggestLoaded] = useState(false);
-  const [suggFollows, setSuggFollows] = useState({});
   const [suggBusy, setSuggBusy] = useState({});
 
   useEffect(() => {
     let active = true;
     // The backend already excludes accounts the viewer follows (guests see
-    // everyone), so every button here starts as "Follow".
-    getSuggestedAccounts(token, 7)
-      .then((data) => {
+    // everyone). For logged-in users we additionally re-check the live follow
+    // state so an account that was followed after this response was built can
+    // never show a "Follow" button here.
+    getSuggestedAccounts(token, isGuest ? 7 : 15)
+      .then(async (data) => {
         if (!active) return;
-        setSuggested(data.users || []);
+        let users = data.users || [];
+        if (!isGuest && users.length > 0) {
+          try {
+            const status = await getFollowStatusBatch(token, users.map((u) => u.id));
+            if (!active) return;
+            // Hard requirement: only show accounts the viewer does not follow.
+            users = users.filter((u) => !status.following?.[u.id]);
+          } catch {
+            // Follow check failed — do not fall back to the unfiltered list.
+            users = [];
+          }
+        }
+        setSuggested(users);
         setSuggestLoaded(true);
       })
       .catch(() => {
@@ -87,13 +100,10 @@ function RightRail() {
     if (suggBusy[u.id]) return;
     setSuggBusy((m) => ({ ...m, [u.id]: true }));
     try {
-      if (suggFollows[u.id]) {
-        await unfollowUser(token, u.id);
-        setSuggFollows((m) => ({ ...m, [u.id]: false }));
-      } else {
-        await followUser(token, u.id);
-        setSuggFollows((m) => ({ ...m, [u.id]: true }));
-      }
+      await followUser(token, u.id);
+      // Already-followed accounts must not stay in the suggestions rail —
+      // remove the row instead of flipping the button to "Following".
+      setSuggested((prev) => prev.filter((s) => s.id !== u.id));
     } catch {
       // leave state unchanged; user can retry
     } finally {
@@ -145,11 +155,11 @@ function RightRail() {
                 {!isGuest && (
                   <button
                     type="button"
-                    className={`community-suggest-follow${suggFollows[u.id] ? ' is-following' : ''}`}
+                    className="community-suggest-follow"
                     onClick={() => toggleSuggestFollow(u)}
                     disabled={suggBusy[u.id]}
                   >
-                    {suggBusy[u.id] ? '…' : suggFollows[u.id] ? 'Following' : 'Follow'}
+                    {suggBusy[u.id] ? '…' : 'Follow'}
                   </button>
                 )}
                 <button
