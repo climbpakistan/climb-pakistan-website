@@ -4860,7 +4860,7 @@ input, textarea, select { font: inherit; color: inherit; }
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #000;
+  color: #0d3b66;
   text-decoration: none;
   background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
   box-shadow: 0 2px 8px rgba(20, 184, 166, 0.35);
@@ -4872,8 +4872,8 @@ a.community-post-topic:hover { filter: brightness(1.08); transform: translateY(-
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.85);
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+  background: #0d3b66;
+  box-shadow: 0 0 6px rgba(13, 59, 102, 0.3);
 }
 
 .community-post-card .community-post-title {
