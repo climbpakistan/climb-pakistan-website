@@ -4583,8 +4583,8 @@ input, textarea, select { font: inherit; color: inherit; }
   align-items: center;
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--cp-accent-soft);
-  color: var(--cp-accent);
+  background: color-mix(in srgb, var(--cp-danger) 16%, transparent);
+  color: var(--cp-danger);
   /* 10px — smaller than the username text */
   font-size: 0.625rem;
   font-weight: 700;
